@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: portal-mecanica-db
+    restart: always
+    environment:
+      POSTGRES_DB: portal_mecanica
+      POSTGRES_USER: portal_user
+      POSTGRES_PASSWORD: portal_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  
