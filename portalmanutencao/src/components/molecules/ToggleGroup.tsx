@@ -12,7 +12,7 @@ const ToggleGroup = ({ options, value, onChange }: ToggleGroupProps) => {
                     label={option.label}
                     checked={value === option.value}
                     onToggle={() => onChange(option.value)}
-                    className="!px-4 !py-2 !text-sm !rounded-lg"
+                    className="px-4! py-2! text-sm! rounded-lg!"
                 />
             ))}
         </div>
