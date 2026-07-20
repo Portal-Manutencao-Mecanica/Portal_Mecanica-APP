@@ -1,4 +1,4 @@
-'use client'; // 👈 Isola a lógica do cliente neste arquivo
+'use client';
 
 import ToggleButton from "@/components/atoms/ToggleButton";
 import { ToggleGroupProps } from "@/props/ToggleGroupProps";

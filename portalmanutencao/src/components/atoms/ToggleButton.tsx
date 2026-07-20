@@ -53,8 +53,8 @@ const ToggleButton = ({
 
                 /* 🎨 ESTADOS DO DESIGN DA IMAGEM: */
                 ${currentChecked 
-                    ? 'bg-[#27272A] border-transparent text-white' // Ativo: Escuro, sem borda e texto branco (Estilo PDF)
-                    : 'bg-white border-[#88888C] text-black hover:bg-gray-50' // Inativo: Branco, borda cinza e texto preto (Estilo CSV)
+                    ? 'bg-[#27272A] border-transparent text-white'
+                    : 'bg-white border-[#88888C] text-black hover:bg-gray-50'
                 }
                 
                 /* Estado desabilitado */
@@ -63,7 +63,6 @@ const ToggleButton = ({
             `}
             {...props}
         >
-            {/* O texto agora fica centralizado dentro do próprio botão */}
             {label}
         </button>
     );
