@@ -1,4 +1,4 @@
-import { InputProps } from "@/props/Input";
+import { InputProps } from "@/props/InputProps";
 import { forwardRef, useState } from "react";
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
