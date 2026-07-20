@@ -3,6 +3,12 @@
 @theme {
   --font-sans: var(--font-roboto-flex), sans-serif;
   --font-mono: var(--font-roboto-mono), monospace;
+  --color-weg-blue: #00579D;
+  --color-weg-warning: #EFC906;
+  --color-weg-gray:#000000;
+  --color-weg-negative:#E71717;
+  --color-weg-info:#28B9DA;
+
 }
 
 body {

@@ -1,4 +1,4 @@
-import { ButtonProps } from '@/props/Button';
+import { ButtonProps } from '@/props/ButtonProps';
 
 export default function Button({
     variant = 'primary',
