@@ -1,17 +1,25 @@
 import { DataRowCardProps } from "@/props/DataRowCardProps";
 
-export function DataRowCard({ children, actions }: DataRowCardProps) {
+export function DataRowCard({
+  acronym,
+  professors,
+  onViewStudents,
+}: DataRowCardProps) {
   return (
-    <div className="flex items-center justify-between py-5 px-6 w-340 max-w-7xl bg-weg-card-white rounded-lg shadow-md ">
-      
-      <div className="flex items-center gap-10">
-        {children}
+    <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-md">
+      <div className="flex gap-20">
+        <div>
+          <p className="font-semibold">Sigla</p>
+          <p>{acronym}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold">Professores</p>
+          <p>{professors.join(", ")}</p>
+        </div>
       </div>
 
-      
-      <div className="flex items-center gap-5">
-        {actions}
-      </div>
+      <button onClick={onViewStudents}>Ver alunos</button>
     </div>
   );
 }
