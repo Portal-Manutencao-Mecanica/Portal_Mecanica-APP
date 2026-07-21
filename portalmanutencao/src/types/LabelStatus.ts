@@ -1,0 +1,1 @@
+export type LabelStatus = "positive" | "warning" | "negative" | "default";
