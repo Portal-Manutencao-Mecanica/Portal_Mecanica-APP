@@ -33,7 +33,7 @@ export default function Header() {
     };
 
     return (
-        <header className="bg-weg-blue w-full py-6 px-8 shadow-lg/30">
+        <header className="bg-weg-blue w-full py-6 px-5 shadow-lg shadow-black/30 relative z-30">
             <nav className="max-full mx-auto flex items-center justify-between">
                 <Link href="/" aria-label="Ir para a página inicial" className="flex items-center">
                     <Image
