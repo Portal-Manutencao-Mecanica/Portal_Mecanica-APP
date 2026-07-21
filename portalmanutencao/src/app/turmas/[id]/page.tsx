@@ -44,7 +44,7 @@ export default async function ClassGroupPage({ params }: Props) {
           <Button>← Voltar</Button>
         </Link>
 
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6 mt-5">
           <h1 className="text-3xl font-bold">
             Turma {classGroup.acronym}
           </h1>
