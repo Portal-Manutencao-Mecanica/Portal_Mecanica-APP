@@ -6,10 +6,12 @@ export function SideBar() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const menuItems = [
-    { icon: MonitorCog, label: 'Maquinas', href: '/maquinas' },
-    { icon: MessageSquareWarning, label: 'Ocorrências', href: '/ocorrencias' },
-    { icon: ShoppingCart, label: 'Compras', href: '/compras' },
-    { icon: Users, label: 'Alunos', href: '/alunos' },
+    { icon: MonitorCog, label: "Maquinas", href: "/maquinas" },
+    { icon: MessageSquareWarning, label: "Ocorrências", href: "/ocorrencias" },
+    { icon: ShoppingCart, label: "Compras", href: "/compras" },
+    { icon: GraduationCap, label: "Alunos", href: "/alunos" },
+    { icon: Users, label: "Turmas", href: "/turmas" },
+
   ];
 
   return (
@@ -40,33 +42,31 @@ export function SideBar() {
             <span className="whitespace-nowrap transition-opacity duration-200 opacity-100">
               Fechar Menu
             </span>
-          )}
-        </a>
+          </button>
 
-
-        {menuItems.map((item, index) => {
-          const Icon = item.icon;
-          return (
-            <a
-              key={index}
-              href={item.href}
-              onClick={(e) => e.stopPropagation()}
-              className={`
-                flex items-center gap-4 h-12 rounded-lg transition-colors hover:bg-white/10
-                ${isExpanded ? 'px-3 justify-start' : 'justify-center'}
-              `}
-            >
-              <Icon className="w-6 h-6 shrink-0" />
-
-              {isExpanded && (
-                <span className="whitespace-nowrap transition-opacity duration-200 opacity-100">
+          {menuItems.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={index}
+                href={item.href}
+                className="flex items-center gap-4 h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3"
+              >
+                <Icon className="w-6 h-6 shrink-0" />
+                <span
+                  className={`whitespace-nowrap transition-opacity duration-200 ${
+                    isExpanded
+                      ? "opacity-100 delay-100"
+                      : "opacity-0 pointer-events-none"
+                  }`}
+                >
                   {item.label}
                 </span>
-              )}
-            </a>
-          );
-        })}
-      </nav>
-    </aside>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+    </div>
   );
 }
