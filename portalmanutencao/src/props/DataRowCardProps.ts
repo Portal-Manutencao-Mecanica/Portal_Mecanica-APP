@@ -1,5 +1,5 @@
-
-export interface DataRowCardProps{
-    children ? : React.ReactNode
-    actions ? : React.ReactNode 
+export interface DataRowCardProps {
+    acronym: string;
+    professors: string[];
+    onViewStudents: () => void;
 }
