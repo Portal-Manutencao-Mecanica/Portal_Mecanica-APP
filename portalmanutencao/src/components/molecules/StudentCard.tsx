@@ -18,7 +18,7 @@ export function StudentCard({
   name,
 }: StudentCardProps) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-all">
+    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-all ">
 
       <div>
         <p className="text-lg font-semibold">{name}</p>
