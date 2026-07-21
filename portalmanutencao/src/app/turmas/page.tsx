@@ -9,20 +9,22 @@ const classGroups = [
   },
   {
     id: 2,
-    acronym: "ES02",
+    acronym: "ADS02",
     professors: ["Carlos Lima"],
   },
   {
     id: 3,
-    acronym: "ADS03",
+    acronym: "MEC01",
     professors: ["Pedro Santos", "Ana Costa"],
   },
 ];
 
-export default function Home() {
+export default function TurmasPage() {
   return (
     <LayoutDesktop>
-      <div className="flex flex-col gap-4 p-8">
+      <div className="max-w-6xl mx-auto p-8 space-y-5">
+        <h1 className="text-3xl font-bold">Turmas</h1>
+
         {classGroups.map((group) => (
           <DataRowCard
             key={group.id}
