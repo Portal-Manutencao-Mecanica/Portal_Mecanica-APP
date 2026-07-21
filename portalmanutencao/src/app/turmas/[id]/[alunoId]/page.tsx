@@ -40,7 +40,7 @@ export default async function StudentPage({ params }: Props) {
           <Button>← Voltar</Button>
         </Link>
 
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-8">
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-8 mt-5">
 
           <h1 className="text-3xl font-bold mb-8">
             Perfil do Aluno
