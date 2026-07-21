@@ -1,10 +1,11 @@
 import React from "react"
 import { CircleLabelProps } from "./CircleLabelProps"
+import { LabelStatus } from "@/types/LabelStatus";
 
 export interface LabelProps{
-    type : "positive" |  "negative" | "default"
-    placeholder : string
-    children ? : React.ReactNode
-    width : string
-    height : string
+    status: LabelStatus;
+    text: string;
+    size?: "sm" | "md" | "lg";
 }
+
+export type { LabelStatus };
