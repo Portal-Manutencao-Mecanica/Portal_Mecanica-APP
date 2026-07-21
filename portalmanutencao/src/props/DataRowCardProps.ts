@@ -1,5 +1,5 @@
 export interface DataRowCardProps {
-    acronym: string;
-    professors: string[];
-    onViewStudents: () => void;
+  acronym: string;
+  professors: string[];
+  classGroupId: number;
 }

@@ -1,25 +1,27 @@
+"use client";
+
+import Link from "next/link";
+import Button from "../atoms/Button";
 import { DataRowCardProps } from "@/props/DataRowCardProps";
 
 export function DataRowCard({
   acronym,
   professors,
-  onViewStudents,
+  classGroupId,
 }: DataRowCardProps) {
   return (
-    <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-md">
-      <div className="flex gap-20">
-        <div>
-          <p className="font-semibold">Sigla</p>
-          <p>{acronym}</p>
-        </div>
+    <div className="flex items-center justify-between w-full rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm hover:shadow-md transition-all">
+      <div className="flex flex-col gap-1">
+        <span className="text-xl font-semibold text-gray-800">{acronym}</span>
 
-        <div>
-          <p className="font-semibold">Professores</p>
-          <p>{professors.join(", ")}</p>
-        </div>
+        <span className="text-sm text-gray-500">Professores</span>
+
+        <span className="text-gray-700">{professors.join(", ")}</span>
       </div>
 
-      <button onClick={onViewStudents}>Ver alunos</button>
+      <Link href={`/turmas/${classGroupId}`}>
+        <Button>Ver alunos</Button>
+      </Link>
     </div>
   );
 }
