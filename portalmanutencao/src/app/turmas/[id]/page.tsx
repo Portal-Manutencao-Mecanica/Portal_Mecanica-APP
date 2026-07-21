@@ -1,10 +1,11 @@
 import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
-import { StudentCard } from "@/components/molecules/StudentCard";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { StudentCard } from "@/components/molecules/StudentCard";
 
 const classGroup = {
+  id: 1,
   acronym: "ES01",
   professors: ["João Silva", "Maria Souza"],
   students: [
@@ -26,21 +27,31 @@ const classGroup = {
   ],
 };
 
-export default function ClassGroupPage() {
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function ClassGroupPage({ params }: Props) {
+  const { id } = await params;
+
   return (
     <LayoutDesktop>
-      <div className="space-y-6 p-8 ">
+      <div className="max-w-6xl mx-auto p-8 space-y-6">
+
         <Link href="/turmas">
           <Button>← Voltar</Button>
         </Link>
 
-        <div className="mt-5">
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
           <h1 className="text-3xl font-bold">
             Turma {classGroup.acronym}
           </h1>
 
-          <p className="text-gray-600">
-            Professores: {classGroup.professors.join(", ")}
+          <p className="mt-2 text-gray-600">
+            <span className="font-semibold">Professores:</span>{" "}
+            {classGroup.professors.join(", ")}
           </p>
         </div>
 
@@ -48,11 +59,14 @@ export default function ClassGroupPage() {
           {classGroup.students.map((student) => (
             <StudentCard
               key={student.id}
+              classGroupId={Number(id)}
+              studentId={student.id}
               registration={student.registration}
               name={student.name}
             />
           ))}
         </div>
+
       </div>
     </LayoutDesktop>
   );
