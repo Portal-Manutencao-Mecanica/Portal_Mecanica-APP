@@ -1,7 +1,9 @@
-import { SideBar } from "@/components/organisms/SideBar";
+import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 
 export default function Home() {
     return (
-        <><SideBar /></>
+        <>
+            <LabelWithCircle status={"default"} text={"Conforme"}></LabelWithCircle>
+        </>
     );
 }
