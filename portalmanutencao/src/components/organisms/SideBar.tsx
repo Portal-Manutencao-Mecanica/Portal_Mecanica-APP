@@ -16,8 +16,8 @@ export function SideBar() {
     <aside
       onClick={() => setIsExpanded(!isExpanded)}
       className={`
-          fixed top-0 left-0 z-50 h-screen bg-weg-blue text-white flex flex-col gap-6 cursor-pointer
-          transition-all duration-300 ease-in-out select-none shadow-2xl
+          h-full bg-weg-blue text-white flex flex-col gap-6 cursor-pointer
+          transition-all duration-300 ease-in-out select-none 
           ${isExpanded ? 'w-64 p-4' : 'w-20 py-4 px-2'}
         `}
     >
@@ -33,7 +33,6 @@ export function SideBar() {
           <PanelLeftOpen
             className={`w-6 h-6 shrink-0 transition-transform duration-300
               ${isExpanded ? 'rotate-180' : 'rotate-0'}`}
-            
           />
 
           {isExpanded && (
