@@ -29,12 +29,12 @@ const classGroup = {
 export default function ClassGroupPage() {
   return (
     <LayoutDesktop>
-      <div className="space-y-6 p-8">
+      <div className="space-y-6 p-8 ">
         <Link href="/turmas">
           <Button>← Voltar</Button>
         </Link>
 
-        <div>
+        <div className="mt-5">
           <h1 className="text-3xl font-bold">
             Turma {classGroup.acronym}
           </h1>
