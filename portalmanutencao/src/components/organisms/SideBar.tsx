@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react';
-import { MonitorCog, MessageSquareWarning, ShoppingBag, ShoppingCart, Users, PanelLeftOpen } from 'lucide-react';
+import { MonitorCog, MessageSquareWarning, ShoppingCart, Users, PanelLeftOpen } from 'lucide-react';
 
 export function SideBar() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -33,6 +33,7 @@ export function SideBar() {
           <PanelLeftOpen
             className={`w-6 h-6 shrink-0 transition-transform duration-300
               ${isExpanded ? 'rotate-180' : 'rotate-0'}`}
+
           />
 
           {isExpanded && (
