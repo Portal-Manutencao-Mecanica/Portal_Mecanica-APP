@@ -1,50 +1,64 @@
-//"use client";
-//
-//import Pagination from "@/components/molecules/Pagination";
-//import { useState, useEffect } from "react";
-//
-//export default function ListaDeProdutos() {
-//  const [page, setPage] = useState(1);
-//  const [allUsers, setAllUsers] = useState<any[]>([]); 
-//  const limit = 1; 
-//
-//  
-//  useEffect(() => {
-//    fetch("http://localhost:8080/admin")
-//      .then((res) => {
-//        if (!res.ok) throw new Error("Erro ao buscar dados");
-//        return res.json();
-//      })
-//      .then((data) => setAllUsers(data))
-//      .catch((err) => console.error(err));
-//  }, []);
-//
-//  
-//  const total = allUsers.length; 
-//  const startIndex = (page - 1) * limit;
-//  const endIndex = startIndex + limit;
-//  
-//  
-//  const currentResults = allUsers.slice(startIndex, endIndex);
-//
-//  return (
-//    <div>
-//      
-//      <ul>
-//        {currentResults.map((p: any) => (
-//          <li key={p.id}>{p.nome}</li>
-//        ))}
-//      </ul>
-//
-//      
-//      {total > 0 && (
-//        <Pagination
-//          page={page}
-//          limit={limit}
-//          total={total}
-//          onPageChange={(newPage: number) => setPage(newPage)}
-//        />
-//      )}
-//    </div>
-//  );
-//}
+import Link from "next/link";
+
+import Button from "@/components/atoms/Button";
+import { MachineTable } from "@/components/organisms/MachineTable";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+
+const machines = [
+  {
+    id: 1,
+    patrimony: "100001",
+    name: "Torno CNC",
+    place: "Laboratório A",
+    condition: "ATIVA",
+    tag: "CNC",
+  },
+  {
+    id: 2,
+    patrimony: "100002",
+    name: "Impressora 3D",
+    place: "Laboratório B",
+    condition: "MANUTENCAO",
+    tag: "3D",
+  },
+  {
+    id: 3,
+    patrimony: "100003",
+    name: "Fresadora",
+    place: "Laboratório C",
+    condition: "ATIVA",
+    tag: "FRESA",
+  },
+] as const;
+
+export default function MachinesPage() {
+  return (
+    <LayoutDesktop>
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+
+        {/* O <Breadcrumbs /> foi removido daqui para não duplicar com o do LayoutDesktop */}
+
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Máquinas
+            </h1>
+
+            <p className="text-gray-500">
+              Visualize todas as máquinas cadastradas.
+            </p>
+          </div>
+
+          <Link href="/maquinas/criar">
+            <Button>
+              Nova Máquina
+            </Button>
+          </Link>
+        </div>
+
+        <MachineTable machines={machines as any} />
+
+      </div>
+    </LayoutDesktop>
+  );
+}
