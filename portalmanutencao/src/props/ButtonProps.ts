@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, ElementType } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary';
+    variant?: 'primary' | 'warning' | 'danger';
     icon?: ElementType;
 }
