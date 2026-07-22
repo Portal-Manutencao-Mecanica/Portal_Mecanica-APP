@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react';
-import { MonitorCog, MessageSquareWarning, ShoppingCart, Users, PanelLeftOpen } from 'lucide-react';
+import { MonitorCog, MessageSquareWarning, ShoppingCart, Users, PanelLeftOpen, GraduationCap } from 'lucide-react';
+import Link from 'next/link';
 
 export function SideBar() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -42,7 +43,8 @@ export function SideBar() {
             <span className="whitespace-nowrap transition-opacity duration-200 opacity-100">
               Fechar Menu
             </span>
-          </button>
+          )}
+          </a>
 
           {menuItems.map((item, index) => {
             const Icon = item.icon;
@@ -67,6 +69,5 @@ export function SideBar() {
           })}
         </nav>
       </aside>
-    </div>
   );
 }
