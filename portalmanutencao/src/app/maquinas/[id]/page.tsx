@@ -1,9 +1,13 @@
+"use client";
+
+import { use, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Button from "@/components/atoms/Button";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 
-// Dados simulados para o exemplo (no futuro você buscará do banco/API usando o params.id)
+// Dados simulados
 const machineData = {
   id: 1,
   patrimony: "100001",
@@ -16,12 +20,18 @@ const machineData = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ViewMachinePage({ params }: PageProps) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  // Estado para controlar a abertura do modal de exclusão
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const status =
     machineData.condition === "ATIVA"
       ? "positive"
@@ -35,6 +45,16 @@ export default function ViewMachinePage({ params }: PageProps) {
       : machineData.condition === "MANUTENCAO"
       ? "Manutenção"
       : "Inativa";
+
+  // Função para lidar com a confirmação de exclusão
+  const handleDelete = () => {
+    // Aqui você faria a requisição para deletar no banco/API (ex: await deleteMachine(id))
+    console.log(`Máquina #${id} excluída com sucesso.`);
+
+    // Fecha o modal e redireciona de volta para a lista de máquinas
+    setIsDeleteModalOpen(false);
+    router.push("/maquinas");
+  };
 
   return (
     <LayoutDesktop>
@@ -58,12 +78,12 @@ export default function ViewMachinePage({ params }: PageProps) {
                 Voltar
               </Button>
             </Link>
-            <Link href={`/maquinas/${params.id}/editar`}>
+            <Link href={`/maquinas/${id}/editar`}>
               <Button variant="warning">
                 Editar
               </Button>
             </Link>
-            <Button variant="danger">
+            <Button variant="danger" onClick={() => setIsDeleteModalOpen(true)}>
               Excluir
             </Button>
           </div>
@@ -127,6 +147,39 @@ export default function ViewMachinePage({ params }: PageProps) {
         </div>
 
       </div>
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-gray-900">
+                Excluir Máquina
+              </h3>
+              <p className="text-sm text-gray-600">
+                Tem certeza que deseja excluir a máquina <strong className="text-gray-900">{machineData.name}</strong> (Patrimônio #{machineData.patrimony})? Esta ação não poderá ser desfeita.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <Button 
+                variant="secondary" 
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={handleDelete}
+              >
+                Sim, Excluir
+              </Button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </LayoutDesktop>
   );
 }
