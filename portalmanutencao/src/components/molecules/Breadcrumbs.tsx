@@ -24,8 +24,9 @@ export function Breadcrumbs() {
 
     return (
         <nav aria-label="Breadcrumb" className="mb-6 flex items-center text-sm text-gray-500 select-none">
-            <Link href="/" className="hover:text-weg-blue transition-colors flex items-center" aria-label="Página Inicial">
+            <Link href="/" className="hover:text-weg-blue transition-colors flex items-center gap-1" aria-label="Página Inicial">
                 <Home className="w-4 h-4" />
+                <p>Página Inicial</p>
             </Link>
             
             {pathSegments.map((segment, index) => {
