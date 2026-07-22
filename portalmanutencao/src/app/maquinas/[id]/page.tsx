@@ -54,7 +54,7 @@ export default function ViewMachinePage({ params }: PageProps) {
           {/* Botões de Ação */}
           <div className="flex items-center gap-3">
             <Link href="/maquinas">
-              <Button className="bg-gray-200 text-gray-700 hover:bg-gray-300">
+              <Button variant="secondary">
                 Voltar
               </Button>
             </Link>
@@ -113,7 +113,7 @@ export default function ViewMachinePage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Seção extra para Descrição */}
+          {/* Seção para Descrição */}
           {machineData.description && (
             <div className="pt-4 border-t border-gray-100">
               <span className="text-xs uppercase tracking-wider font-semibold text-gray-400">
