@@ -1,10 +1,9 @@
 import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
-import Pagination from "@/components/molecules/Pagination";
 import { Breadcrumbs } from "@/components/molecules/Breadcrumbs";
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { MachineTable } from "@/components/organisms/MachineTable";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
 
 const machines = [
     {
@@ -36,14 +35,14 @@ const machines = [
 export default function MachinesPage() {
     return (
         <LayoutDesktop>
-            <div className="max-w-7xl mx-auto p-8 space-y-6">
+            <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
                 <Breadcrumbs />
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
                     <div>
-                        <h1 className="text-3xl font-bold">
+                        <h1 className="text-2xl md:text-3xl font-bold">
                             Máquinas
                         </h1>
 
@@ -61,13 +60,6 @@ export default function MachinesPage() {
                 </div>
 
                 <MachineTable machines={machines} />
-
-                <Pagination
-                    page={1}
-                    limit={10}
-                    total={50}
-                    onPageChange={() => { }}
-                />
 
             </div>
         </LayoutDesktop>
