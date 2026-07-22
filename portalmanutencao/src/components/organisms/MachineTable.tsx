@@ -1,11 +1,12 @@
 import { MachineRow } from "../molecules/MachineRow";
 
+// Criamos o tipo exato ou atualizamos na interface
 interface Machine {
   id: number;
   patrimony: string;
   name: string;
   place: string;
-  condition: string;
+  condition: "ATIVA" | "MANUTENCAO" | "INATIVA"; // 👈 Atualizado aqui!
   tag?: string;
 }
 
@@ -16,9 +17,7 @@ interface Props {
 export function MachineTable({ machines }: Props) {
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-
       <div className="min-w-[900px]">
-
         <div className="grid grid-cols-6 bg-gray-100 px-6 py-4 font-semibold">
           <span>Patrimônio</span>
           <span>Nome</span>
@@ -31,9 +30,7 @@ export function MachineTable({ machines }: Props) {
         {machines.map((machine) => (
           <MachineRow key={machine.id} {...machine} />
         ))}
-
       </div>
-
     </div>
   );
 }
