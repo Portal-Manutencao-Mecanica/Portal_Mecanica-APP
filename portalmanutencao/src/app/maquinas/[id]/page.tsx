@@ -183,3 +183,4 @@ export default function ViewMachinePage({ params }: PageProps) {
     </LayoutDesktop>
   );
 }
+//
