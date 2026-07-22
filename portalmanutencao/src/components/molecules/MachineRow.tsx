@@ -44,16 +44,12 @@ export function MachineRow({
       <span>{tag ?? "-"}</span>
       <div className="flex justify-end gap-2">
         <Link href={`/maquinas/${id}`}>
-          <Button>Ver</Button>
+          <Button variant="primary">Ver</Button>
         </Link>
         <Link href={`/maquinas/${id}/editar`}>
-          <Button className="bg-amber-400 hover:bg-amber-500 text-black">
-            Editar
-          </Button>
+          <Button variant="warning">Editar</Button>
         </Link>
-        <Button className="bg-red-600 hover:bg-red-700 text-white">
-          Excluir
-        </Button>
+        <Button variant="danger">Excluir</Button>
       </div>
     </div>
   );
