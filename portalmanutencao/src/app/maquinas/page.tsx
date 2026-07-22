@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
-import Pagination from "@/components/atoms/Pagination";
+import Pagination from "@/components/molecules/Pagination";
 import { Breadcrumbs } from "@/components/molecules/Breadcrumbs";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { MachineTable } from "@/components/organisms/MachineTable";
