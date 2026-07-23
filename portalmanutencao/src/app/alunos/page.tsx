@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
-import { Breadcrumbs } from "@/components/molecules/Breadcrumbs";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { StudentTable } from "@/components/organisms/StudentTable";
 
@@ -37,7 +36,6 @@ export default function StudentsPage() {
     <LayoutDesktop>
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-        <Breadcrumbs />
 
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
