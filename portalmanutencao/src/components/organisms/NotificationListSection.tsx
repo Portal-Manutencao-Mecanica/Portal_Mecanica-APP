@@ -53,7 +53,6 @@ export default function NotificationListSection({
         )}
       </div>
 
-      {/* 2. Filtros / Abas */}
       <div className="flex items-center gap-6 border-b border-gray-200 text-sm font-medium">
         <button
           onClick={() => setFilter("ALL")}
@@ -86,7 +85,6 @@ export default function NotificationListSection({
         </button>
       </div>
 
-      {/* 3. LISTA DE CARDS (A parte que tinha sumido!) */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">
         {filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500 text-sm">
