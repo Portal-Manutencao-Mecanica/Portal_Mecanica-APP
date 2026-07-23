@@ -21,14 +21,14 @@ export function StudentRow({
   classGroups,
 }: Props) {
   return (
-    <div className="grid grid-cols-6 items-center border-t border-gray-100 px-6 py-5">
-      <span className="font-medium">{name}</span>
+    <div className="grid grid-cols-[2fr_2fr_1fr_2fr_1fr_2fr] items-center border-t border-gray-100 px-6 py-5 hover:bg-gray-50 transition-colors">
+      <span className="font-semibold">{name}</span>
 
       <span>{email}</span>
 
       <span>{numberCard}</span>
 
-      <span>{classGroups.join(", ")}</span>
+      <span className="truncate">{classGroups.join(", ")}</span>
 
       <LabelWithCircle
         status={enabled ? "positive" : "negative"}

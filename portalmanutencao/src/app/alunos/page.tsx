@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
 import { Breadcrumbs } from "@/components/molecules/Breadcrumbs";
-import { StudentTable } from "@/components/organisms/StudentTable";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { StudentTable } from "@/components/organisms/StudentTable";
 
 const students = [
   {
@@ -18,7 +18,7 @@ const students = [
     id: 2,
     name: "Ana Paula",
     email: "ana@weg.com",
-    numberCard: "456789",
+    numberCard: "456321",
     enabled: true,
     classGroups: ["ES01"],
   },
@@ -42,12 +42,12 @@ export default function StudentsPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">
+            <h1 className="text-3xl font-bold">
               Alunos
             </h1>
 
             <p className="text-gray-500">
-              Visualize todos os alunos cadastrados.
+              Gerencie todos os alunos cadastrados.
             </p>
           </div>
 
