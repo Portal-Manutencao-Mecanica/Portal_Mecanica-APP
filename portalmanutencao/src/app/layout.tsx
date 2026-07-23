@@ -30,7 +30,6 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${robotoFlex.variable} ${roboto.variable}`}
-      
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
