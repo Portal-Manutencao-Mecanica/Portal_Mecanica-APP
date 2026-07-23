@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { FileImage, Trash2, Upload } from "lucide-react";
 import formatBytes from "@/utils/formatBytes";
@@ -23,16 +23,23 @@ export default function UploadedFile({ onChange, error }: UploadedFileProps) {
         openFileDialog
     } = useFileUpload();
 
-    // Sempre que a lista 'files' mudar no hook, enviamos apenas as strings Base64 para o Form
+    // Guardamos a referência do callback para não causar re-renders no useEffect
+    const onChangeRef = useRef(onChange);
     useEffect(() => {
-        if (onChange) {
-            const base64Strings = files
-                .map((f) => f.fileContent)
-                .filter((content): content is string => typeof content === "string");
+        onChangeRef.current = onChange;
+    }, [onChange]);
 
-            onChange(base64Strings);
-        }
-    }, [files, onChange]);
+    // Dispara para o Valibot SOMENTE quando a lista de 'files' realmente mudar
+    useEffect(() => {
+        if (!onChangeRef.current) return;
+
+        // Filtra apenas as strings que já concluíram a conversão Base64
+        const base64Strings = files
+            .map((f) => f.fileContent)
+            .filter((content): content is string => typeof content === "string" && content.length > 0);
+
+        onChangeRef.current(base64Strings);
+    }, [files]); // Dependência EXCLUSIVA de 'files'
 
     return (
         <div className="w-full max-w-xl mx-auto p-4 flex flex-col gap-4">
@@ -45,7 +52,7 @@ export default function UploadedFile({ onChange, error }: UploadedFileProps) {
                 className="hidden"
             />
 
-            {/* Dropzone */}
+            {/* Caixa de Dropzone */}
             <div
                 onClick={openFileDialog}
                 onDragOver={handleDragOver}
@@ -56,9 +63,9 @@ export default function UploadedFile({ onChange, error }: UploadedFileProps) {
                     p-6 sm:p-10 rounded-2xl border-2 border-dashed transition-all cursor-pointer select-none text-center
                     ${isDragging
                         ? 'border-blue-500 bg-blue-50/50'
-                        : error
-                            ? 'border-red-400 bg-red-50/30'
-                            : 'border-gray-300 bg-gray-100 hover:bg-gray-200/70 hover:border-gray-400'
+                        : error 
+                            ? 'border-red-400 bg-red-50/30' 
+                            : 'border-gray-300 bg-gray-100 hover:bg-gray-200/70'
                     }
                 `}
             >
@@ -71,14 +78,14 @@ export default function UploadedFile({ onChange, error }: UploadedFileProps) {
                 </p>
             </div>
 
-            {/* Mensagem de Erro da Validação */}
+            {/* Mensagem de Erro da Validação do Valibot */}
             {error && (
                 <span className="text-xs font-medium text-red-500 text-center">
                     {error}
                 </span>
             )}
 
-            {/* Lista de Imagens */}
+            {/* Lista de Imagens Carregadas */}
             {files.length > 0 && (
                 <div className="flex flex-col gap-2.5 mt-2">
                     {files.map((item, index) => (
