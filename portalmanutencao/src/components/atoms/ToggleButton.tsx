@@ -52,7 +52,7 @@ const ToggleButton = ({
                 active:ring-4 active:ring-gray-400/20
 
                 /* 🎨 ESTADOS DO DESIGN DA IMAGEM: */
-                ${currentChecked 
+                ${currentChecked
                     ? 'bg-[#27272A] border-transparent text-white'
                     : 'bg-white border-[#88888C] text-black hover:bg-gray-50'
                 }
