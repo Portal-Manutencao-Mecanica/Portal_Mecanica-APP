@@ -49,11 +49,6 @@ export default function StudentsPage() {
             </p>
           </div>
 
-          <Link href="/alunos/criar">
-            <Button>
-              Novo Aluno
-            </Button>
-          </Link>
 
         </div>
 
