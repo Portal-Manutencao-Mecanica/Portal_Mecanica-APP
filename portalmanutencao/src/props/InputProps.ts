@@ -1,7 +1,7 @@
 import { InputHTMLAttributes } from "react";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-    label? : string;
+    label?: string;
     error?: string;
     maxLength?: number;
 }
