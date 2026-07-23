@@ -14,7 +14,7 @@ export function useAuth() {
                 id: 1,
                 name: "Arthur Mourão",
                 email: "arthur@professor.com",
-                role: "PROFESSOR",
+                role: "ALUNO",
             };
             setUser(mockUser);
         }
