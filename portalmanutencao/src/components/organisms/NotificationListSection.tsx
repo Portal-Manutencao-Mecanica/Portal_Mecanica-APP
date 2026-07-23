@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { CheckCheck } from "lucide-react";
 import Button from "@/components/atoms/Button";
+import NotificationItem from "@/components/atoms/NotificationItem"; 
 import { NotificationData } from "@/props/NotificationDetailProps";
 
 interface NotificationListSectionProps {
@@ -16,6 +17,7 @@ export default function NotificationListSection({
 }: NotificationListSectionProps) {
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
 
+  // Filtra as notificações conforme a aba selecionada
   const filteredNotifications = notifications.filter((item) => {
     if (filter === "UNREAD") return !item.statusRead;
     return true;
@@ -26,94 +28,79 @@ export default function NotificationListSection({
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       
-      {/* Cabeçalho com Filtros e Ações */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-4">
+      {/* 1. Cabeçalho */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
             Todas as Notificações
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Você tem <strong className="text-gray-800">{unreadCount}</strong> {unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas'}.
+            Gerencie e visualize seu histórico de alertas
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {unreadCount > 0 && onMarkAllAsRead && (
-            <Button variant="secondary" onClick={onMarkAllAsRead}>
-              Marcar todas como lidas
+        {unreadCount > 0 && onMarkAllAsRead && (
+          <div className="flex items-center">
+            <Button
+              variant="secondary"
+              onClick={onMarkAllAsRead}
+              className="flex items-center gap-2 text-xs border-weg-blue/30 text-weg-blue hover:bg-weg-blue/10 transition-colors py-2 px-3.5 rounded-lg font-medium"
+            >
+              <CheckCheck size={16} className="text-weg-blue" />
+              <span>Marcar todas como lidas</span>
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Tabs / Filtro de Exibição */}
-      <div className="flex border-b border-gray-200 gap-6 text-sm font-medium">
+      {/* 2. Filtros / Abas */}
+      <div className="flex items-center gap-6 border-b border-gray-200 text-sm font-medium">
         <button
           onClick={() => setFilter("ALL")}
-          className={`pb-2 border-b-2 transition-colors cursor-pointer ${
+          className={`pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
             filter === "ALL"
-              ? "border-weg-blue text-weg-blue"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-weg-blue text-weg-blue font-semibold"
+              : "border-transparent text-gray-500 hover:text-gray-800"
           }`}
         >
-          Todas ({notifications.length})
+          <span>Todas</span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-normal">
+            {notifications.length}
+          </span>
         </button>
+
         <button
           onClick={() => setFilter("UNREAD")}
-          className={`pb-2 border-b-2 transition-colors cursor-pointer ${
+          className={`pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
             filter === "UNREAD"
-              ? "border-weg-blue text-weg-blue"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-weg-blue text-weg-blue font-semibold"
+              : "border-transparent text-gray-500 hover:text-gray-800"
           }`}
         >
-          Não Lidas ({unreadCount})
+          <span>Não lidas</span>
+          {unreadCount > 0 && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-weg-negative/20 text-weg-negative font-bold">
+              {unreadCount}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Lista de Notificações */}
-      <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 shadow-sm overflow-hidden">
+      {/* 3. LISTA DE CARDS (A parte que tinha sumido!) */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">
         {filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500 text-sm">
-            Nenhuma notificação encontrada.
+            Nenhuma notificação encontrada nesta aba.
           </div>
         ) : (
-          filteredNotifications.map((item) => (
-            <Link
-              key={item.id}
-              href={`/notificacoes/${item.id}`}
-              className="group p-4 flex items-start justify-between gap-4 hover:bg-gray-50 transition-colors"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  {!item.statusRead && (
-                    <span className="w-2 h-2 rounded-full bg-red-600 shrink-0" />
-                  )}
-                  <h3
-                    className={`text-base ${
-                      !item.statusRead
-                        ? "font-bold text-weg-blue"
-                        : "font-medium text-gray-900"
-                    }`}
-                  >
-                    {item.title}
-                  </h3>
-                </div>
-                
-                {item.about && (
-                  <p className="text-sm text-gray-600 pl-4">
-                    {item.about}
-                  </p>
-                )}
-
-                <p className="text-xs text-gray-400 pl-4 pt-1">
-                  Para: {item.email}
-                </p>
-              </div>
-
-              <div className="text-xs font-medium text-gray-400 group-hover:text-weg-blue flex items-center gap-1 shrink-0 pt-1">
-                Ver detalhes &rarr;
-              </div>
-            </Link>
+          filteredNotifications.map((notif) => (
+            <NotificationItem
+              key={notif.id}
+              id={notif.id}
+              title={notif.title}
+              about={notif.about}
+              isUnread={!notif.statusRead}
+            />
           ))
         )}
       </div>
