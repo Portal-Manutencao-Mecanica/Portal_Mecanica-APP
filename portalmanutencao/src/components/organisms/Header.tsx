@@ -34,7 +34,7 @@ export default function Header() {
 
     return (
         <header className="bg-weg-blue w-full py-6 px-5 shadow-lg shadow-black/30 relative z-30">
-            <nav className="max-full mx-auto flex items-center justify-between">
+            <nav className="max-full mx-auto flex items-center justify-between relative">
                 <Link href="/" aria-label="Ir para a página inicial" className="flex items-center">
                     <Image
                         src="/brand/logo-icon.svg"
@@ -45,7 +45,7 @@ export default function Header() {
                     />
                 </Link>
                 
-                <h1 className="text-3xl text-white font-semibold">
+                <h1 className="text-3xl text-white font-semibold absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none">
                     Portal da Manutenção
                 </h1>
                 
