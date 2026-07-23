@@ -52,7 +52,7 @@ export default function NotificationListSection({
           onClick={() => setFilter("ALL")}
           className={`pb-2 border-b-2 transition-colors cursor-pointer ${
             filter === "ALL"
-              ? "border-[#00579D] text-[#00579D]"
+              ? "border-weg-blue text-weg-blue"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -62,7 +62,7 @@ export default function NotificationListSection({
           onClick={() => setFilter("UNREAD")}
           className={`pb-2 border-b-2 transition-colors cursor-pointer ${
             filter === "UNREAD"
-              ? "border-[#00579D] text-[#00579D]"
+              ? "border-weg-blue text-weg-blue"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -81,17 +81,17 @@ export default function NotificationListSection({
             <Link
               key={item.id}
               href={`/notificacoes/${item.id}`}
-              className="group p-4 flex items-start justify-between gap-4 hover:bg-gray-50 transition-colors block"
+              className="group p-4 flex items-start justify-between gap-4 hover:bg-gray-50 transition-colors"
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   {!item.statusRead && (
-                    <span className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-red-600 shrink-0" />
                   )}
                   <h3
                     className={`text-base ${
                       !item.statusRead
-                        ? "font-bold text-[#00579D]"
+                        ? "font-bold text-weg-blue"
                         : "font-medium text-gray-900"
                     }`}
                   >
@@ -110,7 +110,7 @@ export default function NotificationListSection({
                 </p>
               </div>
 
-              <div className="text-xs font-medium text-gray-400 group-hover:text-[#00579D] flex items-center gap-1 flex-shrink-0 pt-1">
+              <div className="text-xs font-medium text-gray-400 group-hover:text-weg-blue flex items-center gap-1 shrink-0 pt-1">
                 Ver detalhes &rarr;
               </div>
             </Link>
