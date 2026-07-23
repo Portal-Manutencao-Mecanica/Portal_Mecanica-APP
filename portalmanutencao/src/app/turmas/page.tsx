@@ -26,12 +26,9 @@ export default function TurmasPage() {
         <h1 className="text-3xl font-bold">Turmas</h1>
 
         {classGroups.map((group) => (
-          <DataRowCard
-            key={group.id}
-            acronym={group.acronym}
-            professors={group.professors}
-            classGroupId={group.id}
-          />
+          <>
+          <DataRowCard children={undefined} actions={undefined}></DataRowCard>
+          </>
         ))}
       </div>
     </LayoutDesktop>
