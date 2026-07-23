@@ -8,7 +8,8 @@ import Input from "../atoms/Input";
 import TextArea from "../atoms/TextArea";
 
 import UploadedFile from "../molecules/UploadedFile";
-import { useAuth } from "@/hooks/useAuth"; // Importa o hook do local correto
+import { useAuth } from "@/hooks/useAuth"; 
+import StudentSelector from "../molecules/StudentSelector";
 
 const IMAGE_BASE64_REGEX = /^data:image\/(png|jpg|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
 
@@ -18,6 +19,13 @@ const maintenanceSchema = v.object({
     place: v.pipe(v.string(), v.nonEmpty("Selecione a Área/Laboratório.")),
     equipmentName: v.pipe(v.string(), v.nonEmpty("Informe o Nome do Equipamento.")),
     description: v.pipe(v.string(), v.nonEmpty("Descreva o problema.")),
+    
+   
+    studentIds: v.pipe(
+        v.array(v.number("O ID do aluno deve ser um número.")),
+        v.minLength(1, "Selecione pelo menos um aluno envolvido.")
+    ),
+
     media: v.pipe(
         v.array(
             v.pipe(
@@ -42,6 +50,7 @@ export default function MaintenceForm() {
     } = useForm<MaintenanceFormData>({
         resolver: valibotResolver(maintenanceSchema),
         defaultValues: {
+
             patrimony: "",
             tag: "",
             place: "",
@@ -74,6 +83,18 @@ export default function MaintenceForm() {
                     <strong className="text-gray-800">{new Date().toLocaleString("pt-BR")}</strong>
                 </div>
             </div>
+
+            <Controller
+                name="studentIds"
+                control={control}
+                render={({ field }) => (
+                    <StudentSelector
+                        value={field.value}
+                        onChange={(selectedIds) => field.onChange(selectedIds)}
+                        error={errors.studentIds?.message}
+                    />
+                )}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
@@ -116,7 +137,7 @@ export default function MaintenceForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Imagens da Anomalia (Anexe imagens pontuais) *
                 </label>
-                
+
                 <Controller
                     name="media"
                     control={control}

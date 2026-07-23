@@ -176,6 +176,8 @@ export default function MachineForm() {
                     Cadastrar Máquina
                 </Button>
             </div>
+            
         </form>
     );
+    console.log(isSubmitting)
 }
