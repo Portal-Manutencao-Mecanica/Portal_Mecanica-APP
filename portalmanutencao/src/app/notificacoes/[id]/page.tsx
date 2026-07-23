@@ -1,31 +1,25 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import NotificationDetailSection from "@/components/organisms/NotificationDetailSection";
-import { NotificationData } from "@/props/NotificationDetailProps";
 
-const mockNotification: NotificationData = {
-  id: 1,
-  email: "usuario@weg.net",
-  title: "Ocorrência Aprovada",
-  about: "A ocorrência do Professor Manutenção foi validada.",
-  description: `Sua ocorrência registrada para a máquina Torno CNC foi avaliada e devidamente aprovada pelo setor responsável.\n\nAs medidas necessárias para o processo de manutenção preventiva já foram encaminhadas para a equipe técnica. Não é necessária nenhuma ação adicional no momento.`,
-  statusRead: false,
-};
+export default function NotificationDetailPage() {
+  const [notification, setNotification] = useState({
+    id: 1,
+    email: "usuario@weg.net",
+    title: "Ocorrência Aprovada",
+    about: "A ocorrência do Professor Manutenção foi validada.",
+    description: "A ocorrência #123 foi validada e aprovada para execução.",
+    statusRead: false,
+  });
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function NotificationPage({ params }: PageProps) {
-  const { id } = use(params);
-  const [notification, setNotification] =
-    useState<NotificationData>(mockNotification);
-
-  const handleMarkAsRead = () => {
-    // Chamada à API Spring Boot no futuro
-    setNotification((prev) => ({ ...prev, statusRead: true }));
+  // Função para alternar (Toggle) entre Lida e Não Lida:
+  const handleToggleRead = () => {
+    setNotification((prev) => ({
+      ...prev,
+      statusRead: !prev.statusRead,
+    }));
   };
 
   return (
@@ -33,7 +27,7 @@ export default function NotificationPage({ params }: PageProps) {
       <div className="p-4 md:p-8">
         <NotificationDetailSection
           notification={notification}
-          onMarkAsRead={handleMarkAsRead}
+          onMarkAsRead={handleToggleRead}
         />
       </div>
     </LayoutDesktop>
