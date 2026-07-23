@@ -8,30 +8,32 @@ import Input from "../atoms/Input";
 import TextArea from "../atoms/TextArea";
 
 import UploadedFile from "../molecules/UploadedFile";
-import { useAuth } from "@/hooks/useAuth"; 
+import { useAuth } from "@/hooks/useAuth";
 import StudentSelector from "../molecules/StudentSelector";
 
 const IMAGE_BASE64_REGEX = /^data:image\/(png|jpg|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
 
 const maintenanceSchema = v.object({
-    patrimony: v.pipe(v.string(), v.nonEmpty("Informe o Patrimônio.")),
+    patrimony: v.pipe(v.string("Informe o Patrimônio."), v.nonEmpty("Informe o Patrimônio.")),
     tag: v.optional(v.string()),
-    place: v.pipe(v.string(), v.nonEmpty("Selecione a Área/Laboratório.")),
-    equipmentName: v.pipe(v.string(), v.nonEmpty("Informe o Nome do Equipamento.")),
-    description: v.pipe(v.string(), v.nonEmpty("Descreva o problema.")),
+    place: v.pipe(v.string("Selecione a Área/Laboratório."), v.nonEmpty("Selecione a Área/Laboratório.")),
+    equipmentName: v.pipe(v.string("Informe o Nome do Equipamento."), v.nonEmpty("Informe o Nome do Equipamento.")),
+    description: v.pipe(v.string("Descreva o problema."), v.nonEmpty("Descreva o problema.")),
+
     
-   
     studentIds: v.pipe(
-        v.array(v.number("O ID do aluno deve ser um número.")),
-        v.minLength(1, "Selecione pelo menos um aluno envolvido.")
+        v.array(v.number("Cada ID de aluno deve ser um número."), "Selecione ao menos um aluno."),
+        v.minLength(1, "Selecione pelo menos um aluno envolvido.") 
     ),
 
+    
     media: v.pipe(
         v.array(
             v.pipe(
                 v.string("A mídia precisa ser um texto em Base64."),
                 v.regex(IMAGE_BASE64_REGEX, "Formato de imagem inválido.")
-            )
+            ),
+            "Anexe pelo menos uma imagem."
         ),
         v.minLength(1, "Anexe pelo menos uma imagem do ocorrido.")
     ),
@@ -50,12 +52,12 @@ export default function MaintenceForm() {
     } = useForm<MaintenanceFormData>({
         resolver: valibotResolver(maintenanceSchema),
         defaultValues: {
-
             patrimony: "",
             tag: "",
             place: "",
             equipmentName: "",
             description: "",
+            studentIds: [], 
             media: []
         }
     });
@@ -65,7 +67,7 @@ export default function MaintenceForm() {
             ...formData,
             createdAt: new Date().toISOString(),
             notifiedTeacherId: user?.id,
-            studentIds: user?.role === "ALUNO" ? [user.id] : [],
+            studentIds: formData.studentIds,
         };
 
         console.log("Payload final para o Spring Boot:", payloadToApi);
@@ -84,14 +86,15 @@ export default function MaintenceForm() {
                 </div>
             </div>
 
+            {/* Componente de Seleção de Alunos */}
             <Controller
                 name="studentIds"
                 control={control}
                 render={({ field }) => (
                     <StudentSelector
-                        value={field.value}
+                        value={field.value || []}
                         onChange={(selectedIds) => field.onChange(selectedIds)}
-                        error={errors.studentIds?.message}
+                        error={errors.studentIds?.message} 
                     />
                 )}
             />
