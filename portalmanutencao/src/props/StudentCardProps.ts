@@ -1,6 +1,5 @@
 export interface StudentCardProps {
-    classGroupId: number;
-    studentId: number;
-    registration: string;
-    name: string;
+  classGroupId: number;
+  studentId: number;
+  name: string;
 }
