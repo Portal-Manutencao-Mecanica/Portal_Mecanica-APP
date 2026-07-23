@@ -13,8 +13,8 @@ export function useAuth() {
             const mockUser: UserProfileProps = {
                 id: 1,
                 name: "Arthur Mourão",
-                email: "joao@aluno.com",
-                role: "ALUNO",
+                email: "arthur@professor.com",
+                role: "PROFESSOR",
             };
             setUser(mockUser);
         }

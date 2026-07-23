@@ -107,7 +107,7 @@ export default function MaintenceForm() {
 
             <TextArea
                 label="Descreva sobre o Problema *"
-                placeholder="Identifique pontualmente o que ocorreu no equipamento..."
+                placeholder="Identifique o que ocorreu no equipamento..."
                 error={errors.description?.message}
                 {...register("description")}
             />
