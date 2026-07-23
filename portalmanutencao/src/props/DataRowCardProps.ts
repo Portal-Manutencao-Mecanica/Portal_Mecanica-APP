@@ -1,5 +1,5 @@
-export interface DataRowCardProps {
-  acronym: string;
-  professors: string[];
-  classGroupId: number;
+
+export interface DataRowCardProps{
+    children ? : React.ReactNode
+    actions ? : React.ReactNode 
 }
