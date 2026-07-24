@@ -1,12 +1,15 @@
 "use client";
 
-import { CircleQuestionMark, Bell, Settings } from "lucide-react";
+import { CircleQuestionMark, Bell, Settings, Menu } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
+import { HeaderProps } from "@/props/HeaderProps";
 
-export default function Header() {
+
+
+export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
@@ -51,57 +54,71 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-weg-blue w-full py-6 px-5 shadow-lg shadow-black/30 relative z-30">
-      <nav className="max-full mx-auto flex items-center justify-between">
-        <Link
-          href="/"
-          aria-label="Ir para a página inicial"
-          className="flex items-center"
-        >
-          <Image
-            src="/brand/logo-icon.svg"
-            alt="WEG logo"
-            width={39}
-            height={25}
-            priority
-          />
-        </Link>
+    <header className="bg-weg-blue w-full py-4 md:py-6 px-4 md:px-5 shadow-lg shadow-black/30 relative z-30">
+      <nav className="w-full mx-auto flex items-center justify-between gap-2">
+        {/* Lado Esquerdo: Hambúrguer (Mobile) + Logo */}
+        <div className="flex items-center gap-3">
+          {/* Botão Hambúrguer - Visível apenas no Mobile */}
+          <button
+            onClick={onOpenMobileMenu}
+            className="md:hidden transition-colors hover:bg-white/10 h-10 w-10 flex justify-center items-center rounded-lg cursor-pointer text-white"
+            aria-label="Abrir Menu Lateral"
+          >
+            <Menu size={24} />
+          </button>
 
-        <h1 className="text-3xl text-white font-semibold">
+          <Link
+            href="/"
+            aria-label="Ir para a página inicial"
+            className="flex items-center shrink-0"
+          >
+            <Image
+              src="/brand/logo-icon.svg"
+              alt="WEG logo"
+              width={35}
+              height={22}
+              priority
+            />
+          </Link>
+        </div>
+
+        {/* Título Principal - Responsivo em telas pequenas */}
+        <h1 className="text-lg sm:text-2xl md:text-3xl text-white font-semibold truncate text-center">
           Portal da Manutenção
         </h1>
 
+        {/* Lado Direito: Ações */}
         <div>
-          <ul className="flex items-center md:gap-4">
-            <li>
+          <ul className="flex items-center gap-1 md:gap-4">
+            <li className="hidden sm:block">
               <button
-                className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
+                className="transition-colors hover:bg-white/10 h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer"
                 aria-label="Ajuda"
               >
-                <CircleQuestionMark color="white" size={24} />
+                <CircleQuestionMark color="white" size={22} />
               </button>
             </li>
 
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
+                className={`relative transition-colors hover:bg-white/10 h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer ${
                   isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
                 }`}
                 aria-label="Notificações"
               >
-                <Bell color="white" size={24} />
+                <Bell color="white" size={22} />
 
                 {hasUnreadNotifications && (
-                  <span className="absolute top-2.5 right-2.5 flex h-3 w-3">
+                  <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-weg-blue"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-weg-blue"></span>
                   </span>
                 )}
               </button>
 
               {isNotificationOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
+                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
                   <div className="px-4 pt-3 py-2 text-xs font-bold text-weg-blue uppercase tracking-wider mb-1 flex justify-between items-center">
                     <span>Notificações Recentes</span>
                   </div>
@@ -138,10 +155,10 @@ export default function Header() {
 
             <li>
               <button
-                className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
+                className="transition-colors hover:bg-white/10 h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer"
                 aria-label="Configurações"
               >
-                <Settings color="white" size={24} />
+                <Settings color="white" size={22} />
               </button>
             </li>
           </ul>
