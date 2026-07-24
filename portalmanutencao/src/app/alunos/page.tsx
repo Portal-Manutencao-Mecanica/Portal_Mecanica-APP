@@ -49,7 +49,7 @@ export default function StudentsPage() {
             </p>
           </div>
 
-
+    
         </div>
 
         <StudentTable students={students} />
