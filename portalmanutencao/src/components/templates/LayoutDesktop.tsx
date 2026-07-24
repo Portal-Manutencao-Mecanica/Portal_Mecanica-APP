@@ -6,14 +6,14 @@ import { LayoutProps } from "@/props/LayoutProps";
 
 export default function LayoutDesktop({ children }: LayoutProps) {
     return (
-        <div className="flex flex-col h-screen w-full overflow-hidden">
+        <div className="flex flex-col min-h-screen  overflow-hidden">
 
             <Header />
 
-            <div className="flex flex-1 overflow-hidden relative">
+            <div className="flex flex-1 w-full ">
                 <SideBar />
                 
-                <main className="flex-1 overflow-y-auto p-6 bg-gray-50 relative">
+                <main className="flex-1 overflow-y-auto p-6 bg-gray-50 ">
                     <div className="max-w-7xl mx-auto">
                         <Breadcrumbs />
                         {children}
