@@ -1,23 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
-import Link from "next/link";
 import Button from "@/components/atoms/Button";
 import SearchInput from "@/components/atoms/Input";
 import EquipmentCard from "@/components/molecules/EquipmentCard";
+import { EquipmentProps } from "../../props/EquipmentProps"
 
-const equipments = [
+const equipments: EquipmentProps[] = [
   {
-    id: 1,
+    id: "1",
     name: "Motor WEG 2CV",
     sap: "123456",
     numberCard: "EQ-0001",
     image: "/images/equipment.png",
   },
   {
-    id: 2,
+    id: "2",
     name: "Rolamento SKF",
     sap: "987654",
     numberCard: "EQ-0002",
@@ -31,7 +32,7 @@ export default function EquipmentsPage() {
   const filteredEquipments = equipments.filter(
     (equipment) =>
       equipment.name.toLowerCase().includes(search.toLowerCase()) ||
-      equipment.sap.toLowerCase().includes(search.toLowerCase())
+      (equipment.sap ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -59,7 +60,10 @@ export default function EquipmentsPage() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredEquipments.map((equipment) => (
-            <EquipmentCard key={equipment.id} equipment={}  />
+            <EquipmentCard
+              key={equipment.id}
+              equipment={equipment}
+            />
           ))}
         </div>
       </div>
