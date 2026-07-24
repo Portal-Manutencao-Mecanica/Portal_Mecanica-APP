@@ -1,3 +1,5 @@
+'use client'
+
 import { InputProps } from "@/props/InputProps";
 import { forwardRef, useState } from "react";
 
