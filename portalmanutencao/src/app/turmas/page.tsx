@@ -16,6 +16,7 @@ interface Student {
   email: string;
 }
 
+<<<<<<< HEAD
 interface ClassGroupProps {
   id: number;
   acronym: string;
@@ -68,4 +69,14 @@ export default async function TurmasPage() {
   } catch (error) {
     console.log(error);
   }
+=======
+        {classGroups.map((group) => (
+          <>
+          <DataRowCard children={undefined} actions={undefined}></DataRowCard>
+          </>
+        ))}
+      </div>
+    </LayoutDesktop>
+  );
+>>>>>>> 5e21f4e4035bf6d80aac432da5d09468a7c5f865
 }

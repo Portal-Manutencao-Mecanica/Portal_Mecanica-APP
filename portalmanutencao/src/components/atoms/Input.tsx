@@ -11,7 +11,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         };
 
         return (
-            <div className="w-full flex flex-col gap-1.5">
+            <div className="w-full flex flex-col gap-1.5 ">
                 {label && (
                     <label className="text-sm font-medium text-gray-700">
                         {label}
@@ -22,7 +22,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     className={`
                     flex items-center justify-between px-4 py-2 border rounded-lg bg-white text-sm
                     transition-all duration-200 ease-out hover:border-[#3498db]
-                    focus-within:border-[#3498db]
+                    focus-within:border-[#3498db] shadow-sm
 
                     active:ring-4
                     active:ring-[#3498db]/30 
