@@ -3,9 +3,10 @@
 import { useState } from "react";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import Link from "next/link";
 import Button from "@/components/atoms/Button";
-import SearchInput from "@/components/atoms/Input"
-import EquipmentCard from "@/components/molecules/EquipmentCard"
+import SearchInput from "@/components/atoms/Input";
+import EquipmentCard from "@/components/molecules/EquipmentCard";
 
 const equipments = [
   {
@@ -39,12 +40,15 @@ export default function EquipmentsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Equipamentos</h1>
+
             <p className="text-gray-500">
               Gerencie todos os equipamentos cadastrados.
             </p>
           </div>
 
-          <Button text="Novo Equipamento" />
+          <Link href="/equipamentos/novo">
+            <Button>Novo Equipamento</Button>
+          </Link>
         </div>
 
         <SearchInput

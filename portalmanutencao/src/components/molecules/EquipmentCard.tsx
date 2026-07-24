@@ -37,7 +37,7 @@ export default function EquipmentCard({ equipment }: EquipmentCardProps) {
         </div>
 
         <Link href={`/equipamentos/${equipment.id}`}>
-          <Button className="w-full">Ver Detalhes</Button>
+          <Button>Ver detalhes</Button>
         </Link>
       </div>
     </div>
