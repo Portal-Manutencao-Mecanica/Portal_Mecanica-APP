@@ -14,7 +14,31 @@ import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
 import { User } from "@/props/UserAvatarProps";
 
-export function SideBar() {
+import { useState } from "react";
+import {
+  MonitorCog,
+  MessageSquareWarning,
+  ShoppingCart,
+  Users,
+  PanelLeftOpen,
+  GraduationCap,
+  X,
+  Settings,
+  CircleQuestionMark,
+} from "lucide-react";
+import Link from "next/link";
+import { UserAvatar } from "@/components/atoms/UserAvatar";
+import { User } from "@/props/UserAvatarProps";
+
+interface SideBarProps {
+  isMobileMenuOpen?: boolean;
+  closeMobileMenu?: () => void;
+}
+
+export function SideBar({
+  isMobileMenuOpen = false,
+  closeMobileMenu,
+}: SideBarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const currentUser: User = {

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Header from "../organisms/Header";
 import { SideBar } from "../organisms/SideBar";
 import Footer from "../organisms/Footer";

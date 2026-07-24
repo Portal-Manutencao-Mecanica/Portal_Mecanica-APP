@@ -1,10 +1,13 @@
 "use client";
 
-import { CircleQuestionMark, Bell, Settings } from "lucide-react";
+import { Bell, Settings, Menu, CircleQuestionMark } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
+import { HeaderProps } from "@/props/HeaderProps";
+import { User } from "@/props/UserAvatarProps";
+import { UserAvatar } from "../atoms/UserAvatar";
 
 export default function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
