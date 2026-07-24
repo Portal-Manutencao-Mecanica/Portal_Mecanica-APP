@@ -1,10 +1,12 @@
+import Image from "next/image";
+import Link from "next/link";
+
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
-import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 
 export default function EquipmentDetailsPage() {
   const equipment = {
-    id: 1,
+    id: "1",
     name: "Motor WEG 2CV",
     sap: "123456",
     numberCard: "EQ-0001",
@@ -13,31 +15,50 @@ export default function EquipmentDetailsPage() {
 
   return (
     <LayoutDesktop>
-      <div className="rounded-xl bg-white p-8 shadow-sm">
-        <div className="flex justify-between items-start">
+      <div className="space-y-8">
+
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">{equipment.name}</h1>
 
-            <p className="text-gray-500 mt-2">Informações do equipamento</p>
+            <p className="text-gray-500">Informações do equipamento.</p>
           </div>
 
           <Button>Editar</Button>
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-6">
-          <LabelWithCircle
-            title="Número do Card"
-            value={equipment.numberCard}
-          />
+        <div className="rounded-xl border bg-white p-8 shadow-sm">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+            <div className="flex justify-center">
+              <div className="relative h-80 w-80 rounded-xl border bg-gray-100">
+                <Image
+                  src={equipment.image}
+                  alt={equipment.name}
+                  fill
+                  className="object-contain p-6"
+                />
+              </div>
+            </div>
 
-          <LabelWithCircle title="Código SAP" value={equipment.sap} />
-        </div>
+            <div className="space-y-6">
+              <div>
+                <p className="text-sm text-gray-500">Nome</p>
 
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Imagem</h2>
+                <h2 className="text-xl font-semibold">{equipment.name}</h2>
+              </div>
 
-          <div className="h-72 rounded-xl border bg-gray-100 flex items-center justify-center">
-            Imagem do equipamento
+              <div>
+                <p className="text-sm text-gray-500">Código SAP</p>
+
+                <p className="text-lg">{equipment.sap || "-"}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Número do Card</p>
+
+                <p className="text-lg break-all">{equipment.numberCard}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
