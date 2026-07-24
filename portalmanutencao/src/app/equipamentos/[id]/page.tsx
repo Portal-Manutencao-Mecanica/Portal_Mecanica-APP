@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
+import Link from "next/link";
 
 export default function EquipmentDetailsPage() {
   const equipment = {
@@ -10,6 +10,8 @@ export default function EquipmentDetailsPage() {
     name: "Motor WEG 2CV",
     sap: "123456",
     numberCard: "EQ-0001",
+    tag: "TAG-001",
+    patrimony: "PAT-458963",
     image: "/images/default-equipment.png",
   };
 
@@ -22,8 +24,11 @@ export default function EquipmentDetailsPage() {
 
             <p className="text-gray-500">Informações do equipamento.</p>
           </div>
-          <div className="flex gap-6">
-            <Button>Editar</Button>
+
+          <div className="flex gap-4">
+            <Link href={`/equipamentos/${equipment.id}/editar`}>
+              <Button>Editar</Button>
+            </Link>
             <Button variant="danger">Deletar</Button>
           </div>
         </div>
@@ -57,7 +62,19 @@ export default function EquipmentDetailsPage() {
               <div>
                 <p className="text-sm text-gray-500">Número do Card</p>
 
-                <p className="text-lg break-all">{equipment.numberCard}</p>
+                <p className="text-lg">{equipment.numberCard}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Tag</p>
+
+                <p className="text-lg">{equipment.tag || "-"}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Patrimônio</p>
+
+                <p className="text-lg">{equipment.patrimony || "-"}</p>
               </div>
             </div>
           </div>
