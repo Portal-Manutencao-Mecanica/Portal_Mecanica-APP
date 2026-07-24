@@ -1,13 +1,13 @@
 "use client";
 
-import { CircleQuestionMark, Bell, Settings, Menu } from "lucide-react";
+import { Bell, Settings, Menu, CircleQuestionMark } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
 import { HeaderProps } from "@/props/HeaderProps";
-
-
+import { User } from "@/props/UserAvatarProps";
+import { UserAvatar } from "../atoms/UserAvatar";
 
 export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -34,6 +34,11 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
     },
   ]);
 
+  const currentUser: User = {
+    name: "Alexandre Santos",
+    role: "Administrador",
+  };
+
   const hasUnreadNotifications = notifications.some((notif) => notif.isUnread);
 
   useEffect(() => {
@@ -54,11 +59,10 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
   };
 
   return (
-    <header className="bg-weg-blue w-full py-4 md:py-6 px-4 md:px-5 shadow-lg shadow-black/30 relative z-30">
+    <header className="bg-weg-blue w-full py-4 md:py-6 px-3 sm:px-5 shadow-lg shadow-black/30 relative z-30">
       <nav className="w-full mx-auto flex items-center justify-between gap-2">
         {/* Lado Esquerdo: Hambúrguer (Mobile) + Logo */}
-        <div className="flex items-center gap-3">
-          {/* Botão Hambúrguer - Visível apenas no Mobile */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onOpenMobileMenu}
             className="md:hidden transition-colors hover:bg-white/10 h-10 w-10 flex justify-center items-center rounded-lg cursor-pointer text-white"
@@ -82,23 +86,19 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
           </Link>
         </div>
 
-        {/* Título Principal - Responsivo em telas pequenas */}
-        <h1 className="text-lg sm:text-2xl md:text-3xl text-white font-semibold truncate text-center">
+        {/* Título Principal: Ajustado o tamanho da fonte para não quebrar em telas pequenas */}
+        <h1 className="text-base sm:text-xl md:text-3xl text-white font-semibold text-center whitespace-nowrap">
           Portal da Manutenção
         </h1>
 
-        {/* Lado Direito: Ações */}
-        <div>
+        {/* Lado Direito: Notificações + Configurações (Apenas Desktop) */}
+        <div className="shrink-0">
           <ul className="flex items-center gap-1 md:gap-4">
             <li className="hidden sm:block">
-              <button
-                className="transition-colors hover:bg-white/10 h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                aria-label="Ajuda"
-              >
-                <CircleQuestionMark color="white" size={22} />
-              </button>
+              <UserAvatar user={currentUser} />
             </li>
 
+            {/* Notificações (Mobile e Desktop) */}
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
@@ -153,13 +153,22 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
               )}
             </li>
 
-            <li>
-              <button
+            {/* Engrenagem: ESCONDIDA NO MOBILE (hidden), VISÍVEL APENAS NO DESKTOP (md:flex) */}
+
+            <li className="hidden md:flex">
+              <Link
                 className="transition-colors hover:bg-white/10 h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                aria-label="Configurações"
-              >
+                aria-label="Configurações" href={"/ajuda"}>
+                <CircleQuestionMark color="white" size={22} />
+              </Link>
+            </li>
+
+            <li className="hidden md:flex">
+              <Link
+                className="transition-colors hover:bg-white/10 h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer"
+                aria-label="Configurações" href={"/configuracoes"}>
                 <Settings color="white" size={22} />
-              </button>
+              </Link>
             </li>
           </ul>
         </div>

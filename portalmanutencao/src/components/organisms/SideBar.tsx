@@ -9,6 +9,8 @@ import {
   PanelLeftOpen,
   GraduationCap,
   X,
+  Settings,
+  CircleQuestionMark,
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
@@ -40,7 +42,7 @@ export function SideBar({
 
   return (
     <>
-      {/* Overlay escuro (Fundo) - Aparece apenas no mobile quando aberto */}
+      {/* Overlay escuro no Mobile */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
@@ -48,22 +50,26 @@ export function SideBar({
         />
       )}
 
-      {/* Container Principal da Sidebar */}
+      {/* Sidebar Principal */}
       <aside
         className={`
           bg-weg-blue text-white flex-col justify-between 
           transition-all duration-300 ease-in-out select-none overflow-hidden p-3
           
-          /* Esconde totalmente no mobile quando fechado, exibe no desktop */
-          ${isMobileMenuOpen ? "flex fixed inset-y-0 left-0 z-50 h-full w-64 translate-x-0 shadow-2xl shadow-black/50" : "hidden -translate-x-full"}
+          /* Oculta no mobile quando fechado, desliza quando aberto */
+          ${
+            isMobileMenuOpen
+              ? "flex fixed inset-y-0 left-0 z-50 h-full w-64 translate-x-0 shadow-2xl shadow-black/50"
+              : "hidden -translate-x-full"
+          }
           
-          /* Desktop Sidebar (Sempre flexível no desktop) */
+          /* Layout Desktop */
           md:flex md:relative md:translate-x-0 md:z-20
           ${isExpanded ? "md:w-64 md:shadow-2xl md:shadow-black/40" : "md:w-20"}
         `}
       >
-        <nav className="flex flex-col gap-2 w-full">
-          {/* Botão Superior: Fechar no Mobile | Toggle de Expansão no Desktop */}
+        <nav className="flex flex-col gap-2 w-full overflow-y-auto">
+          {/* Botão Superior: Fechar (Mobile) / Expanding (Desktop) */}
           <button
             onClick={() => {
               if (isMobileMenuOpen && closeMobileMenu) {
@@ -74,8 +80,7 @@ export function SideBar({
             }}
             className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 w-full"
           >
-            <div className="w-8 h-8 flex items-center justify-center shrink-0">
-              {/* Ícone 'X' no Mobile para Fechar / 'PanelLeftOpen' no Desktop */}
+            <div className="w-8 h-8 flex items-center justify-center shrink-0 " >
               <X className="w-6 h-6 md:hidden" />
               <PanelLeftOpen
                 className={`hidden md:block w-6 h-6 transition-transform duration-300 ${
@@ -97,14 +102,12 @@ export function SideBar({
             >
               <span className="md:hidden">Fechar Menu</span>
               <span className="hidden md:inline">
-                {isExpanded ? "Recolher Menu" : ""}
+                {isExpanded ? "Fechar Menu" : ""}
               </span>
             </span>
           </button>
-
-          
-
-          {/* Links do Menu */}
+              <div className="border-t border-white/10 md:border-transparent"></div>
+          {/* Links Principais */}
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
@@ -133,10 +136,40 @@ export function SideBar({
               </Link>
             );
           })}
+
+          {/* ITEM EXCLUSIVO DO MOBILE: CONFIGURAÇÕES */}
+          <div className="md:hidden flex flex-col gap-2 mt-2">
+            <div className="h-px bg-white/20 my-1 w-full" />
+            <Link
+              href="/configuracoes"
+              onClick={closeMobileMenu}
+              className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 w-full"
+            >
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                <Settings className="w-6 h-6" />
+              </div>
+              <span className="whitespace-nowrap text-sm font-medium ml-3">
+                Configurações
+              </span>
+            </Link>
+
+            <Link
+              href="/ajuda"
+              onClick={closeMobileMenu}
+              className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 w-full"
+            >
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                <CircleQuestionMark className="w-6 h-6" />
+              </div>
+              <span className="whitespace-nowrap text-sm font-medium ml-3">
+                Ajuda
+              </span>
+            </Link>
+          </div>
         </nav>
 
         {/* Perfil no Rodapé */}
-        <div className="pt-3 mt-auto flex items-center ">
+        <div className="pt-3 mt-auto flex items-center border-t border-white/10 md:border-transparent">
           <UserAvatar
             user={currentUser}
             isExpanded={isExpanded || isMobileMenuOpen}
