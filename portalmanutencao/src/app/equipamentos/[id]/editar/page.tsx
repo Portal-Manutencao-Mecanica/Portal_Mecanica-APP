@@ -109,7 +109,8 @@ export default function EditEquipmentPage() {
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" onClick={() => router.back()}>
+            <Button type="button" onClick={() => router.back()}
+            variant="secondary">
               Cancelar
             </Button>
 
