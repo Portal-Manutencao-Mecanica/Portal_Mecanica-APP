@@ -4,29 +4,27 @@ import { useState } from "react";
 import Header from "../organisms/Header";
 import { SideBar } from "../organisms/SideBar";
 import Footer from "../organisms/Footer";
+import { Breadcrumbs } from "../molecules/Breadcrumbs";
+import { LayoutProps } from "@/props/LayoutProps";
 
+export default function LayoutDesktop({ children }: LayoutProps) {
+    return (
+        <div className="flex flex-col h-screen w-full overflow-hidden">
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            <Header />
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+            <div className="flex flex-1 overflow-hidden relative">
+                <SideBar />
+                
+                <main className="flex-1 overflow-y-auto p-6 bg-gray-50 relative">
+                    <div className="max-w-7xl mx-auto">
+                        <Breadcrumbs />
+                        {children}
+                    </div>
+                </main>
+            </div>
 
-      <Header onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
-
-      <div className="flex flex-1 w-full">
-        
-        <SideBar
-          isMobileMenuOpen={isMobileMenuOpen}
-          closeMobileMenu={() => setIsMobileMenuOpen(false)}
-        />
-
-        <main className="flex-1 p-4 md:p-6 w-full">
-          {children}
-        </main>
-      </div>
-
-      <Footer />
-    </div>
-  );
+            <Footer />
+        </div>
+    );
 }
