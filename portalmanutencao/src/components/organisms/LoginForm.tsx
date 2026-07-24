@@ -1,6 +1,6 @@
-
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
+import Link from "next/link";
 
 export function LoginForm() {
   return (
@@ -16,7 +16,12 @@ export function LoginForm() {
       </Button>
 
       <p className="pt-2 text-center text-sm text-gray-700">
-        Esqueceu sua Senha? <span className="font-bold cursor-pointer">Clique Aqui</span>
+        <Link
+          href="/login/forgot-password"
+          className="font-bold hover:underline"
+        >
+          Esqueceu sua senha? Clique aqui
+        </Link>
       </p>
     </form>
   );
