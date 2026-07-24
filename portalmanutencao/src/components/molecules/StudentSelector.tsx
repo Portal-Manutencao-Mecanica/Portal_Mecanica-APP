@@ -5,16 +5,7 @@ import { Check, ChevronRight, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // Types/Interfaces temporários (ajuste as importações conforme seu projeto)
-interface ClassroomProps {
-    id: number;
-    name: string;
-}
 
-interface StudentSelectorProps {
-    value?: number[];
-    onChange?: (selectedIds: number[]) => void;
-    error?: string;
-}
 
 // 1. Dados mockados para simular o banco de dados/API
 const MOCK_CLASSROOMS: ClassroomProps[] = [
