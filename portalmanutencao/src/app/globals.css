@@ -2,7 +2,8 @@
 
 @theme {
   --font-sans: var(--font-roboto-flex), sans-serif;
-  --font-mono: var(--font-roboto-mono), monospace;
+  --font-roboto: var(--font-roboto), sans-serif;
+
   --color-weg-blue: #00579D;
   --color-weg-warning: #EFC906;
   --color-weg-gray:#000000;
@@ -11,6 +12,8 @@
   --color-weg-label-warning:#EF8300;
   --color-weg-card-white:#FAFAFE;
 
+ --shadow-t-lg: 0 -10px 15px -3px rgba(0, 0, 0, 0.2), 0 -4px 6px -4px rgba(0, 0, 0, 0.2);
+
 }
 
 body {
@@ -18,5 +21,5 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-mono);
+  font-family: var(--font-roboto);
 }
