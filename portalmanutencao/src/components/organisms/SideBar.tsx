@@ -8,6 +8,7 @@ import {
   Users,
   PanelLeftOpen,
   GraduationCap,
+  Toolbox 
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
@@ -27,6 +28,8 @@ export function SideBar() {
     { icon: ShoppingCart, label: "Compras", href: "/compras" },
     { icon: GraduationCap, label: "Alunos", href: "/alunos" },
     { icon: Users, label: "Turmas", href: "/turmas" },
+    { icon: Toolbox, label: "Equipamentos", href: "/equipamentos" },
+
   ];
 
   return (
