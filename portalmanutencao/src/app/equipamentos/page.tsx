@@ -59,7 +59,7 @@ export default function EquipmentsPage() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredEquipments.map((equipment) => (
-            <EquipmentCard key={equipment.id} equipment={equipment} />
+            <EquipmentCard key={equipment.id} equipment={}  />
           ))}
         </div>
       </div>
