@@ -16,15 +16,16 @@ export default function EquipmentDetailsPage() {
   return (
     <LayoutDesktop>
       <div className="space-y-8">
-
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">{equipment.name}</h1>
 
             <p className="text-gray-500">Informações do equipamento.</p>
           </div>
-
-          <Button>Editar</Button>
+          <div className="flex gap-6">
+            <Button>Editar</Button>
+            <Button variant="danger">Deletar</Button>
+          </div>
         </div>
 
         <div className="rounded-xl border bg-white p-8 shadow-sm">
