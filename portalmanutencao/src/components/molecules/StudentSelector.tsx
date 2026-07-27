@@ -1,8 +1,35 @@
-'use client'
+"use client";
 
 import { StudentProps } from "@/props/StudentProps";
 import { Check, ChevronRight, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
+
+// Types/Interfaces temporários (ajuste as importações conforme seu projeto)
+
+
+// 1. Dados mockados para simular o banco de dados/API
+const MOCK_CLASSROOMS: ClassroomProps[] = [
+    { id: 1, name: "MM 77 - Matutino" },
+    { id: 2, name: "MM 78 - Matutino" },
+    { id: 3, name: "MM 79 - Noturno" },
+];
+
+const MOCK_STUDENTS: Record<number, StudentProps[]> = {
+    1: [
+        { id: 101, name: "Ana Silva" },
+        { id: 102, name: "Bruno Costa" },
+        { id: 103, name: "Carla Souza" },
+    ],
+    2: [
+        { id: 201, name: "Diego Oliveira" },
+        { id: 202, name: "Elena Santos" },
+        { id: 203, name: "Fernando Lima" },
+    ],
+    3: [
+        { id: 301, name: "Gabriel Rocha" },
+        { id: 302, name: "Helena Martins" },
+    ],
+};
 
 export default function StudentSelector({ value = [], onChange, error }: StudentSelectorProps) {
     const [classrooms, setClassrooms] = useState<ClassroomProps[]>([]);
@@ -11,33 +38,19 @@ export default function StudentSelector({ value = [], onChange, error }: Student
     const [selectedStudentsList, setSelectedStudentsList] = useState<StudentProps[]>([]);
     const [isOpen, setIsOpen] = useState(false);
 
-    // 1. Busca todas as turmas da API ao carregar o componente
+    // Carrega as turmas mockadas na montagem do componente
     useEffect(() => {
-        async function fetchClassrooms() {
-            try {
-                const res = await fetch("/api/classrooms"); // Substitua pela sua URL real
-                const data = await res.json();
-                setClassrooms(data);
-            } catch (err) {
-                console.error("Erro ao buscar turmas:", err);
-            }
-        }
-        fetchClassrooms();
+        setClassrooms(MOCK_CLASSROOMS);
     }, []);
 
-    // 2. Quando passar o mouse/selecionar uma turma, busca os alunos dela na API
-    const handleHoverClassroom = async (classroomId: number) => {
+    // Atualiza os alunos ao passar o mouse ou clicar em uma turma mockada
+    const handleHoverClassroom = (classroomId: number) => {
         setSelectedClassroom(classroomId);
-        try {
-            const res = await fetch(`/api/classrooms/${classroomId}/students`); // Endpoint de alunos da turma
-            const data = await res.json();
-            setStudents(data);
-        } catch (err) {
-            console.error("Erro ao buscar alunos da turma:", err);
-        }
+        const classroomStudents = MOCK_STUDENTS[classroomId] || [];
+        setStudents(classroomStudents);
     };
 
-    // 3. Adiciona ou remove o aluno do estado global do formulário
+    // Adiciona ou remove o aluno do estado global do formulário
     const toggleStudent = (student: StudentProps) => {
         let updatedIds: number[];
         let updatedList: StudentProps[];
@@ -65,7 +78,7 @@ export default function StudentSelector({ value = [], onChange, error }: Student
                 {selectedStudentsList.map((student) => (
                     <span
                         key={student.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-weg-blue text-xs font-semibold rounded-full border border-blue-200"
                     >
                         <User className="w-3.5 h-3.5" />
                         {student.name}
@@ -100,8 +113,8 @@ export default function StudentSelector({ value = [], onChange, error }: Student
             {isOpen && (
                 <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg flex h-64 overflow-hidden">
                     {/* Nível 1: Lista de Turmas */}
-                    <div className="w-1/2 border-r border-gray-100 overflow-y-auto bg-gray-50/50 p-2">
-                        <span className="text-[11px] font-bold text-gray-400 uppercase px-2 mb-1 block">
+                    <div className="w-1/2 border-r border-gray-100 overflow-y-auto bg-gray-50/50 p-2 space-y-1">
+                        <span className="text-[11px] font-bold text-gray-500 uppercase px-2 mb-1 block">
                             Turmas
                         </span>
                         {classrooms.map((cls) => (
@@ -111,7 +124,7 @@ export default function StudentSelector({ value = [], onChange, error }: Student
                                 onClick={() => handleHoverClassroom(cls.id)}
                                 className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                                     selectedClassroom === cls.id
-                                        ? "bg-blue-600 text-white"
+                                        ? "bg-weg-blue text-white"
                                         : "hover:bg-gray-200/70 text-gray-700"
                                 }`}
                             >
@@ -122,8 +135,8 @@ export default function StudentSelector({ value = [], onChange, error }: Student
                     </div>
 
                     {/* Nível 2: Lista de Alunos da Turma Selecionada */}
-                    <div className="w-1/2 overflow-y-auto p-2">
-                        <span className="text-[11px] font-bold text-gray-400 uppercase px-2 mb-1 block">
+                    <div className="w-1/2 overflow-y-auto space-y-1  p-2">
+                        <span className="text-[11px] font-bold text-gray-500 uppercase px-2 mb-1 block">
                             Alunos da Turma
                         </span>
                         {!selectedClassroom ? (
@@ -139,12 +152,12 @@ export default function StudentSelector({ value = [], onChange, error }: Student
                                         onClick={() => toggleStudent(student)}
                                         className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                                             isSelected
-                                                ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                                ? "bg-blue-50 text-weg-blue border border-blue-200"
                                                 : "hover:bg-gray-100 text-gray-700"
                                         }`}
                                     >
                                         <span>{student.name}</span>
-                                        {isSelected && <Check className="w-4 h-4 text-blue-600" />}
+                                        {isSelected && <Check className="w-4 h-4 text-weg-blue" />}
                                     </div>
                                 );
                             })
