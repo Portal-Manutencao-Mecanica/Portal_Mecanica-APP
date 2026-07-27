@@ -14,14 +14,19 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
   error,
   badgeIcon: BadgeIcon = Tag,
 }: CascadingMultiSelectorProps<T>) {
-  const [activeGroupId, setActiveGroupId] = useState<string | number | null>(null);
+  const [activeGroupId, setActiveGroupId] = useState<string | number | null>(
+    null
+  );
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fecha o dropdown ao clicar fora do componente
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -31,12 +36,12 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
 
   // Mapeia todos os itens de todos os grupos para facilitar a busca
   const allItems = useMemo(() => {
-    return groups.flatMap((group : any) => group.items);
+    return groups.flatMap((group: any) => group.items);
   }, [groups]);
 
   // Obtém os itens selecionados com base nos IDs passados em 'value'
   const selectedItems = useMemo(() => {
-    return allItems.filter((item : any) => value.includes(item.id));
+    return allItems.filter((item: any) => value.includes(item.id));
   }, [allItems, value]);
 
   // Obtém os itens do grupo que está ativo/hover no momento
@@ -68,14 +73,14 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
           {selectedItems.map((item) => (
             <span
               key={item.id}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-weg-blue text-xs font-semibold rounded-full border border-blue-200"
             >
               <BadgeIcon className="w-3.5 h-3.5" />
               {item.name}
               <button
                 type="button"
                 onClick={() => toggleItem(item.id)}
-                className="hover:text-red-500 transition-colors ml-1"
+                className="inline-flex items-center justify-center p-0.5 rounded-md hover:bg-blue-200/60 text-weg-blue transition-colors cursor-pointer ml-0.5"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -89,13 +94,23 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full text-left px-4 py-2.5 bg-white border rounded-xl text-sm font-medium flex justify-between items-center transition-all ${
-          error ? "border-red-400 focus:ring-red-200" : "border-gray-300 hover:border-gray-400"
+          error
+            ? "border-red-400 focus:ring-red-200"
+            : "border-gray-300 hover:border-gray-400"
         }`}
       >
-        <span className={value.length === 0 ? "text-gray-400" : "text-gray-800"}>
-          {value.length === 0 ? placeholder : `${value.length} item(ns) selecionado(s)`}
+        <span
+          className={value.length === 0 ? "text-gray-400" : "text-gray-800"}
+        >
+          {value.length === 0
+            ? placeholder
+            : `${value.length} item(ns) selecionado(s)`}
         </span>
-        <ChevronRight className={`w-4 h-4 transition-transform ${isOpen ? "rotate-90" : ""}`} />
+        <ChevronRight
+          className={`w-4 h-4 transition-transform ${
+            isOpen ? "rotate-90" : ""
+          }`}
+        />
       </button>
 
       {/* Dropdown de 2 Níveis */}
@@ -113,7 +128,7 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
                 onClick={() => setActiveGroupId(group.id)}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                   activeGroupId === group.id
-                    ? "bg-blue-600 text-white"
+                    ? "bg-weg-blue text-white"
                     : "hover:bg-gray-200/70 text-gray-700"
                 }`}
               >
@@ -129,9 +144,13 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
               {itemHeader}
             </span>
             {!activeGroupId ? (
-              <p className="text-xs text-gray-400 p-2">Passe o mouse sobre um grupo...</p>
+              <p className="text-xs text-gray-400 p-2">
+                Passe o mouse sobre um grupo...
+              </p>
             ) : activeItems.length === 0 ? (
-              <p className="text-xs text-gray-400 p-2">Nenhum item nesta categoria.</p>
+              <p className="text-xs text-gray-400 p-2">
+                Nenhum item nesta categoria.
+              </p>
             ) : (
               activeItems.map((item) => {
                 const isSelected = value.includes(item.id);
@@ -141,7 +160,7 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
                     onClick={() => toggleItem(item.id)}
                     className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                       isSelected
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        ? "bg-blue-50 text-weg-blue border border-blue-200"
                         : "hover:bg-gray-100 text-gray-700"
                     }`}
                   >
@@ -156,7 +175,9 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
       )}
 
       {/* Mensagem de Erro */}
-      {error && <span className="text-xs text-red-500 font-medium block">{error}</span>}
+      {error && (
+        <span className="text-xs text-red-500 font-medium block">{error}</span>
+      )}
     </div>
   );
 }
