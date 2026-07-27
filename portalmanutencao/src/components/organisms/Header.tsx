@@ -1,19 +1,16 @@
 "use client";
 
-import { Bell, Settings, Menu, CircleQuestionMark } from "lucide-react";
+import { Bell, Settings, CircleQuestionMark } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
-import { HeaderProps } from "@/props/HeaderProps";
-import { User } from "@/props/UserAvatarProps";
-import { UserAvatar } from "../atoms/UserAvatar";
 
 export default function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     {
       id: 1,
       title: "Ocorrência Aprovada",
@@ -54,12 +51,13 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-weg-blue w-full py-6 px-5 shadow-lg shadow-black/30 relative z-30">
-      <nav className="max-full mx-auto flex items-center justify-between">
+    <header className="bg-weg-blue w-full h-20 px-5 shadow-md relative z-30 flex items-center">
+      <nav className="w-full flex items-center justify-between gap-4">
+        {/* Logo WEG */}
         <Link
           href="/"
           aria-label="Ir para a página inicial"
-          className="flex items-center"
+          className="flex items-center shrink-0"
         >
           <Image
             src="/brand/logo-icon.svg"
@@ -70,12 +68,14 @@ export default function Header() {
           />
         </Link>
 
-        <h1 className="text-3xl text-white font-semibold">
+        {/* Título do Portal */}
+        <h1 className="text-xl md:text-3xl text-white font-semibold truncate text-center">
           Portal da Manutenção
         </h1>
 
-        <div>
-          <ul className="flex items-center gap-4">
+        {/* Botões da Direita */}
+        <div className="shrink-0">
+          <ul className="flex items-center gap-2 md:gap-4">
             <li>
               <button
                 className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
@@ -88,7 +88,7 @@ export default function Header() {
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
+                className={`relative transition-colors h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
                   isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
                 }`}
                 aria-label="Notificações"
