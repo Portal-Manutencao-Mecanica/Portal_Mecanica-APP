@@ -8,35 +8,38 @@ import Button from "@/components/atoms/Button";
 import SearchInput from "@/components/atoms/Input";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import { DataRowCard } from "@/components/molecules/DataRowCard";
-import { LabelStatus } from "../../props/LabelProps";
+import { LabelStatus } from "@/types/LabelStatus";
 
-const buys = [
+const inconveniences = [
   {
     id: "1",
-    numberCard: "COMP-0001",
-    createdBy: "João Silva",
+    numberCard: "5S-0001",
+    inconvenience: "Cabos espalhados pelo laboratório",
+    place: "Laboratório Mecânica",
     classGroup: "TIIN 2025/1",
-    createdAt: "24/07/2026",
-    totalItems: 4,
-    status: "NAO_VISUALIZADO",
+    notifiedTeacher: "Carlos Henrique",
+    createdAt: "27/07/2026",
+    status: "NAO_VISUALIZADA",
   },
   {
     id: "2",
-    numberCard: "COMP-0002",
-    createdBy: "Maria Souza",
+    numberCard: "5S-0002",
+    inconvenience: "Ferramentas fora do local",
+    place: "Laboratório Elétrica",
     classGroup: "TIIN 2025/2",
-    createdAt: "23/07/2026",
-    totalItems: 2,
-    status: "APROVADO",
+    notifiedTeacher: "João Pedro",
+    createdAt: "26/07/2026",
+    status: "VISUALIZADA",
   },
   {
     id: "3",
-    numberCard: "COMP-0003",
-    createdBy: "Carlos Henrique",
+    numberCard: "5S-0003",
+    inconvenience: "Resíduos no chão",
+    place: "Oficina",
     classGroup: "TIIN 2025/1",
-    createdAt: "22/07/2026",
-    totalItems: 6,
-    status: "REPROVADO",
+    notifiedTeacher: "Maria Souza",
+    createdAt: "25/07/2026",
+    status: "RESOLVIDA",
   },
 ];
 
@@ -45,28 +48,22 @@ function getStatus(status: string): {
   status: LabelStatus;
 } {
   switch (status) {
-    case "NAO_VISUALIZADO":
+    case "NAO_VISUALIZADA":
       return {
-        text: "Não Visualizado",
+        text: "Não Visualizada",
         status: "warning",
       };
 
-    case "VISUALIZADO":
+    case "VISUALIZADA":
       return {
-        text: "Visualizado",
+        text: "Visualizada",
         status: "default",
       };
 
-    case "APROVADO":
+    case "RESOLVIDA":
       return {
-        text: "Aprovado",
+        text: "Resolvida",
         status: "positive",
-      };
-
-    case "REPROVADO":
-      return {
-        text: "Reprovado",
-        status: "negative",
       };
 
     default:
@@ -77,14 +74,15 @@ function getStatus(status: string): {
   }
 }
 
-export default function BuyPage() {
+export default function InconveniencePage() {
   const [search, setSearch] = useState("");
 
-  const filteredBuys = buys.filter(
-    (buy) =>
-      buy.numberCard.toLowerCase().includes(search.toLowerCase()) ||
-      buy.createdBy.toLowerCase().includes(search.toLowerCase()) ||
-      buy.classGroup.toLowerCase().includes(search.toLowerCase()),
+  const filteredInconveniences = inconveniences.filter(
+    (item) =>
+      item.numberCard.toLowerCase().includes(search.toLowerCase()) ||
+      item.inconvenience.toLowerCase().includes(search.toLowerCase()) ||
+      item.place.toLowerCase().includes(search.toLowerCase()) ||
+      item.classGroup.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -92,55 +90,61 @@ export default function BuyPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Solicitações de Compra</h1>
+            <h1 className="text-3xl font-bold">Incoveniência 5S</h1>
 
             <p className="text-gray-500">
-              Gerencie as solicitações enviadas pelos professores.
+              Gerencie todas as ocorrências registradas.
             </p>
           </div>
+
+          <Link href="/incoveniencia5s/nova">
+            <Button>Nova Incoveniência</Button>
+          </Link>
         </div>
 
         <SearchInput
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Pesquisar solicitação..."
+          placeholder="Pesquisar ocorrência..."
         />
 
         <div className="space-y-4">
-          {filteredBuys.map((buy) => {
-            const label = getStatus(buy.status);
+          {filteredInconveniences.map((item) => {
+            const label = getStatus(item.status);
 
             return (
               <DataRowCard
-                key={buy.id}
+                key={item.id}
                 actions={
-                  <Link href={`/compras/${buy.id}`}>
+                  <Link href={`/incoveniencia5s/${item.id}`}>
                     <Button>Ver Detalhes</Button>
                   </Link>
                 }
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold">{buy.numberCard}</h2>
+                    <h2 className="text-lg font-semibold">{item.numberCard}</h2>
 
                     <LabelWithCircle status={label.status} text={label.text} />
                   </div>
 
+                  <p className="font-medium">{item.inconvenience}</p>
+
                   <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600">
                     <p>
-                      <strong>Professor:</strong> {buy.createdBy}
+                      <strong>Local:</strong> {item.place}
                     </p>
 
                     <p>
-                      <strong>Turma:</strong> {buy.classGroup}
+                      <strong>Professor:</strong> {item.notifiedTeacher}
                     </p>
 
                     <p>
-                      <strong>Data:</strong> {buy.createdAt}
+                      <strong>Turma:</strong> {item.classGroup}
                     </p>
 
                     <p>
-                      <strong>Itens:</strong> {buy.totalItems}
+                      <strong>Data:</strong> {item.createdAt}
                     </p>
                   </div>
                 </div>
