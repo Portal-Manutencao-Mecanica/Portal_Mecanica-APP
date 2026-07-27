@@ -97,8 +97,8 @@ export default function InconveniencePage() {
             </p>
           </div>
 
-          <Link href="/ocorrencias/nova">
-            <Button>Nova Ocorrência</Button>
+          <Link href="/incoveniencia5s/nova">
+            <Button>Nova Incoveniência</Button>
           </Link>
         </div>
 
@@ -116,7 +116,7 @@ export default function InconveniencePage() {
               <DataRowCard
                 key={item.id}
                 actions={
-                  <Link href={`/ocorrencias/${item.id}`}>
+                  <Link href={`/incoveniencia5s/${item.id}`}>
                     <Button>Ver Detalhes</Button>
                   </Link>
                 }
