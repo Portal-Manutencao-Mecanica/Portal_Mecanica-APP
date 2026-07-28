@@ -56,10 +56,10 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
 
   return (
     <header className="bg-weg-blue w-full h-16 md:h-20 px-4 md:px-5 shadow-md relative z-30 flex items-center shrink-0">
-      <nav className="w-full flex items-center justify-between gap-2 md:gap-4">
+      <nav className="w-full flex items-center justify-between gap-2 md:gap-4 relative">
         
         {/* Esquerda: Botão Menu Mobile + Logo WEG */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 z-10">
           <button
             onClick={onOpenMobileMenu}
             className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
@@ -71,7 +71,7 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
           <Link
             href="/"
             aria-label="Ir para a página inicial"
-            className="flex items-center shrink-0"
+            className="hidden sm:flex items-center shrink-0"
           >
             <Image
               src="/brand/logo-icon.svg"
@@ -83,13 +83,13 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
           </Link>
         </div>
 
-        {/* Título do Portal */}
-        <h1 className="text-base sm:text-xl md:text-3xl text-white font-semibold truncate text-center">
+        {/* Título do Portal (Centralizado na tela/header) */}
+        <h1 className="absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-3xl text-white font-semibold truncate text-center pointer-events-none max-w-[50%]">
           Portal da Manutenção
         </h1>
 
         {/* Botões da Direita */}
-        <div className="shrink-0">
+        <div className="shrink-0 z-10">
           <ul className="flex items-center gap-1 md:gap-4">
             {/* Oculto no celular, visível na Sidebar mobile se necessário */}
             <li className="hidden sm:block">
