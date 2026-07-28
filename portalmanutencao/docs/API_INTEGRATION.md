@@ -347,6 +347,12 @@ Proxy autenticado para os services do navegador:
 - o arquivo local `maintenanceRequests` deixou de alimentar a listagem.
 - o detalhe consulta `GET /api/solicitao-manutencao/{id}`;
 - ações locais que não possuíam endpoint correspondente foram removidas.
+- o cadastro em `/manutencao/cadastro` foi alinhado ao DTO real e envia
+  `POST /api/solicitao-manutencao` via service;
+- setor, prioridade, alunos, local, máquina, descrição e professor autenticado
+  são enviados com UUIDs e enums aceitos pelo backend;
+- campos antigos de patrimônio, tag e mídia foram removidos desse formulário
+  porque não pertencem ao contrato atual da API.
 
 ### Calendário
 
@@ -535,6 +541,7 @@ arquivos de `src/services`.
 | Criar inconveniência 5S | POST | `/api/5s` |
 | Detalhar inconveniência 5S | GET | `/api/5s/{id}` |
 | Detalhar ocorrência | GET | `/api/solicitao-manutencao/{id}` |
+| Criar ocorrência | POST | `/api/solicitao-manutencao` |
 
 ## 12. Como executar
 
