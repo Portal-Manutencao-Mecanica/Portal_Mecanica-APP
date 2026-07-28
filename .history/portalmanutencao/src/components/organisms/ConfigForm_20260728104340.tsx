@@ -115,7 +115,7 @@ export default function ConfigForm({ user }: ConfigFormProps) {
                         </p>
                     </div>
 
-                    <Link href="/login/forgot-password">
+                    <Link>
                         <Button>
                             Trocar senha
                         </Button>

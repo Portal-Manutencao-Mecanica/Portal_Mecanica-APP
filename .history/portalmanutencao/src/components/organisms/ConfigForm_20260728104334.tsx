@@ -3,7 +3,6 @@
 import Input from "../atoms/Input";
 import Button from "../atoms/Button";
 import { ConfigFormProps } from "@/props/ConfigFormProps";
-import Link from "next/link";
 
 export default function ConfigForm({ user }: ConfigFormProps) {
     return (
@@ -115,7 +114,7 @@ export default function ConfigForm({ user }: ConfigFormProps) {
                         </p>
                     </div>
 
-                    <Link href="/login/forgot-password">
+                    <Link>
                         <Button>
                             Trocar senha
                         </Button>

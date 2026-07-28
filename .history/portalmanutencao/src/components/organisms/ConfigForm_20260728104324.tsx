@@ -3,7 +3,6 @@
 import Input from "../atoms/Input";
 import Button from "../atoms/Button";
 import { ConfigFormProps } from "@/props/ConfigFormProps";
-import Link from "next/link";
 
 export default function ConfigForm({ user }: ConfigFormProps) {
     return (
@@ -114,13 +113,12 @@ export default function ConfigForm({ user }: ConfigFormProps) {
                             Atualize sua senha para manter sua conta segura.
                         </p>
                     </div>
-
-                    <Link href="/login/forgot-password">
-                        <Button>
-                            Trocar senha
-                        </Button>
+                    
+                    <Link>
                     </Link>
-
+                    <Button>
+                        Trocar senha
+                    </Button>
 
                 </div>
 
