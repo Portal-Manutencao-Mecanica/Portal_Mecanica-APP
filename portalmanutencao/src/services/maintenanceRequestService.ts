@@ -15,4 +15,20 @@ export const maintenanceRequestService = {
     );
     return data;
   },
+
+  async create(payload: {
+    sector: string;
+    priority: string;
+    assignedStudentIds: string[];
+    placeId: string;
+    description: string;
+    notifiedTeacherId: string;
+    machineId: string;
+  }) {
+    const { data } = await browserApi.post<MaintenanceRequestApi>(
+      "/solicitao-manutencao",
+      payload,
+    );
+    return data;
+  },
 };
