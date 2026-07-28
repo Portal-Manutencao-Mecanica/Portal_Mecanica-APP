@@ -6,13 +6,13 @@
 
   --color-weg-blue: #00579D;
   --color-weg-warning: #EFC906;
-  --color-weg-gray:#000000;
-  --color-weg-negative:#E71717;
-  --color-weg-info:#28B9DA;
-  --color-weg-label-warning:#EF8300;
-  --color-weg-card-white:#FAFAFE;
+  --color-weg-gray: #000000;
+  --color-weg-negative: #E71717;
+  --color-weg-info: #28B9DA;
+  --color-weg-label-warning: #EF8300;
+  --color-weg-card-white: #FAFAFE;
 
- --shadow-t-lg: 0 -10px 15px -3px rgba(0, 0, 0, 0.2), 0 -4px 6px -4px rgba(0, 0, 0, 0.2);
+  --shadow-t-lg: 0 -10px 15px -3px rgba(0, 0, 0, 0.2), 0 -4px 6px -4px rgba(0, 0, 0, 0.2);
 
 }
 
@@ -20,6 +20,25 @@ body {
   font-family: var(--font-sans);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-roboto);
+}
+
+.fc .fc-button {
+  background-color: var(--color-weg-blue) !important;
+  border-color: var(--color-weg-blue) !important;
+  color: white !important;
+}
+
+.fc .fc-button:hover {
+  background-color: var(--color-weg-blue) !important;
+}
+
+.fc .fc-button-active {
+  background-color: var(--color-weg-blue) !important;
 }
