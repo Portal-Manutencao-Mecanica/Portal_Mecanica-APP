@@ -1,5 +1,4 @@
-
-export interface DataRowCardProps{
-    children ? : React.ReactNode
-    actions ? : React.ReactNode 
+export interface DataRowCardProps {
+  children : React.ReactNode
+  actions : React.ReactNode
 }
