@@ -41,7 +41,7 @@ export default function NewInconveniencePage() {
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-5xl rounded-xl border bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-7xl rounded-xl border bg-white p-8 shadow-sm">
         <h1 className="mb-8 text-3xl font-bold">Nova Ocorrência 5S</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">

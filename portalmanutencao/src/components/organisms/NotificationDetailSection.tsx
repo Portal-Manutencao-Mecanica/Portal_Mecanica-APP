@@ -7,7 +7,7 @@ export default function NotificationDetailSection({
   onMarkAsRead,
 }: NotificationDetailProps) {
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Cabeçalho de Ações */}
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
         <div className="flex items-center gap-3">

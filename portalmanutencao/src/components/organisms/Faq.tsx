@@ -68,7 +68,7 @@ export default function Faq() {
   }
 
   return (
-    <section aria-labelledby="faq-title" className="mx-auto max-w-4xl">
+    <section aria-labelledby="faq-title" className="mx-auto max-w-7xl">
       <div className="mb-6 rounded-xl border border-gray-200 border-t-8 border-t-weg-blue bg-white p-6 shadow-sm sm:p-8">
         <h1 id="faq-title" className="text-2xl font-bold text-gray-900 md:text-3xl">Perguntas frequentes</h1>
         <p className="mt-2 text-gray-500">Encontre respostas rápidas sobre o uso do Portal de Manutenção.</p>

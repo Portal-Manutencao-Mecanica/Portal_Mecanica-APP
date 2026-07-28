@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-4xl rounded-xl border bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-7xl rounded-xl border bg-white p-8 shadow-sm">
         <h1 className="mb-8 text-3xl font-bold">Meu Perfil</h1>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
