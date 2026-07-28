@@ -175,7 +175,7 @@ export function SideBar({
         </nav>
 
         {/* Perfil no Rodapé */}
-        <div className="pt-3 mt-auto flex items-center ">
+        <div className=" flex items-center pb-10  ">
           <UserAvatar
             user={currentUser}
             isExpanded={isExpanded || isMobileMenuOpen}
