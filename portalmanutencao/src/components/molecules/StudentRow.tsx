@@ -8,7 +8,7 @@ import LabelWithCircle from "./LabelWithCircle";
 import ConfirmDialog from "../organisms/ConfirmDialog";
 
 interface Props {
-  id: number;
+  id: string;
   name: string;
   email: string;
   numberCard: string;
