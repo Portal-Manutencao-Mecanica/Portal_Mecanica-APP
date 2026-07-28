@@ -1,20 +1,16 @@
 "use client";
 
-import { Bell, Settings, CircleQuestionMark, Menu } from "lucide-react";
+import { CircleQuestionMark, Bell, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
 
-interface HeaderProps {
-  onOpenMobileMenu?: () => void;
-}
-
-export default function Header({ onOpenMobileMenu }: HeaderProps) {
+export default function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications] = useState([
+  const [notifications, setNotifications] = useState([
     {
       id: 1,
       title: "Ocorrência Aprovada",
@@ -55,57 +51,41 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
   };
 
   return (
-    <header className="bg-weg-blue w-full h-16 md:h-20 px-4 md:px-5 shadow-md relative z-30 flex items-center shrink-0">
-      <nav className="w-full flex items-center justify-between gap-2 md:gap-4">
-        
-        {/* Esquerda: Botão Menu Mobile + Logo WEG */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={onOpenMobileMenu}
-            className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-            aria-label="Abrir menu"
-          >
-            <Menu size={24} />
-          </button>
+    <header className="bg-weg-blue w-full py-6 px-5 shadow-lg shadow-black/30 relative z-30">
+      <nav className="max-full mx-auto flex items-center justify-between">
+        <Link
+          href="/"
+          aria-label="Ir para a página inicial"
+          className="flex items-center"
+        >
+          <Image
+            src="/brand/logo-icon.svg"
+            alt="WEG logo"
+            width={39}
+            height={25}
+            priority
+          />
+        </Link>
 
-          <Link
-            href="/"
-            aria-label="Ir para a página inicial"
-            className="flex items-center shrink-0"
-          >
-            <Image
-              src="/brand/logo-icon.svg"
-              alt="WEG logo"
-              width={39}
-              height={25}
-              priority
-            />
-          </Link>
-        </div>
-
-        {/* Título do Portal */}
-        <h1 className="text-base sm:text-xl md:text-3xl text-white font-semibold truncate text-center">
+        <h1 className="text-3xl text-white font-semibold">
           Portal da Manutenção
         </h1>
 
-        {/* Botões da Direita */}
-        <div className="shrink-0">
-          <ul className="flex items-center gap-1 md:gap-4">
-            {/* Oculto no celular, visível na Sidebar mobile se necessário */}
-            <li className="hidden sm:block">
-              <Link
-                href="/faq"
+        <div>
+          <ul className="flex items-center gap-4">
+            <li>
+              <button
                 className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
                 aria-label="Ajuda"
               >
                 <CircleQuestionMark color="white" size={24} />
-              </Link>
+              </button>
             </li>
 
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer ${
+                className={`relative transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
                   isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
                 }`}
                 aria-label="Notificações"
@@ -120,9 +100,8 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                 )}
               </button>
 
-              {/* Dropdown de Notificações */}
               {isNotificationOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
+                <div className="absolute right-0 top-full mt-2 w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
                   <div className="px-4 pt-3 py-2 text-xs font-bold text-weg-blue uppercase tracking-wider mb-1 flex justify-between items-center">
                     <span>Notificações Recentes</span>
                   </div>
@@ -134,31 +113,23 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                         title={notif.title}
                         about={notif.about}
                         isUnread={notif.isUnread}
-                        onClick={() =>
-                          console.log(`Clicou na notificação ${notif.id}`)
-                        }
-                        id={""}
-                      />
+                        onClick={() => console.log(`Clicou na notificação ${notif.id}`)} id={""}                      />
                     ))}
                   </div>
 
                   <div className="h-px bg-weg-blue/30 my-1" />
 
-                  <Link
-                    href="/notificacoes"
-                    onClick={() => setIsNotificationOpen(false)}
-                    className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors"
-                  >
-                    <span className="text-sm font-medium">
-                      Ver todas as notificações
+                  <div className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors">
+                    <span className="text-sm">Ver todas as notificações</span>
+                    <span className="text-xs text-gray-500 group-hover:text-white/80">
+                      Ctrl+N
                     </span>
-                  </Link>
+                  </div>
                 </div>
               )}
             </li>
 
-            {/* Oculto no celular, visível na Sidebar mobile se necessário */}
-            <li className="hidden sm:block">
+            <li>
               <button
                 className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
                 aria-label="Configurações"
