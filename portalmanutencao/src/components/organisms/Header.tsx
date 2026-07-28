@@ -1,16 +1,20 @@
 "use client";
 
-import { CircleQuestionMark, Bell, Settings } from "lucide-react";
+import { Bell, Settings, CircleQuestionMark, Menu } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
 
-export default function Header() {
+interface HeaderProps {
+  onOpenMobileMenu?: () => void;
+}
+
+export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     {
       id: 1,
       title: "Ocorrência Aprovada",
@@ -53,7 +57,7 @@ export default function Header() {
   return (
     <header className="bg-weg-blue w-full h-16 md:h-20 px-4 md:px-5 shadow-md relative z-30 flex items-center shrink-0">
       <nav className="w-full flex items-center justify-between gap-2 md:gap-4 relative">
-        
+
         {/* Esquerda: Botão Menu Mobile + Logo WEG */}
         <div className="flex items-center gap-2 shrink-0 z-10">
           <button
@@ -89,21 +93,21 @@ export default function Header() {
           <ul className="flex items-center gap-1 md:gap-4">
             {/* Oculto no celular, visível na Sidebar mobile se necessário */}
             <li className="hidden sm:block">
-              <Link
-                href="/faq"
-                className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                aria-label="Ajuda"
-              >
-                <CircleQuestionMark color="white" size={24} />
-              </button>
+              <Link href={"/faq"}>
+                <button
+                  className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
+                  aria-label="Ajuda"
+                >
+                  <CircleQuestionMark color="white" size={24} />
+                </button>
+              </Link>
             </li>
 
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
-                  isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
-                }`}
+                className={`relative transition-colors h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer ${isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
+                  }`}
                 aria-label="Notificações"
               >
                 <Bell color="white" size={24} />
@@ -116,8 +120,9 @@ export default function Header() {
                 )}
               </button>
 
+              {/* Dropdown de Notificações */}
               {isNotificationOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
+                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
                   <div className="px-4 pt-3 py-2 text-xs font-bold text-weg-blue uppercase tracking-wider mb-1 flex justify-between items-center">
                     <span>Notificações Recentes</span>
                   </div>
@@ -139,17 +144,22 @@ export default function Header() {
 
                   <div className="h-px bg-weg-blue/30 my-1" />
 
-                  <div className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors">
-                    <span className="text-sm">Ver todas as notificações</span>
-                    <span className="text-xs text-gray-500 group-hover:text-white/80">
-                      Ctrl+N
+                  <Link
+                    href="/notificacoes"
+                    onClick={() => setIsNotificationOpen(false)}
+                    className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors"
+                  >
+                    <span className="text-sm font-medium">
+                      Ver todas as notificações
                     </span>
-                  </div>
+                  </Link>
                 </div>
               )}
             </li>
 
-            <li>
+            {/* Oculto no celular, visível na Sidebar mobile se necessário */}
+            <li className="hidden sm:block">
+
               <Link href={"/configuracao"}>
                 <button
                   className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
@@ -158,6 +168,7 @@ export default function Header() {
                   <Settings color="white" size={24} />
                 </button>
               </Link>
+
             </li>
           </ul>
         </div>
