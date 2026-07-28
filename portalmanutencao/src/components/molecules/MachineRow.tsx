@@ -41,7 +41,6 @@ export function MachineRow({
         status={status}
         text={text}
       />
-      
       <span>{tag ?? "-"}</span>
       <div className="flex justify-end gap-2">
         <Link href={`/maquinas/${id}`}>
