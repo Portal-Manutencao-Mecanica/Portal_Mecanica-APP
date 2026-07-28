@@ -8,4 +8,11 @@ export const maintenanceRequestService = {
     );
     return data;
   },
+
+  async getById(id: string) {
+    const { data } = await browserApi.get<MaintenanceRequestApi>(
+      `/solicitao-manutencao/${encodeURIComponent(id)}`,
+    );
+    return data;
+  },
 };

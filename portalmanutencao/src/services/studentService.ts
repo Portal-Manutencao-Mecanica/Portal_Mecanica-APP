@@ -6,4 +6,11 @@ export const studentService = {
     const { data } = await browserApi.get<Student[]>("/alunos");
     return data;
   },
+
+  async getById(id: string) {
+    const { data } = await browserApi.get<Student>(
+      `/alunos/${encodeURIComponent(id)}`,
+    );
+    return data;
+  },
 };

@@ -103,7 +103,19 @@ export interface Buy {
   classGroupId: string;
   classGroupAcronym: string;
   createdAt: string;
-  items: unknown[];
+  items: BuyItem[];
+}
+
+export interface BuyItem {
+  id: string;
+  equipmentId: string;
+  equipmentName: string;
+  quantity: number;
+  technicalSpecification: string;
+  sap: string;
+  patrimony: string;
+  tag: string;
+  mechanicalSet: string;
 }
 
 export interface Inconvenience5S {

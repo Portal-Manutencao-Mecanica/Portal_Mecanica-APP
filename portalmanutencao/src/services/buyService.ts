@@ -6,4 +6,11 @@ export const buyService = {
     const { data } = await browserApi.get<Buy[]>("/compras");
     return data;
   },
+
+  async getById(id: string) {
+    const { data } = await browserApi.get<Buy>(
+      `/compras/${encodeURIComponent(id)}`,
+    );
+    return data;
+  },
 };

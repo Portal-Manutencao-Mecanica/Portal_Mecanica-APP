@@ -11,4 +11,23 @@ export const equipmentService = {
     const { data } = await browserApi.post<Equipment>("/equipamento", equipment);
     return data;
   },
+
+  async getById(id: string) {
+    const { data } = await browserApi.get<Equipment>(
+      `/equipamento/${encodeURIComponent(id)}`,
+    );
+    return data;
+  },
+
+  async update(id: string, equipment: CreateEquipment) {
+    const { data } = await browserApi.put<Equipment>(
+      `/equipamento/${encodeURIComponent(id)}`,
+      equipment,
+    );
+    return data;
+  },
+
+  async remove(id: string) {
+    await browserApi.delete(`/equipamento/${encodeURIComponent(id)}`);
+  },
 };

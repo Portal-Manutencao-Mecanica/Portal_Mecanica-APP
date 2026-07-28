@@ -1,226 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
-import Button from "@/components/atoms/Button";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
-import ConfirmDialog from "@/components/organisms/ConfirmDialog";
-import { LabelStatus } from "@/props/LabelProps";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import type { Inconvenience5S } from "@/lib/api/types";
+import { inconvenienceService } from "@/services/inconvenienceService";
+import type { LabelStatus } from "@/types/LabelStatus";
 
-function getStatus(status: string): {
-  text: string;
-  status: LabelStatus;
-} {
-  switch (status) {
-    case "NAO_VISUALIZADA":
-      return {
-        text: "Não Visualizada",
-        status: "warning",
-      };
-
-    case "VISUALIZADA":
-      return {
-        text: "Visualizada",
-        status: "default",
-      };
-
-    case "RESOLVIDA":
-      return {
-        text: "Resolvida",
-        status: "positive",
-      };
-
-    default:
-      return {
-        text: status,
-        status: "default",
-      };
-  }
-}
+const statusStyle: Record<string, LabelStatus> = {
+  NAO_VISUALIZADA: "warning",
+  VISUALIZADA: "default",
+  RESOLVIDA: "positive",
+};
 
 export default function InconvenienceDetailsPage() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { id } = useParams<{ id: string }>();
+  const [item, setItem] = useState<Inconvenience5S | null>(null);
 
-  const inconvenience = {
-    id: "1",
-    numberCard: "5S-0001",
-    inconvenience: "Cabos espalhados pelo laboratório",
-    status: "VISUALIZADA",
-    place: "Laboratório Mecânica",
-    notifiedTeacher: "Carlos Henrique",
-    classGroup: "TIIN 2025/1",
-    createdBy: "João Silva",
-    registrationPeriod: "Noturno",
-    createdAt: "27/07/2026",
-
-    involvedStudents: [
-      "Junior Gabriel",
-      "Otávio",
-      "Ícaro",
-    ],
-
-    description:
-      "Durante a aula prática foram encontrados diversos cabos espalhados pelo laboratório, oferecendo risco de tropeço e dificultando a organização do ambiente.",
-
-    media: [
-      "/images/default-equipment.png",
-      "/images/default-equipment.png",
-    ],
-  };
-
-  const label = getStatus(inconvenience.status);
-
-  function handleResolve() {
-    console.log("Ocorrência resolvida.");
-    setDialogOpen(false);
-  }
+  useEffect(() => {
+    inconvenienceService.getById(id).then(setItem).catch(() => setItem(null));
+  }, [id]);
 
   return (
     <LayoutDesktop>
-      <div className="space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">
-              {inconvenience.numberCard}
-            </h1>
-
-            <p className="text-gray-500">
-              Detalhes da ocorrência 5S.
-            </p>
+      {!item ? <p className="ui-surface p-8 text-gray-500">Carregando ocorrência 5S...</p> : (
+        <div className="ui-page">
+          <div className="flex items-center justify-between">
+            <div><h1 className="text-3xl font-bold">{item.inconvenience}</h1><p className="text-gray-500">Detalhes da ocorrência 5S.</p></div>
+            <LabelWithCircle status={statusStyle[item.status] ?? "default"} text={item.status} />
           </div>
-
-          <LabelWithCircle
-            status={label.status}
-            text={label.text}
-          />
-        </div>
-
-        <div className="rounded-xl border bg-white p-8 shadow-sm">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <p className="text-sm text-gray-500">Inconveniência</p>
-              <p className="text-lg font-semibold">
-                {inconvenience.inconvenience}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Local</p>
-              <p className="text-lg">{inconvenience.place}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Professor Notificado
-              </p>
-              <p className="text-lg">
-                {inconvenience.notifiedTeacher}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Turma</p>
-              <p className="text-lg">
-                {inconvenience.classGroup}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Criado por</p>
-              <p className="text-lg">
-                {inconvenience.createdBy}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Período</p>
-              <p className="text-lg">
-                {inconvenience.registrationPeriod}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Data da Ocorrência
-              </p>
-              <p className="text-lg">
-                {inconvenience.createdAt}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="mb-2 text-sm text-gray-500">
-              Alunos Envolvidos
-            </p>
-
-            <div className="flex flex-wrap gap-2">
-              {inconvenience.involvedStudents.map((student) => (
-                <span
-                  key={student}
-                  className="rounded-full bg-blue-100 px-4 py-2 text-sm"
-                >
-                  {student}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="mb-2 text-sm text-gray-500">
-              Descrição
-            </p>
-
-            <div className="rounded-lg bg-gray-50 p-4">
-              {inconvenience.description}
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="mb-4 text-sm text-gray-500">
-              Imagens
-            </p>
-
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {inconvenience.media.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative h-40 rounded-lg border"
-                >
-                  <Image
-                    src={image}
-                    alt={`Imagem ${index + 1}`}
-                    fill
-                    className="rounded-lg object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="ui-surface grid gap-6 p-8 md:grid-cols-2">
+            <Detail label="Local" value={item.placeName} />
+            <Detail label="Professor notificado" value={item.notifiedTeacherName} />
+            <Detail label="Turma" value={item.classGroupAcronym} />
+            <Detail label="Período" value={item.registrationPeriod} />
+            <Detail label="Data" value={new Intl.DateTimeFormat("pt-BR").format(new Date(item.createdAt))} />
+            <Detail label="Alunos envolvidos" value={item.involvedStudentIds.join(", ")} />
+            <div className="md:col-span-2"><Detail label="Descrição" value={item.description} /></div>
           </div>
         </div>
-
-        {inconvenience.status !== "RESOLVIDA" && (
-          <div className="flex justify-end">
-            <Button
-              onClick={() => setDialogOpen(true)}
-            >
-              Marcar como Resolvida
-            </Button>
-          </div>
-        )}
-
-        <ConfirmDialog
-          open={dialogOpen}
-          title="Resolver Ocorrência"
-          description="Deseja marcar esta ocorrência 5S como resolvida?"
-          confirmText="Resolver"
-          confirmVariant="primary"
-          onCancel={() => setDialogOpen(false)}
-          onConfirm={handleResolve}
-        />
-      </div>
+      )}
     </LayoutDesktop>
   );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return <div><p className="text-sm text-gray-500">{label}</p><p className="text-lg font-semibold">{value || "-"}</p></div>;
 }
