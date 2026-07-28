@@ -1,11 +1,13 @@
+"use client";
+
 import Input from "../atoms/Input";
 import Button from "../atoms/Button";
+import { ConfigFormProps } from "@/props/ConfigFormProps";
 
-export default function ConfigForm() {
+export default function ConfigForm({ user }: ConfigFormProps) {
     return (
         <div className="w-full max-w-5xl mx-auto px-6 py-8">
 
-            {/* Título */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-weg-gray">
                     Configurações
@@ -30,7 +32,7 @@ export default function ConfigForm() {
                 </div>
 
                 {/* Nome social */}
-                <div className="border-b border-gray-200 py-5 first:pt-0 last:border-0">
+                <div className="border-b border-gray-200 py-5">
 
                     <div className="mb-4">
                         <h3 className="font-bold text-weg-gray">
@@ -45,6 +47,7 @@ export default function ConfigForm() {
                     <div className="flex items-end gap-4">
                         <div className="flex-1">
                             <Input
+                                value={user.name}
                                 placeholder="Digite seu nome social"
                             />
                         </div>
@@ -57,7 +60,7 @@ export default function ConfigForm() {
                 </div>
 
                 {/* E-mail */}
-                <div className="border-b border-gray-200 py-5 last:border-0">
+                <div className="py-5">
 
                     <div className="mb-4">
                         <h3 className="font-bold text-weg-gray">
@@ -72,6 +75,7 @@ export default function ConfigForm() {
                     <div className="flex items-end gap-4">
                         <div className="flex-1">
                             <Input
+                                value={user.email}
                                 placeholder="Digite seu novo e-mail"
                             />
                         </div>
@@ -98,7 +102,6 @@ export default function ConfigForm() {
                     </p>
                 </div>
 
-                {/* Senha */}
                 <div className="flex items-center justify-between gap-6">
 
                     <div>
