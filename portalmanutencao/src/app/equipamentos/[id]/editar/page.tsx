@@ -35,7 +35,7 @@ export default function EditEquipmentPage() {
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-4xl rounded-xl border bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-7xl rounded-xl border bg-white p-8 shadow-sm">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Editar Equipamento</h1>
 
