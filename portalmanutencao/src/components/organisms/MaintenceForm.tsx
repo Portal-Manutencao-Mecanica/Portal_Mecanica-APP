@@ -7,7 +7,7 @@ import Button from "../atoms/Button";
 import Input from "../atoms/Input";
 import TextArea from "../atoms/TextArea";
 
-import UploadedFile from "../molecules/UploadedFile";
+import UploadedFile from "../molecules/UploadedFile64";
 import { useAuth } from "@/hooks/useAuth";
 import { CascadingMultiSelect } from "../molecules/CascadingSelector";
 import { CascadingGroupProps } from "@/props/CascadingGroupProps";
