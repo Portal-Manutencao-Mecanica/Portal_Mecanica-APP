@@ -305,6 +305,8 @@ Proxy autenticado para os services do navegador:
   `availableQuantity`;
 - campos de tag, patrimônio e imagens foram retirados do cadastro porque não
   existem no contrato `EquipmentRequest` atual.
+- detalhe, edição e exclusão usam respectivamente `GET`, `PUT` e `DELETE` em
+  `/api/equipamento/{id}`.
 
 ### Máquinas
 
@@ -312,18 +314,30 @@ Proxy autenticado para os services do navegador:
 - a tabela removeu os dados fixos;
 - IDs numéricos foram substituídos por UUID;
 - local e condição são lidos diretamente da resposta da API.
+- criação usa `POST /api/maquinas`;
+- detalhe, edição parcial e exclusão usam `GET`, `PATCH` e `DELETE` em
+  `/api/maquinas/{id}`;
+- o formulário foi alinhado aos campos aceitos pela API e não envia descrição,
+  pois esse campo não existe no DTO atual.
 
 ### Compras
 
 - `buyService.list()` consulta `GET /api/compras`;
 - solicitante, turma, data, status e quantidade de itens vêm da API;
 - os três exemplos locais foram removidos.
+- a tela de detalhe consulta `GET /api/compras/{id}`;
+- os botões locais de aprovação e reprovação foram removidos porque a versão
+  atual da API não fornece endpoint de transição de status de compra.
 
 ### Inconveniências 5S
 
 - `inconvenienceService.list()` consulta `GET /api/5s`;
 - local, professor, turma, data e status são exibidos a partir da resposta real;
 - todos os registros simulados foram removidos.
+- detalhe usa `GET /api/5s/{id}`;
+- cadastro usa `POST /api/5s` com UUIDs de local, professor, turma e alunos;
+- o botão local de resolução foi removido porque o `PATCH` atual não aceita
+  mudança do campo `status`.
 
 ### Ocorrências de manutenção
 
@@ -331,6 +345,8 @@ Proxy autenticado para os services do navegador:
   `GET /api/solicitao-manutencao`, preservando a grafia atual do backend;
 - máquina, local, professor, prioridade, descrição e status vêm da API;
 - o arquivo local `maintenanceRequests` deixou de alimentar a listagem.
+- o detalhe consulta `GET /api/solicitao-manutencao/{id}`;
+- ações locais que não possuíam endpoint correspondente foram removidas.
 
 ### Calendário
 
@@ -340,6 +356,26 @@ Proxy autenticado para os services do navegador:
   removidos;
 - o formulário envia datas, IDs relacionados, criticidade, tipo e status no
   formato esperado pelo DTO da API.
+
+### Recuperação de senha
+
+- o formulário antigo de “código” local foi substituído pelo fluxo real da API;
+- `authService.forgotPassword()` chama o Route Handler
+  `POST /api/auth/password/forgot`;
+- o Route Handler encaminha a solicitação a
+  `POST /api/auth/password/forgot` da API Spring Boot;
+- a resposta continua genérica, conforme a proteção contra enumeração de
+  contas implementada no backend.
+
+### Detalhes de alunos e turmas
+
+- detalhes de aluno usam `GET /api/alunos/{id}`;
+- a tela de aluno dentro da turma carrega aluno e turmas relacionadas pelos
+  services;
+- edição de turma usa `GET /api/turma/{id}` e
+  `PATCH /api/turma/{id}`;
+- apenas a sigla é alterada, pois o DTO `ClassPatchRequest` atual não aceita
+  professores ou alunos.
 
 ### Tipos da API
 
@@ -485,6 +521,20 @@ arquivos de `src/services`.
 | Listar ocorrências | GET | `/api/solicitao-manutencao` |
 | Listar eventos | GET | `/api/eventos` |
 | Criar evento | POST | `/api/eventos` |
+| Recuperar senha | POST | `/api/auth/password/forgot` |
+| Detalhar aluno | GET | `/api/alunos/{id}` |
+| Editar sigla da turma | PATCH | `/api/turma/{id}` |
+| Detalhar equipamento | GET | `/api/equipamento/{id}` |
+| Editar equipamento | PUT | `/api/equipamento/{id}` |
+| Excluir equipamento | DELETE | `/api/equipamento/{id}` |
+| Criar máquina | POST | `/api/maquinas` |
+| Detalhar máquina | GET | `/api/maquinas/{id}` |
+| Editar máquina | PATCH | `/api/maquinas/{id}` |
+| Excluir máquina | DELETE | `/api/maquinas/{id}` |
+| Detalhar compra | GET | `/api/compras/{id}` |
+| Criar inconveniência 5S | POST | `/api/5s` |
+| Detalhar inconveniência 5S | GET | `/api/5s/{id}` |
+| Detalhar ocorrência | GET | `/api/solicitao-manutencao/{id}` |
 
 ## 12. Como executar
 
