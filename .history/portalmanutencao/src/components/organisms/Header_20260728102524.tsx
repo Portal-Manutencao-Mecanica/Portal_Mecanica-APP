@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
-import ConfigForm from "./ConfigForm";
 
 export default function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -89,8 +88,9 @@ export default function Header() {
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
-                  }`}
+                className={`relative transition-colors h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
+                  isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
+                }`}
                 aria-label="Notificações"
               >
                 <Bell color="white" size={24} />
@@ -140,15 +140,11 @@ export default function Header() {
             </li>
 
             <li>
+              
+              <Link>
 
-              <Link href="/config">
-                <button
-                  className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                  aria-label="Configurações"
-                >
-                  <Settings color="white" size={24} />
-                </button>
               </Link>
+              
             </li>
           </ul>
         </div>

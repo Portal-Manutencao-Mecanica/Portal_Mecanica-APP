@@ -1,6 +1,8 @@
 "use client"
 
-import Input from "../atoms/Input";
+export default function ConfigForm() {
+    return (
+        import Input from "../atoms/Input";
 import Button from "../atoms/Button";
 
 export default function ConfigForm() {
@@ -123,4 +125,6 @@ export default function ConfigForm() {
 
         </div>
     );
+}
+    )
 }

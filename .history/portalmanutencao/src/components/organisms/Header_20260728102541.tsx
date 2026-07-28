@@ -141,7 +141,7 @@ export default function Header() {
 
             <li>
 
-              <Link href="/config">
+              <Link ref={ConfigForm}>
                 <button
                   className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
                   aria-label="Configurações"

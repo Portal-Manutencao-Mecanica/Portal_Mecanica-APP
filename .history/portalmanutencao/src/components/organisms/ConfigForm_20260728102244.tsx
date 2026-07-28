@@ -1,5 +1,3 @@
-"use client"
-
 import Input from "../atoms/Input";
 import Button from "../atoms/Button";
 

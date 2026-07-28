@@ -1,4 +1,4 @@
-"use client"
+"use c"
 
 import Input from "../atoms/Input";
 import Button from "../atoms/Button";

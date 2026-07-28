@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
-import ConfigForm from "./ConfigForm";
 
 export default function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -141,7 +140,7 @@ export default function Header() {
 
             <li>
 
-              <Link href="/config">
+              <Link>
                 <button
                   className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
                   aria-label="Configurações"
