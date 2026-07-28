@@ -17,8 +17,11 @@ const roboto = Roboto({
 
 
 export const metadata: Metadata = {
-  title: "Portal Manutenção",
-  description: "Portal feito para Alunos, Professores e Cordenadores",
+  title: {
+    default: "Portal da Manutenção",
+    template: "%s | Portal da Manutenção",
+  },
+  description: "Portal de manutenção para alunos, professores e coordenadores.",
 };
 
 export default function RootLayout({
