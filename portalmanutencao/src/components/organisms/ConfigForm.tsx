@@ -4,6 +4,7 @@ import Input from "../atoms/Input";
 import Button from "../atoms/Button";
 import { ConfigFormProps } from "@/props/ConfigFormProps";
 import Link from "next/link";
+import ConfirmDialog from "./ConfirmDialog";
 
 export default function ConfigForm({ user }: ConfigFormProps) {
     return (
@@ -53,7 +54,7 @@ export default function ConfigForm({ user }: ConfigFormProps) {
                             />
                         </div>
 
-                        <Button>
+                        <Button >
                             Salvar
                         </Button>
                     </div>
