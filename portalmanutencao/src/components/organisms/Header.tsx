@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
+import type { Notification } from "@/lib/api/types";
+import { notificationService } from "@/services/notificationService";
 
 interface HeaderProps {
   onOpenMobileMenu?: () => void;
@@ -14,28 +16,15 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications] = useState([
-    {
-      id: 1,
-      title: "Ocorrência Aprovada",
-      about: "A ocorrência do Professor Manutenção foi validada.",
-      isUnread: true,
-    },
-    {
-      id: 2,
-      title: "Sistema Atualizado",
-      about: "O portal recebeu uma nova versão hoje.",
-      isUnread: false,
-    },
-    {
-      id: 3,
-      title: "Manutenção Concluída",
-      about: "Máquina Torno CNC liberada para uso.",
-      isUnread: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const hasUnreadNotifications = notifications.some((notif) => notif.isUnread);
+  const hasUnreadNotifications = notifications.some((notif) => !notif.statusRead);
+
+  useEffect(() => {
+    notificationService.list()
+      .then((items) => setNotifications(items.slice(0, 5)))
+      .catch(() => setNotifications([]));
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -133,11 +122,8 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                         key={notif.id}
                         title={notif.title}
                         about={notif.about}
-                        isUnread={notif.isUnread}
-                        onClick={() =>
-                          console.log(`Clicou na notificação ${notif.id}`)
-                        }
-                        id={""}
+                        isUnread={!notif.statusRead}
+                        id={notif.id}
                       />
                     ))}
                   </div>
