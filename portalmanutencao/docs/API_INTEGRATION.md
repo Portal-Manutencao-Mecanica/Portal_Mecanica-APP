@@ -35,6 +35,32 @@ MAINTENANCE_API_URL=http://localhost:8080/api
 Para desenvolvimento local, copie o arquivo para `.env.local` e altere o valor
 caso a API esteja em outro endereço. A URL deve incluir o contexto `/api`.
 
+### Usuário de teste em desenvolvimento
+
+A API não permite definir manualmente a senha de usuários comuns criados por
+`POST /users`; ela gera credenciais temporárias aleatórias. Por isso, o acesso
+de teste usa o seed oficial de administrador do perfil `dev`.
+
+Na configuração da API Spring Boot, use:
+
+```env
+SPRING_PROFILES_ACTIVE=dev
+DEV_ADMIN_PASSWORD=user123@
+```
+
+Ao iniciar a API, ela cria:
+
+```text
+E-mail real na API: admin@local.com
+Usuário curto no frontend: user
+Senha: user123@
+```
+
+Em desenvolvimento, `authService` converte o identificador curto `user` para
+`admin@local.com` antes de chamar o endpoint real de login. Esse alias é
+desabilitado automaticamente no build de produção. A senha nunca fica gravada
+no frontend; ela precisa ser configurada no processo da API.
+
 ## 3. Dependência adicionada
 
 ### Axios
@@ -123,6 +149,18 @@ validada pela API.
    armazenados em cookies `HttpOnly`.
 5. O usuário é redirecionado para `/configuracao` quando
    `passwordChangeRequired=true`; nos demais casos, vai para `/`.
+
+### Proteção das páginas
+
+`src/proxy.ts` protege todas as páginas internas:
+
+- sem access token e sem refresh token, o visitante é redirecionado para
+  `/login`;
+- a URL original é preservada no parâmetro `redirect`;
+- usuários autenticados não voltam acidentalmente à tela de login;
+- arquivos estáticos, imagens e Route Handlers não passam por redirecionamento.
+
+Assim, a primeira tela do portal é o login quando não existe uma sessão.
 
 ### Renovação automática
 
@@ -249,6 +287,59 @@ Proxy autenticado para os services do navegador:
 `src/props/NotificationDetailProps.ts`:
 
 - passou a aceitar UUID textual.
+
+### Alunos
+
+- `studentService.list()` consulta `GET /api/alunos`;
+- a tela removeu os três alunos fixos;
+- tabela, linhas e propriedades agora aceitam UUID;
+- IDs das turmas são exibidos diretamente conforme o contrato atual da API.
+
+### Equipamentos
+
+- `equipmentService.list()` consulta `GET /api/equipamento`;
+- `equipmentService.create()` envia `POST /api/equipamento`;
+- a listagem removeu os equipamentos fixos e apresenta nome, SAP, valor e
+  quantidade reais;
+- o cadastro foi alinhado ao DTO da API: `name`, `sap`, `unitPrice` e
+  `availableQuantity`;
+- campos de tag, patrimônio e imagens foram retirados do cadastro porque não
+  existem no contrato `EquipmentRequest` atual.
+
+### Máquinas
+
+- `machineService.list()` consulta `GET /api/maquinas`;
+- a tabela removeu os dados fixos;
+- IDs numéricos foram substituídos por UUID;
+- local e condição são lidos diretamente da resposta da API.
+
+### Compras
+
+- `buyService.list()` consulta `GET /api/compras`;
+- solicitante, turma, data, status e quantidade de itens vêm da API;
+- os três exemplos locais foram removidos.
+
+### Inconveniências 5S
+
+- `inconvenienceService.list()` consulta `GET /api/5s`;
+- local, professor, turma, data e status são exibidos a partir da resposta real;
+- todos os registros simulados foram removidos.
+
+### Ocorrências de manutenção
+
+- `maintenanceRequestService.list()` consulta
+  `GET /api/solicitao-manutencao`, preservando a grafia atual do backend;
+- máquina, local, professor, prioridade, descrição e status vêm da API;
+- o arquivo local `maintenanceRequests` deixou de alimentar a listagem.
+
+### Calendário
+
+- `calendarService.list()` consulta `GET /api/eventos`;
+- `calendarService.create()` envia `POST /api/eventos`;
+- os três eventos simulados e a criação com `crypto.randomUUID()` foram
+  removidos;
+- o formulário envia datas, IDs relacionados, criticidade, tipo e status no
+  formato esperado pelo DTO da API.
 
 ### Tipos da API
 
@@ -385,6 +476,15 @@ arquivos de `src/services`.
 | Listar notificações | GET | `/api/notification` |
 | Marcar todas como lidas | PATCH | `/api/notification/read-all` |
 | Alternar leitura | PATCH | `/api/notification/{id}/toggle-read` |
+| Listar alunos | GET | `/api/alunos` |
+| Listar equipamentos | GET | `/api/equipamento` |
+| Criar equipamento | POST | `/api/equipamento` |
+| Listar máquinas | GET | `/api/maquinas` |
+| Listar compras | GET | `/api/compras` |
+| Listar inconveniências 5S | GET | `/api/5s` |
+| Listar ocorrências | GET | `/api/solicitao-manutencao` |
+| Listar eventos | GET | `/api/eventos` |
+| Criar evento | POST | `/api/eventos` |
 
 ## 12. Como executar
 
