@@ -13,6 +13,7 @@ import {
   Settings,
   CircleQuestionMark,
   BrushCleaning,
+  Calendar 
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
@@ -38,6 +39,8 @@ export function SideBar({
     { icon: Users, label: "Turmas", href: "/turmas" },
     { icon: Toolbox, label: "Equipamentos", href: "/equipamentos" },
     { icon: BrushCleaning, label: "Incovenciência 5S", href: "/incoveniencia5s" },
+    { icon: Calendar, label: "Calendário Preventiva", href: "/calendario" },
+
     
   ];
 
