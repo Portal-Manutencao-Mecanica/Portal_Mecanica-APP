@@ -1,7 +1,9 @@
-import UploadedCsv from "@/components/molecules/UploadedCsv";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
 
 export default function Home() {
     return (
-        <><UploadedCsv></UploadedCsv></>
+      <LayoutDesktop children={undefined}>
+        
+      </LayoutDesktop>
     );
 }
