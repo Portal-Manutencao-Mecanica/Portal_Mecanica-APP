@@ -1,35 +1,51 @@
-// src/hooks/useFileUpload.ts
 import { useState, useRef } from 'react';
-import { FilePayloadProps } from "@/props/FilePayloadProps";
-import { UploadedFileProps } from "@/props/UploadedFileProps";
-import { isAllowedFileType } from "@/utils/validationFiles";
 
-export function useFileUpload() {
-  const [files, setFiles] = useState<UploadedFileProps[]>([]);
+export interface CsvFileState {
+  fileObject: File;
+  content: string; // Conteúdo de texto puro do CSV
+  previewEmails: string[]; // Primeiros e-mails para preview visual
+}
+
+export function useFileUploadedCsv() {
+  const [files, setFiles] = useState<CsvFileState[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
 
   const processFiles = async (selectedFiles: FileList | File[]) => {
     const filesArray = Array.from(selectedFiles);
 
+    // Valida apenas extensoes CSV
     const validFiles = filesArray.filter((file) => {
-      const isValid = isAllowedFileType(file.name);
+      const isValid = file.name.endsWith('.csv') || file.type === 'text/csv';
       if (!isValid) {
-        alert(`O arquivo "${file.name}" não é permitido. Apenas imagens são aceitas!`);
+        alert(`O arquivo "${file.name}" não é um CSV válido!`);
       }
       return isValid;
     });
 
-    const processFile = (file: File): Promise<UploadedFileProps> => {
+    const processFile = (file: File): Promise<CsvFileState> => {
       return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.readAsText(file);
+
+        // 💡 Lê o CSV como texto puro (não Base64)
+        reader.readAsText(file, 'UTF-8');
 
         reader.onload = () => {
+          const textContent = (reader.result as string) || '';
+
+          // Extrai linhas simples para extrair e-mails para prévia (preview)
+          const lines = textContent
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+          // Pega os primeiros 5 e-mails para exibir na tela
+          const previewEmails = lines.slice(0, 5);
+
           resolve({
             fileObject: file,
-            fileContent: reader.result,
+            content: textContent,
+            previewEmails,
           });
         };
       });
@@ -39,7 +55,6 @@ export function useFileUpload() {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
-  
   const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       processFiles(event.target.files);
@@ -47,7 +62,6 @@ export function useFileUpload() {
     }
   };
 
-  
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -61,31 +75,13 @@ export function useFileUpload() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    if (e.dataTransfer.files?.length > 0) {
       processFiles(e.dataTransfer.files);
     }
   };
 
   const removeFile = (indexToRemove: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
-  };
-
-  const handleSubmit = () => {
-    const sendPayload = {
-      filePayloadProps: files.map((f): FilePayloadProps => {
-        const contentString = typeof f.fileContent === 'string' ? f.fileContent : '';
-        const base64Clean = contentString.split(',')[1] || contentString;
-
-        return {
-          name: f.fileObject.name,
-          fileContent: base64Clean,
-          type: f.fileObject.type,
-          size: f.fileObject.size,
-        };
-      }),
-    };
-
-    console.log("Payload Final:", JSON.stringify(sendPayload, null, 2));
   };
 
   const openFileDialog = () => {
@@ -101,7 +97,6 @@ export function useFileUpload() {
     handleDragLeave,
     handleDrop,
     removeFile,
-    handleSubmit,
     openFileDialog,
   };
 }
