@@ -93,12 +93,13 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
           <ul className="flex items-center gap-1 md:gap-4">
             {/* Oculto no celular, visível na Sidebar mobile se necessário */}
             <li className="hidden sm:block">
-              <button
+              <Link
+                href="/faq"
                 className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
                 aria-label="Ajuda"
               >
                 <CircleQuestionMark color="white" size={24} />
-              </button>
+              </Link>
             </li>
 
             <li ref={dropdownRef} className="relative">
