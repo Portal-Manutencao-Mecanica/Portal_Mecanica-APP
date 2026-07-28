@@ -27,7 +27,14 @@ export function LoginForm() {
         password: String(formData.get("password") ?? ""),
       });
 
-      router.replace(session.passwordChangeRequired ? "/configuracao" : "/");
+      const requestedPath = new URLSearchParams(window.location.search).get("redirect");
+      const safeRedirect =
+        requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
+          ? requestedPath
+          : "/";
+      router.replace(
+        session.passwordChangeRequired ? "/configuracao" : safeRedirect,
+      );
       router.refresh();
     } catch (submitError) {
       setError(getServiceErrorMessage(submitError, "Não foi possível entrar. Tente novamente."));
@@ -43,12 +50,12 @@ export function LoginForm() {
     >
       <div className="flex flex-col gap-4">
         <Input
-          autoComplete="email"
-          label="E-mail"
+          autoComplete="username"
+          label="E-mail ou usuário"
           name="email"
-          placeholder="Insira seu e-mail"
+          placeholder="Insira seu e-mail ou usuário"
           required
-          type="email"
+          type="text"
         />
         <Input
           autoComplete="current-password"
@@ -69,6 +76,12 @@ export function LoginForm() {
       <Button type="submit" variant="primary" disabled={isSubmitting}>
         {isSubmitting ? "Entrando..." : "Acessar"}
       </Button>
+
+      {process.env.NODE_ENV === "development" && (
+        <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
+          Acesso de desenvolvimento: <strong>user</strong> / <strong>user123@</strong>
+        </p>
+      )}
 
       <p className="pt-2 text-center text-sm text-gray-700">
         <Link
