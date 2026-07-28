@@ -113,7 +113,11 @@ export default function Header() {
                         title={notif.title}
                         about={notif.about}
                         isUnread={notif.isUnread}
-                        onClick={() => console.log(`Clicou na notificação ${notif.id}`)} id={""}                      />
+                        onClick={() =>
+                          console.log(`Clicou na notificação ${notif.id}`)
+                        }
+                        id={""}
+                      />
                     ))}
                   </div>
 
@@ -130,12 +134,14 @@ export default function Header() {
             </li>
 
             <li>
-              <button
-                className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                aria-label="Configurações"
-              >
-                <Settings color="white" size={24} />
-              </button>
+              <Link href={"/configuracao"}>
+                <button
+                  className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
+                  aria-label="Configurações"
+                >
+                  <Settings color="white" size={24} />
+                </button>
+              </Link>
             </li>
           </ul>
         </div>
