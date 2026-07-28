@@ -16,7 +16,8 @@ export function UserAvatar({
             className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 group select-none"
         >
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                <div className="w-8 h-8 rounded-full bg-white text-weg-blue flex items-center justify-center font-bold text-xs shadow-sm group-hover:scale-105 transition-transform">
+                {/* Removido "group-hover:scale-105 transition-transform" para não crescer */}
+                <div className="w-8 h-8 rounded-full bg-white text-weg-blue flex items-center justify-center font-bold text-xs shadow-sm">
                     {initials}
                 </div>
             </div>
