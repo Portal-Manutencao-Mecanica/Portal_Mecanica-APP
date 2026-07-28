@@ -1,20 +1,16 @@
 "use client";
 
-import { Bell, Settings, CircleQuestionMark, Menu } from "lucide-react";
+import { CircleQuestionMark, Bell, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
 
-interface HeaderProps {
-  onOpenMobileMenu?: () => void;
-}
-
-export default function Header({ onOpenMobileMenu }: HeaderProps) {
+export default function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications] = useState([
+  const [notifications, setNotifications] = useState([
     {
       id: 1,
       title: "Ocorrência Aprovada",
@@ -99,13 +95,13 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                 aria-label="Ajuda"
               >
                 <CircleQuestionMark color="white" size={24} />
-              </Link>
+              </button>
             </li>
 
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer ${
+                className={`relative transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer ${
                   isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
                 }`}
                 aria-label="Notificações"
@@ -120,9 +116,8 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                 )}
               </button>
 
-              {/* Dropdown de Notificações */}
               {isNotificationOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
+                <div className="absolute right-0 top-full mt-2 w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
                   <div className="px-4 pt-3 py-2 text-xs font-bold text-weg-blue uppercase tracking-wider mb-1 flex justify-between items-center">
                     <span>Notificações Recentes</span>
                   </div>
@@ -144,27 +139,25 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
 
                   <div className="h-px bg-weg-blue/30 my-1" />
 
-                  <Link
-                    href="/notificacoes"
-                    onClick={() => setIsNotificationOpen(false)}
-                    className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors"
-                  >
-                    <span className="text-sm font-medium">
-                      Ver todas as notificações
+                  <div className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors">
+                    <span className="text-sm">Ver todas as notificações</span>
+                    <span className="text-xs text-gray-500 group-hover:text-white/80">
+                      Ctrl+N
                     </span>
-                  </Link>
+                  </div>
                 </div>
               )}
             </li>
 
-            {/* Oculto no celular, visível na Sidebar mobile se necessário */}
-            <li className="hidden sm:block">
-              <button
-                className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                aria-label="Configurações"
-              >
-                <Settings color="white" size={24} />
-              </button>
+            <li>
+              <Link href={"/configuracao"}>
+                <button
+                  className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
+                  aria-label="Configurações"
+                >
+                  <Settings color="white" size={24} />
+                </button>
+              </Link>
             </li>
           </ul>
         </div>

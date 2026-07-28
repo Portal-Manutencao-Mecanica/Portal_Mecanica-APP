@@ -47,7 +47,7 @@ export default function StudentPage() {
 
   return (
     <LayoutDesktop>
-      <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
         <div className="rounded-xl border border-gray-200 border-t-8 border-t-weg-blue bg-white shadow-sm p-6 md:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

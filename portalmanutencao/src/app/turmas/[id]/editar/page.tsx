@@ -90,7 +90,7 @@ export default function EditClassPage({ params }: PageProps) {
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-8">
+      <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
         <div className="flex items-center gap-3">
           <Link href={`/turmas/${id}`} aria-label="Voltar para a turma">
             <Button type="button" variant="secondary" icon={ArrowLeft}>

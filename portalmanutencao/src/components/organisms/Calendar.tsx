@@ -14,7 +14,7 @@ interface CalendarProps {
 
 export default function Calendar({ events, onEventClick, onDateClick }: CalendarProps) {
   return (
-    <div className="w-230 mx-auto">
+    <div className="w-full">
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         locales={[ptBrLocale]}
