@@ -30,4 +30,11 @@ export const authService = {
   async logout() {
     await authApi.post("/logout");
   },
+
+  async forgotPassword(email: string) {
+    const { data } = await authApi.post<{ message: string }>("/password/forgot", {
+      email,
+    });
+    return data;
+  },
 };
