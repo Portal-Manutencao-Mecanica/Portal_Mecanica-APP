@@ -6,9 +6,8 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 
 export default function Calendar() {
   return (
-    <FullCalendar
-      plugins={[dayGridPlugin]}
-      initialView="dayGridMonth"
-    />
+    <div className="w-230  mx-auto">
+      <FullCalendar plugins={[dayGridPlugin]} initialView="dayGridMonth" height={740} />
+    </div>
   );
 }
