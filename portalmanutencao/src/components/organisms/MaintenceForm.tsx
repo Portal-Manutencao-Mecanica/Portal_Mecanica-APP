@@ -9,155 +9,215 @@ import TextArea from "../atoms/TextArea";
 
 import UploadedFile from "../molecules/UploadedFile";
 import { useAuth } from "@/hooks/useAuth";
-import StudentSelector from "../molecules/StudentSelector";
+import { CascadingMultiSelect } from "../molecules/CascadingSelector";
+import { CascadingGroupProps } from "@/props/CascadingGroupProps";
+import { User } from "lucide-react";
 
-const IMAGE_BASE64_REGEX = /^data:image\/(png|jpg|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
+const IMAGE_BASE64_REGEX =
+  /^data:image\/(png|jpg|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
 
 const maintenanceSchema = v.object({
-    patrimony: v.pipe(v.string("Informe o Patrimônio."), v.nonEmpty("Informe o Patrimônio.")),
-    tag: v.optional(v.string()),
-    place: v.pipe(v.string("Selecione a Área/Laboratório."), v.nonEmpty("Selecione a Área/Laboratório.")),
-    equipmentName: v.pipe(v.string("Informe o Nome do Equipamento."), v.nonEmpty("Informe o Nome do Equipamento.")),
-    description: v.pipe(v.string("Descreva o problema."), v.nonEmpty("Descreva o problema.")),
+  patrimony: v.pipe(
+    v.string("Informe o Patrimônio."),
+    v.nonEmpty("Informe o Patrimônio.")
+  ),
+  tag: v.optional(v.string()),
+  place: v.pipe(
+    v.string("Selecione a Área/Laboratório."),
+    v.nonEmpty("Selecione a Área/Laboratório.")
+  ),
+  equipmentName: v.pipe(
+    v.string("Informe o Nome do Equipamento."),
+    v.nonEmpty("Informe o Nome do Equipamento.")
+  ),
+  description: v.pipe(
+    v.string("Descreva o problema."),
+    v.nonEmpty("Descreva o problema.")
+  ),
 
-    
-    studentIds: v.pipe(
-        v.array(v.number("Cada ID de aluno deve ser um número."), "Selecione ao menos um aluno."),
-        v.minLength(1, "Selecione pelo menos um aluno envolvido.") 
+  studentIds: v.pipe(
+    v.array(
+      v.number("Cada ID de aluno deve ser um número."),
+      "Selecione ao menos um aluno."
     ),
+    v.minLength(1, "Selecione pelo menos um aluno envolvido.")
+  ),
 
-    
-    media: v.pipe(
-        v.array(
-            v.pipe(
-                v.string("A mídia precisa ser um texto em Base64."),
-                v.regex(IMAGE_BASE64_REGEX, "Formato de imagem inválido.")
-            ),
-            "Anexe pelo menos uma imagem."
-        ),
-        v.minLength(1, "Anexe pelo menos uma imagem do ocorrido.")
+  media: v.pipe(
+    v.array(
+      v.pipe(
+        v.string("A mídia precisa ser um texto em Base64."),
+        v.regex(IMAGE_BASE64_REGEX, "Formato de imagem inválido.")
+      ),
+      "Anexe pelo menos uma imagem."
     ),
+    v.minLength(1, "Anexe pelo menos uma imagem do ocorrido.")
+  ),
 });
 
 type MaintenanceFormData = v.InferInput<typeof maintenanceSchema>;
 
+const MOCK_CLASSROOM_GROUPS: CascadingGroupProps[] = [
+  {
+    id: 1,
+    name: "MM 77 - Matutino",
+    items: [
+      { id: 101, name: "Ana Silva" },
+      { id: 102, name: "Bruno Costa" },
+      { id: 103, name: "Carla Souza" },
+    ],
+  },
+  {
+    id: 2,
+    name: "MM 78 - Matutino",
+    items: [
+      { id: 201, name: "Diego Oliveira" },
+      { id: 202, name: "Elena Santos" },
+      { id: 203, name: "Fernando Lima" },
+    ],
+  },
+  {
+    id: 3,
+    name: "MM 79 - Noturno",
+    items: [
+      { id: 301, name: "Gabriel Rocha" },
+      { id: 302, name: "Helena Martins" },
+    ],
+  },
+];
+
 export default function MaintenceForm() {
-    const { user } = useAuth();
+  const { user } = useAuth();
 
-    const {
-        register,
-        control,
-        handleSubmit,
-        formState: { errors, isSubmitting }
-    } = useForm<MaintenanceFormData>({
-        resolver: valibotResolver(maintenanceSchema),
-        defaultValues: {
-            patrimony: "",
-            tag: "",
-            place: "",
-            equipmentName: "",
-            description: "",
-            studentIds: [], 
-            media: []
-        }
-    });
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<MaintenanceFormData>({
+    resolver: valibotResolver(maintenanceSchema),
+    defaultValues: {
+      patrimony: "",
+      tag: "",
+      place: "",
+      equipmentName: "",
+      description: "",
+      studentIds: [],
+      media: [],
+    },
+  });
 
-    const onSubmit = (formData: MaintenanceFormData) => {
-        const payloadToApi = {
-            ...formData,
-            createdAt: new Date().toISOString(),
-            notifiedTeacherId: user?.id,
-            studentIds: formData.studentIds,
-        };
-
-        console.log("Payload final para o Spring Boot:", payloadToApi);
+  const onSubmit = (formData: MaintenanceFormData) => {
+    const payloadToApi = {
+      ...formData,
+      createdAt: new Date().toISOString(),
+      notifiedTeacherId: user?.id,
+      studentIds: formData.studentIds,
     };
 
-    return (
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                    <span className="text-gray-500 block">Professor Notificado / Solicitante:</span>
-                    <strong className="text-gray-800">{user?.name || "Carregando..."}</strong>
-                </div>
-                <div>
-                    <span className="text-gray-500 block">Data / Hora do Registro:</span>
-                    <strong className="text-gray-800">{new Date().toLocaleString("pt-BR")}</strong>
-                </div>
-            </div>
+    console.log("Payload final para o Spring Boot:", payloadToApi);
+  };
 
-            {/* Componente de Seleção de Alunos */}
-            <Controller
-                name="studentIds"
-                control={control}
-                render={({ field }) => (
-                    <StudentSelector
-                        value={field.value || []}
-                        onChange={(selectedIds) => field.onChange(selectedIds)}
-                        error={errors.studentIds?.message} 
-                    />
-                )}
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6"
+    >
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-gray-500 block">
+            Professor Notificado / Solicitante:
+          </span>
+          <strong className="text-gray-800">
+            {user?.name || "Carregando..."}
+          </strong>
+        </div>
+        <div>
+          <span className="text-gray-500 block">Data / Hora do Registro:</span>
+          <strong className="text-gray-800">
+            {new Date().toLocaleString("pt-BR")}
+          </strong>
+        </div>
+      </div>
+
+      {/* Componente de Seleção de Alunos */}
+      <Controller
+        name="studentIds"
+        control={control}
+        render={({ field, fieldState }) => (
+          <CascadingMultiSelect
+            label="Alunos Envolvidos *"
+            placeholder="Selecione a turma para escolher os alunos..."
+            groupHeader="Turmas"
+            itemHeader="Alunos da Turma"
+            groups={MOCK_CLASSROOM_GROUPS}
+            value={field.value}
+            onChange={field.onChange}
+            error={fieldState.error?.message}
+            badgeIcon={User}
+          />
+        )}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          label="Patrimônio *"
+          placeholder="Ex: 100020"
+          error={errors.patrimony?.message}
+          {...register("patrimony")}
+        />
+
+        <Input
+          label="TAG"
+          placeholder="Ex: TORNO-01"
+          error={errors.tag?.message}
+          {...register("tag")}
+        />
+
+        <Input
+          label="Laboratório / Área CentroWEG *"
+          placeholder="Ex: Laboratório de Usinagem"
+          error={errors.place?.message}
+          {...register("place")}
+        />
+
+        <Input
+          label="Nome Equipamento / Identificação do Conjunto *"
+          placeholder="Ex: Torno CNC Romi"
+          error={errors.equipmentName?.message}
+          {...register("equipmentName")}
+        />
+      </div>
+
+      <TextArea
+        label="Descreva sobre o Problema *"
+        placeholder="Identifique o que ocorreu no equipamento..."
+        error={errors.description?.message}
+        {...register("description")}
+      />
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Imagens da Anomalia (Anexe imagens pontuais) *
+        </label>
+
+        <Controller
+          name="media"
+          control={control}
+          render={({ field }) => (
+            <UploadedFile
+              onChange={(base64List) => field.onChange(base64List)}
+              error={errors.media?.message}
             />
+          )}
+        />
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                    label="Patrimônio *"
-                    placeholder="Ex: 100020"
-                    error={errors.patrimony?.message}
-                    {...register("patrimony")}
-                />
-
-                <Input
-                    label="TAG"
-                    placeholder="Ex: TORNO-01"
-                    error={errors.tag?.message}
-                    {...register("tag")}
-                />
-
-                <Input
-                    label="Laboratório / Área CentroWEG *"
-                    placeholder="Ex: Laboratório de Usinagem"
-                    error={errors.place?.message}
-                    {...register("place")}
-                />
-
-                <Input
-                    label="Nome Equipamento / Identificação do Conjunto *"
-                    placeholder="Ex: Torno CNC Romi"
-                    error={errors.equipmentName?.message}
-                    {...register("equipmentName")}
-                />
-            </div>
-
-            <TextArea
-                label="Descreva sobre o Problema *"
-                placeholder="Identifique o que ocorreu no equipamento..."
-                error={errors.description?.message}
-                {...register("description")}
-            />
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Imagens da Anomalia (Anexe imagens pontuais) *
-                </label>
-
-                <Controller
-                    name="media"
-                    control={control}
-                    render={({ field }) => (
-                        <UploadedFile
-                            onChange={(base64List) => field.onChange(base64List)}
-                            error={errors.media?.message}
-                        />
-                    )}
-                />
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-gray-100">
-                <Button type="submit" variant="primary" disabled={isSubmitting}>
-                    Enviar Ocorrência
-                </Button>
-            </div>
-        </form>
-    );
+      <div className="flex justify-end pt-4 border-t border-gray-100">
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          Enviar Ocorrência
+        </Button>
+      </div>
+    </form>
+  );
 }
