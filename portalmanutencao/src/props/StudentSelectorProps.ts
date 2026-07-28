@@ -1,6 +1,8 @@
+import { CascadingGroupProps } from "./CascadingGroupProps";
 
-interface StudentSelectorProps {
-    value?: number[]; 
-    onChange?: (selectedIds: number[]) => void;
-    error?: string;
+export interface StudentSelectorProps {
+  groups: CascadingGroupProps[]; 
+  value?: (string | number)[];
+  onChange?: (value: (string | number)[]) => void;
+  error?: string;
 }
