@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import TextArea from "@/components/atoms/TextArea";
-import { inconvenienceService } from "@/services/inconvenienceService";
 
 export default function NewInconveniencePage() {
   const router = useRouter();
@@ -33,19 +31,12 @@ export default function NewInconveniencePage() {
     });
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await inconvenienceService.create({
-      inconvenience: form.inconvenience,
-      placeId: form.place,
-      notifiedTeacherId: form.teacher,
-      classGroupId: form.classGroup,
-      registrationPeriod: form.registrationPeriod,
-      involvedStudentIds: form.students.split(",").map((id) => id.trim()).filter(Boolean),
-      description: form.description,
-    });
-    router.push("/incoveniencia5s");
-    router.refresh();
+
+    console.log(form);
+
+    router.push("/ocorrencias");
   }
 
   return (
@@ -62,41 +53,78 @@ export default function NewInconveniencePage() {
           />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Input name="place" label="ID do local *" required value={form.place} onChange={handleChange} />
-            <Input name="teacher" label="ID do professor *" required value={form.teacher} onChange={handleChange} />
-            <Input name="classGroup" label="ID da turma *" required value={form.classGroup} onChange={handleChange} />
+            <select
+              name="place"
+              value={form.place}
+              onChange={handleChange}
+              className="rounded-lg border p-3"
+            >
+              <option value="">Selecione o Local</option>
+              <option>Laboratório Mecânica</option>
+              <option>Laboratório Elétrica</option>
+              <option>Oficina</option>
+            </select>
+
+            <select
+              name="teacher"
+              value={form.teacher}
+              onChange={handleChange}
+              className="rounded-lg border p-3"
+            >
+              <option value="">Professor Notificado</option>
+              <option>Carlos Henrique</option>
+              <option>João Pedro</option>
+            </select>
+
+            <select
+              name="classGroup"
+              value={form.classGroup}
+              onChange={handleChange}
+              className="rounded-lg border p-3"
+            >
+              <option value="">Turma</option>
+              <option>TIIN 2025/1</option>
+              <option>TIIN 2025/2</option>
+            </select>
 
             <select
               name="registrationPeriod"
               value={form.registrationPeriod}
               onChange={handleChange}
-              className="ui-control"
-              required
+              className="rounded-lg border p-3"
             >
               <option value="">Período</option>
-              <option value="MATUTINO">Matutino</option>
-              <option value="VESPERTINO">Vespertino</option>
-              <option value="NOTURNO">Noturno</option>
+              <option>Matutino</option>
+              <option>Vespertino</option>
+              <option>Noturno</option>
             </select>
           </div>
 
           <Input
             name="students"
-            label="IDs dos alunos envolvidos *"
-            placeholder="Separe os UUIDs por vírgula"
-            required
+            placeholder="Alunos envolvidos"
             value={form.students}
             onChange={handleChange}
           />
 
-          <TextArea
+          <textarea
             name="description"
             value={form.description}
             onChange={handleChange}
             rows={6}
             placeholder="Descrição da ocorrência..."
-            label="Descrição"
+            className="w-full rounded-lg border p-3"
           />
+
+          <div>
+            <label className="mb-2 block font-medium">Imagens</label>
+
+            <input
+              type="file"
+              multiple
+              className="w-full rounded-lg border p-3"
+            />
+          </div>
 
           <div className="flex justify-end gap-4">
             <Button
