@@ -8,14 +8,9 @@ export interface LoginCredentials {
 
 export const authService = {
   async login(credentials: LoginCredentials) {
-    const email =
-      process.env.NODE_ENV === "development" &&
-      credentials.email.trim().toLowerCase() === "user"
-        ? "admin@local.com"
-        : credentials.email.trim();
     const { data } = await authApi.post<LoginResponse>("/login", {
       ...credentials,
-      email,
+      email: credentials.email.trim(),
     });
     return data;
   },
