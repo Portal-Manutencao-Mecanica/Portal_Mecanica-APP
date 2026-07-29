@@ -1,24 +1,20 @@
-import { UserProfileProps } from "@/props/UserProfileProps";
 import { useEffect, useState } from "react";
 
+import type { UserProfile } from "@/lib/api/types";
+import { authService } from "@/services/authService";
+
 export function useAuth() {
-    const [user, setUser] = useState<UserProfileProps | null>(null);
+    const [user, setUser] = useState<UserProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("@App:user");
-        
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else {
-            const mockUser: UserProfileProps = {
-                id: 1,
-                name: "Arthur Mourão",
-                email: "arthur@professor.com",
-                role: "ALUNO",
-            };
-            setUser(mockUser);
-        }
+        authService.getSession()
+            .then(setUser)
+            .catch(() => {
+                setUser(null);
+            })
+            .finally(() => setIsLoading(false));
     }, []);
 
-    return { user };
+    return { user, isLoading };
 }

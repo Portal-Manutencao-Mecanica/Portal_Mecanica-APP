@@ -43,21 +43,13 @@ const ToggleButton = ({
             disabled={disabled}
             onClick={handleToggle}
             className={`
-                /* Estrutura base seguindo a imagem */
-                inline-flex items-center justify-center p-2 font-bold text-lg rounded-lg border
-                transition-all duration-100 ease-out outline-none select-none shadow-sm
-                
-                /* Efeito físico de clique rápido (pulsada sutil ao pressionar) */
-                active:scale-[0.97]
-                active:ring-4 active:ring-gray-400/20
-
-                /* 🎨 ESTADOS DO DESIGN DA IMAGEM: */
+                inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2
+                text-sm font-semibold shadow-sm outline-none transition-all duration-150
+                focus-visible:ring-3 focus-visible:ring-weg-blue/25 active:scale-[0.98]
                 ${currentChecked
-                    ? 'bg-[#27272A] border-transparent text-white'
-                    : 'bg-white border-[#88888C] text-black hover:bg-gray-50'
+                    ? 'border-weg-blue bg-weg-blue text-white'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
                 }
-                
-                /* Estado desabilitado */
                 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
                 ${className}
             `}

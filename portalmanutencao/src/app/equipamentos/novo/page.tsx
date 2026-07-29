@@ -5,30 +5,38 @@ import { useRouter } from "next/navigation";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import { equipmentService } from "@/services/equipmentService";
+import { getServiceErrorMessage } from "@/services/httpService";
 
 export default function NewEquipmentPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
   const [sap, setSap] = useState("");
-  const [tag, setTag] = useState("");
-  const [patrimony, setPatrimony] = useState("");
-  const [images, setImages] = useState<FileList | null>(null);
+  const [unitPrice, setUnitPrice] = useState("");
+  const [availableQuantity, setAvailableQuantity] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    console.log({
-      name,
-      sap,
-      tag,
-      patrimony,
-      images,
-    });
-
-    // Futuramente chamar a API
-
-    router.push("/equipamentos");
+    setError("");
+    setIsSubmitting(true);
+    try {
+      await equipmentService.create({
+        name,
+        sap,
+        unitPrice: Number(unitPrice),
+        availableQuantity: Number(availableQuantity),
+      });
+      router.push("/equipamentos");
+      router.refresh();
+    } catch (requestError) {
+      setError(getServiceErrorMessage(requestError, "Falha ao cadastrar equipamento."));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -45,84 +53,61 @@ export default function NewEquipmentPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium">
-                Nome do Equipamento *
-              </label>
-
-              <input
-                type="text"
+              <Input
+                label="Nome do Equipamento *"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex.: Motor WEG 2CV"
                 required
-                className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-blue-600"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium">
-                Código SAP
-              </label>
-
-              <input
+              <Input
+                label="Código SAP"
                 type="text"
                 value={sap}
                 onChange={(e) => setSap(e.target.value)}
                 placeholder="Ex.: 123456"
-                className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-blue-600"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium">Tag</label>
-
-              <input
-                type="text"
-                value={tag}
-                onChange={(e) => setTag(e.target.value)}
-                placeholder="Ex.: TAG-001"
-                className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-blue-600"
+              <Input
+                label="Valor unitário *"
+                type="number"
+                min="0"
+                step="0.01"
+                value={unitPrice}
+                onChange={(e) => setUnitPrice(e.target.value)}
+                placeholder="0,00"
+                required
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium">
-                Patrimônio
-              </label>
-
-              <input
-                type="text"
-                value={patrimony}
-                onChange={(e) => setPatrimony(e.target.value)}
-                placeholder="Ex.: PAT-000123"
-                className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-blue-600"
+              <Input
+                label="Quantidade disponível *"
+                type="number"
+                min="0"
+                step="1"
+                value={availableQuantity}
+                onChange={(e) => setAvailableQuantity(e.target.value)}
+                placeholder="0"
+                required
               />
             </div>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">Imagens</label>
-
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => setImages(e.target.files)}
-              className="w-full rounded-lg border border-dashed border-gray-300 p-3"
-            />
-          </div>
+          {error && <p className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
 
           <div className="flex justify-end gap-4 pt-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-            >
-              <Button variant="secondary">Cancelar</Button>
-            </button>
-
-            <button type="submit">
-              <Button>Salvar Equipamento</Button>
-            </button>
+            <Button type="button" variant="secondary" onClick={() => router.back()}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Salvando..." : "Salvar Equipamento"}
+            </Button>
           </div>
         </form>
       </div>

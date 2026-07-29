@@ -1,5 +1,5 @@
 export interface NotificationData {
-  id: number;
+  id: number | string;
   email: string;
   title: string;
   about: string;

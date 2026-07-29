@@ -12,12 +12,18 @@
   --color-weg-label-warning: #EF8300;
   --color-weg-card-white: #FAFAFE;
 
+  --radius-control: 0.5rem;
+  --radius-surface: 0.75rem;
+  --shadow-control: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-surface: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
   --shadow-t-lg: 0 -10px 15px -3px rgba(0, 0, 0, 0.2), 0 -4px 6px -4px rgba(0, 0, 0, 0.2);
-
 }
 
 body {
   font-family: var(--font-sans);
+  background: #f8fafc;
+  color: #111827;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -27,6 +33,40 @@ h4,
 h5,
 h6 {
   font-family: var(--font-roboto);
+  letter-spacing: -0.015em;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-weg-blue) 70%, white);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .ui-page {
+    @apply mx-auto w-full max-w-7xl space-y-6;
+  }
+
+  .ui-surface {
+    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+  }
+
+  .ui-field-label {
+    @apply text-sm font-medium text-gray-700;
+  }
+
+  .ui-control {
+    @apply min-h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm transition-colors;
+    @apply hover:border-gray-400 focus:border-weg-blue focus:ring-3 focus:ring-weg-blue/15 focus:outline-none;
+    @apply disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:opacity-70;
+  }
 }
 
 .fc .fc-button {

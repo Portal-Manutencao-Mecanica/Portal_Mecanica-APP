@@ -2,7 +2,7 @@ import { MachineRow } from "../molecules/MachineRow";
 
 // Criamos o tipo exato ou atualizamos na interface
 interface Machine {
-  id: number;
+  id: string;
   patrimony: string;
   name: string;
   place: string;
