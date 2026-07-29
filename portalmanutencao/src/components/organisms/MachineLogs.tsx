@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { ClipboardList, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
@@ -28,7 +29,6 @@ export default function MachineLogs({ machine }: { machine: Machine }) {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function loadLogs() {
     const page = await machineLogService.list();
@@ -45,7 +45,6 @@ export default function MachineLogs({ machine }: { machine: Machine }) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
-    setError(null);
 
     try {
       await machineLogService.create({
@@ -62,8 +61,9 @@ export default function MachineLogs({ machine }: { machine: Machine }) {
       setForm(initialForm);
       setIsFormOpen(false);
       await loadLogs();
+      toast.success("Log da máquina registrado.");
     } catch (requestError) {
-      setError(getServiceErrorMessage(requestError, "Não foi possível registrar o log da máquina."));
+      toast.error(getServiceErrorMessage(requestError, "Não foi possível registrar o log da máquina."));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +91,6 @@ export default function MachineLogs({ machine }: { machine: Machine }) {
           </div>
           <TextArea label="Descrição" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
           <TextArea label="Relatório de execução" value={form.executionReport} onChange={(event) => setForm({ ...form, executionReport: event.target.value })} />
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end"><Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Salvando..." : "Salvar log"}</Button></div>
         </form>
       )}

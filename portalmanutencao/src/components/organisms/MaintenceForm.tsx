@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import Button from "../atoms/Button";
 import Input from "../atoms/Input";
@@ -24,7 +25,6 @@ export default function MaintenceForm() {
     notifiedTeacherId: "",
     description: "",
   });
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,6 @@ export default function MaintenceForm() {
     event.preventDefault();
     if (!user || user.role !== "ALUNO") return;
     setIsSubmitting(true);
-    setError(null);
 
     try {
       await maintenanceRequestService.create({
@@ -47,10 +46,11 @@ export default function MaintenceForm() {
         description: form.description,
         notifiedTeacherId: form.notifiedTeacherId,
       });
+      toast.success("Solicitação enviada ao professor.");
       router.push("/ocorrencias");
       router.refresh();
     } catch (requestError) {
-      setError(getServiceErrorMessage(requestError, "Não foi possível enviar a solicitação."));
+      toast.error(getServiceErrorMessage(requestError, "Não foi possível enviar a solicitação."));
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +94,6 @@ export default function MaintenceForm() {
         </div>
       </div>
       <TextArea label="Descrição *" required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting || !isStudent}>{isSubmitting ? "Enviando..." : "Enviar solicitação"}</Button>
       </div>
