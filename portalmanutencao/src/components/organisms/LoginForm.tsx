@@ -5,18 +5,17 @@ import Button from "@/components/atoms/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { toast } from "sonner";
 
 import { authService } from "@/services/authService";
 import { getServiceErrorMessage } from "@/services/httpService";
 
 export function LoginForm() {
   const router = useRouter();
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
@@ -37,7 +36,7 @@ export function LoginForm() {
       );
       router.refresh();
     } catch (submitError) {
-      setError(getServiceErrorMessage(submitError, "Não foi possível entrar. Tente novamente."));
+      toast.error(getServiceErrorMessage(submitError, "Não foi possível entrar. Tente novamente."));
     } finally {
       setIsSubmitting(false);
     }
@@ -67,19 +66,13 @@ export function LoginForm() {
         />
       </div>
 
-      {error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          {error}
-        </p>
-      )}
-
       <Button type="submit" variant="primary" disabled={isSubmitting}>
         {isSubmitting ? "Entrando..." : "Acessar"}
       </Button>
 
       {process.env.NODE_ENV === "development" && (
         <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
-          Acesso de desenvolvimento: <strong>user</strong> / <strong>user123@</strong>
+          Acesso de teste: <strong>admin@teste.local</strong> / <strong>Senha@123</strong>
         </p>
       )}
 
