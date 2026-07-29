@@ -1,10 +1,9 @@
 const nextConfig: import('next').NextConfig = {
-  compress: true,
-  poweredByHeader: false,
-  output: 'standalone',
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
 };
+
+module.exports = nextConfig;
 
 export default nextConfig;

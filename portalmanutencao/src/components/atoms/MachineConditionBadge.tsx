@@ -17,7 +17,7 @@ export default function MachineConditionBadge({ condition }: Props) {
 
   return (
     <span
-      className={`inline-flex w-fit items-center rounded-full border border-current/10 px-2.5 py-1 text-xs font-semibold ${
+      className={`w-fit rounded-full px-3 py-1 text-sm font-medium ${
         styles[condition as keyof typeof styles]
       }`}
     >

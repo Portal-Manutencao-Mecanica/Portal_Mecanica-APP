@@ -7,7 +7,18 @@ import { ArrowLeft, Save } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
-import { classGroupBrowserService } from "@/services/classGroupBrowserService";
+
+interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface ClassGroup {
+  id: number;
+  acronym: string;
+  teachers: Teacher[];
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,7 +36,13 @@ export default function EditClassPage({ params }: PageProps) {
   useEffect(() => {
     async function loadClass() {
       try {
-        const classGroup = await classGroupBrowserService.getById(id);
+        const response = await fetch(`http://localhost:8080/api/turma/${id}`);
+
+        if (!response.ok) {
+          throw new Error("Não foi possível carregar os dados da turma.");
+        }
+
+        const classGroup: ClassGroup = await response.json();
         setAcronym(classGroup.acronym ?? "");
         setTeachers(classGroup.teachers?.map((teacher) => teacher.name).join(", ") ?? "");
       } catch (loadError) {
@@ -45,7 +62,21 @@ export default function EditClassPage({ params }: PageProps) {
     setSaving(true);
 
     try {
-      await classGroupBrowserService.updateAcronym(id, acronym.trim());
+      const response = await fetch(`http://localhost:8080/api/turma/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          acronym: acronym.trim(),
+          teachers: teachers
+            .split(",")
+            .map((name) => name.trim())
+            .filter(Boolean),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha ao salvar a turma.");
+      }
 
       router.push(`/turmas/${id}`);
       router.refresh();
