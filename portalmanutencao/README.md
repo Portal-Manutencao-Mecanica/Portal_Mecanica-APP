@@ -1,9 +1,4 @@
-# Portal da Manutenção
-
-Frontend do Portal da Manutenção integrado à API Spring Boot do projeto.
-
-Consulte [a documentação completa da integração](docs/API_INTEGRATION.md) para
-entender a arquitetura, variáveis de ambiente, endpoints e todas as alterações.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
