@@ -1,33 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import SearchInput from "@/components/atoms/Input";
 import EquipmentCard from "@/components/molecules/EquipmentCard";
-import { EquipmentProps } from "../../props/EquipmentProps"
-
-const equipments: EquipmentProps[] = [
-  {
-    id: "1",
-    name: "Motor WEG 2CV",
-    sap: "123456",
-    numberCard: "EQ-0001",
-    image: "/images/equipment.png",
-  },
-  {
-    id: "2",
-    name: "Rolamento SKF",
-    sap: "987654",
-    numberCard: "EQ-0002",
-    image: "/images/equipment.png",
-  },
-];
+import type { Equipment } from "@/lib/api/types";
+import { equipmentService } from "@/services/equipmentService";
+import { getServiceErrorMessage } from "@/services/httpService";
 
 export default function EquipmentsPage() {
   const [search, setSearch] = useState("");
+  const [equipments, setEquipments] = useState<Equipment[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    equipmentService.list().then(setEquipments).catch((requestError) => {
+      setError(getServiceErrorMessage(requestError, "Falha ao carregar equipamentos."));
+    });
+  }, []);
 
   const filteredEquipments = equipments.filter(
     (equipment) =>
@@ -59,6 +52,7 @@ export default function EquipmentsPage() {
         />
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {error && <p className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
           {filteredEquipments.map((equipment) => (
             <EquipmentCard
               key={equipment.id}

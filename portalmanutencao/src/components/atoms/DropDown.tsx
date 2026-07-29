@@ -12,13 +12,15 @@ export default function DropDown<T extends Record <string , string >>({
 
     return (
         <select 
-            className=" bg-white text-slate-800 border border-slate-300 rounded-md px-3 py-2 shadow-sm focus:outline-none "
+            aria-label={defaultSelection}
+            className="ui-control"
             defaultValue={""}
+            data-option-count={qty}
             onChange={(e) => onSelect(e.target.value as unknown as T[keyof T])}
         >
             <option className="bg-white text-slate-400" value="" disabled>{defaultSelection}</option>
             {keys.map((key) => (
-                <option className="bg-gray-200 text-slate-600"
+                <option
                 key={key} value={enumData[key]}>
                     {enumData[key]}
                 </option>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto_Flex, Roboto} from 'next/font/google';
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const robotoFlex = Roboto_Flex({
   subsets: ['latin'],
@@ -17,8 +18,11 @@ const roboto = Roboto({
 
 
 export const metadata: Metadata = {
-  title: "Portal Manutenção",
-  description: "Portal feito para Alunos, Professores e Cordenadores",
+  title: {
+    default: "Portal da Manutenção",
+    template: "%s | Portal da Manutenção",
+  },
+  description: "Portal de manutenção para alunos, professores e coordenadores.",
 };
 
 export default function RootLayout({
@@ -31,7 +35,10 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${robotoFlex.variable} ${roboto.variable}`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster position="top-right" richColors closeButton />
+      </body>
     </html>
   );
 }

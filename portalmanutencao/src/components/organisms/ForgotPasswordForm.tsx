@@ -1,28 +1,48 @@
-import Input from "../atoms/Input"
-import Button from "../atoms/Button"
+"use client";
 
-export default function ForgotPasswordPage() {
-    return (
-        <form className="w-full flex flex-col gap-12">
-            <div className="flex flex-col gap-4">
-                <Input
-                    label="Email"
-                    placeholder="Insira seu Email"
-                />
+import { FormEvent, useState } from "react";
 
-                <Button type="button" variant="secondary">
-                    Enviar código
-                </Button>
+import Button from "../atoms/Button";
+import Input from "../atoms/Input";
+import { authService } from "@/services/authService";
+import { getServiceErrorMessage } from "@/services/httpService";
 
-                <Input
-                    label="Código"
-                    placeholder="Digite o código recebido"
-                />
-            </div>
+export default function ForgotPasswordForm() {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-            <Button type="submit" variant="primary">
-                Verificar código
-            </Button>
-        </form>
-    )
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+    try {
+      const response = await authService.forgotPassword(email);
+      setMessage(response.message);
+    } catch (requestError) {
+      setError(getServiceErrorMessage(requestError, "Falha ao solicitar recuperação."));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form className="flex w-full flex-col gap-8" onSubmit={handleSubmit}>
+      <Input
+        label="E-mail"
+        type="email"
+        required
+        autoComplete="email"
+        placeholder="Insira seu e-mail"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
+      {message && <p className="rounded-lg bg-green-50 p-4 text-sm text-green-700">{message}</p>}
+      {error && <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Enviando..." : "Enviar link de recuperação"}
+      </Button>
+    </form>
+  );
 }

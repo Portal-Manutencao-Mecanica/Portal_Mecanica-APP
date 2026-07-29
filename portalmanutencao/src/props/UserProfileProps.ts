@@ -1,5 +1,5 @@
 export interface UserProfileProps {
-    id: number;
+    id: string;
     name: string;
     email: string;
     role: "ALUNO" | "PROFESSOR" | "ADMIN" | "COORDENADOR"; 
