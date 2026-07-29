@@ -1,6 +1,5 @@
 export type CalendarResponseDto = {
   id: string;
-  numberCard: string;
   scheduledAction: string;
   criticality: string;
   createdAt: string;
@@ -24,10 +23,12 @@ export type CreateCalendarEventDto = {
   scheduledAction: string;
   criticality: string;
   scheduledFor: string;
+  requestedAt: string;
   maintenanceType: string;
-  equipmentId?: string;
-  machineId?: string;
-  placeId?: string;
+  equipmentId: string;
+  machineId: string;
+  placeId: string;
   studentId?: string;
-  teacherId?: string;
+  teacherId: string;
+  status: string;
 };

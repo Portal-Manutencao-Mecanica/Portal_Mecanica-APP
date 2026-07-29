@@ -1,36 +1,8 @@
-import { MachineRow } from "../molecules/MachineRow";
-
-// Criamos o tipo exato ou atualizamos na interface
-interface Machine {
-  id: number;
-  patrimony: string;
-  name: string;
-  place: string;
-  condition: "ATIVA" | "MANUTENCAO" | "INATIVA"; // 👈 Atualizado aqui!
-  tag?: string;
-}
-
-interface Props {
-  machines: Machine[];
-}
-
-export function MachineTable({ machines }: Props) {
-  return (
-    <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="min-w-225">
-        <div className="grid grid-cols-6 bg-gray-100 px-6 py-4 font-semibold">
-          <span>Patrimônio</span>
-          <span>Nome</span>
-          <span>Local</span>
-          <span>Condição</span>
-          <span>Tag</span>
-          <span className="text-right">Ações</span>
-        </div>
-
-        {machines.map((machine) => (
-          <MachineRow key={machine.id} {...machine} />
-        ))}
-      </div>
-    </div>
-  );
-}
+"use client";
+import Link from "next/link";
+import Button from "@/components/atoms/Button";
+import LabelWithCircle from "@/components/molecules/LabelWithCircle";
+import DataTable from "@/components/organisms/DataTable";
+import type { Machine } from "@/lib/api/types";
+import type { ColumnProps } from "@/props/ColumnProps";
+export function MachineTable({ machines }: { machines: Machine[] }) { const columns: ColumnProps<Machine>[] = [{ header: "Patrimônio", accessorKey: "patrimony" }, { header: "Nome", accessorKey: "name" }, { header: "Local", accessorKey: "placeName" }, { header: "Condição", render: (machine) => <LabelWithCircle status={machine.condition === "ATIVA" ? "positive" : machine.condition === "MANUTENCAO" ? "warning" : "negative"} text={machine.condition === "ATIVA" ? "Ativa" : machine.condition === "MANUTENCAO" ? "Em manutenção" : "Inativa"} /> }, { header: "Tag", accessorKey: "tag" }, { header: "Ações", align: "right", render: (machine) => <div className="flex justify-end gap-2"><Link href={`/maquinas/${machine.id}`}><Button>Ver</Button></Link><Link href={`/maquinas/${machine.id}/editar`}><Button variant="warning">Editar</Button></Link></div> }]; return <DataTable data={machines} columns={columns} searchKeys={["patrimony", "name", "placeName", "tag"]} searchPlaceholder="Pesquisar máquina..." emptyMessage="Nenhuma máquina encontrada." />; }

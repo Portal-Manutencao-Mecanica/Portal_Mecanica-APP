@@ -6,7 +6,7 @@ import NotificationDetailSection from "@/components/organisms/NotificationDetail
 
 export default function NotificationDetailPage() {
   const [notification, setNotification] = useState({
-    id: 1,
+    id: "1",
     email: "usuario@weg.net",
     title: "Ocorrência Aprovada",
     about: "A ocorrência do Professor Manutenção foi validada.",

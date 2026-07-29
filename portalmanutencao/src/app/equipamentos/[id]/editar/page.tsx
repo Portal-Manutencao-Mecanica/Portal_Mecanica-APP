@@ -1,122 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
+import EquipmentForm from "@/components/organisms/EquipmentForm";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import type { CreateEquipment, Equipment } from "@/lib/api/types";
+import { equipmentService } from "@/services/equipmentService";
+import { getServiceErrorMessage } from "@/services/httpService";
 
-export default function EditEquipmentPage() {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EditEquipmentPage({ params }: PageProps) {
+  const { id } = use(params);
   const router = useRouter();
+  const [equipment, setEquipment] = useState<Equipment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Mock até integrar com a API
-  const [name, setName] = useState("Motor WEG 2CV");
-  const [sap, setSap] = useState("123456");
-  const [tag, setTag] = useState("MT-001");
-  const [patrimony, setPatrimony] = useState("PAT-458963");
-  const [images, setImages] = useState<FileList | null>(null);
+  useEffect(() => {
+    async function loadEquipment() {
+      try {
+        setEquipment(await equipmentService.getById(id));
+      } catch (loadError) {
+        setError(
+          getServiceErrorMessage(
+            loadError,
+            "Não foi possível carregar o equipamento.",
+          ),
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+    loadEquipment();
+  }, [id]);
 
-    console.log({
-      name,
-      sap,
-      tag,
-      patrimony,
-      images,
-    });
-
-    // Futuramente:
-    // await api.put(`/equipment/${id}`, {...})
-
-    router.push("/equipamentos");
+  async function updateEquipment(payload: CreateEquipment) {
+    try {
+      await equipmentService.update(id, payload);
+      router.push(`/equipamentos/${id}`);
+      router.refresh();
+    } catch (updateError) {
+      throw new Error(
+        getServiceErrorMessage(
+          updateError,
+          "Não foi possível atualizar o equipamento.",
+        ),
+      );
+    }
   }
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-7xl rounded-xl border bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Editar Equipamento</h1>
-
-          <p className="mt-2 text-gray-500">
-            Atualize as informações do equipamento.
-          </p>
+          <h1 className="text-3xl font-bold">Editar equipamento</h1>
+          <p className="mt-2 text-gray-500">Atualize as informações do equipamento.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Nome do Equipamento *
-              </label>
-
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border p-3"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Código SAP
-              </label>
-
-              <input
-                value={sap}
-                onChange={(e) => setSap(e.target.value)}
-                className="w-full rounded-lg border p-3"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">Tag</label>
-
-              <input
-                value={tag}
-                onChange={(e) => setTag(e.target.value)}
-                className="w-full rounded-lg border p-3"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Patrimônio
-              </label>
-
-              <input
-                value={patrimony}
-                onChange={(e) => setPatrimony(e.target.value)}
-                className="w-full rounded-lg border p-3"
-              />
-            </div>
+        {loading ? (
+          <p className="text-center text-gray-500">Carregando equipamento...</p>
+        ) : equipment ? (
+          <EquipmentForm
+            initialValues={{
+              name: equipment.name,
+              sap: equipment.sap ?? undefined,
+              unitPrice: equipment.unitPrice,
+              availableQuantity: equipment.availableQuantity,
+            }}
+            submitLabel="Salvar alterações"
+            successMessage="Equipamento atualizado com sucesso."
+            onSubmit={updateEquipment}
+          />
+        ) : (
+          <div className="space-y-4 text-center">
+            <p className="text-red-700">{error || "Equipamento não encontrado."}</p>
+            <Link href="/equipamentos"><Button variant="secondary">Voltar</Button></Link>
           </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Alterar Imagens
-            </label>
-
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => setImages(e.target.files)}
-              className="w-full rounded-lg border border-dashed p-3"
-            />
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <Button type="button" onClick={() => router.back()}
-            variant="secondary">
-              Cancelar
-            </Button>
-
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
-        </form>
+        )}
       </div>
     </LayoutDesktop>
   );

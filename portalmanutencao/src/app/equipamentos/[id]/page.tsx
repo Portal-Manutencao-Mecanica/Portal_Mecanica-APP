@@ -1,146 +1,138 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import type { Equipment } from "@/lib/api/types";
+import { equipmentService } from "@/services/equipmentService";
+import { getServiceErrorMessage } from "@/services/httpService";
 
-export default function EquipmentDetailsPage() {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EquipmentDetailsPage({ params }: PageProps) {
+  const { id } = use(params);
   const router = useRouter();
-
+  const [equipment, setEquipment] = useState<Equipment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const equipment = {
-    id: "1",
-    name: "Motor WEG 2CV",
-    sap: "123456",
-    numberCard: "EQ-0001",
-    tag: "TAG-001",
-    patrimony: "PAT-458963",
-    image: "/images/default-equipment.png",
-  };
+  useEffect(() => {
+    async function loadEquipment() {
+      try {
+        setEquipment(await equipmentService.getById(id));
+      } catch (loadError) {
+        setError(
+          getServiceErrorMessage(
+            loadError,
+            "Não foi possível carregar o equipamento.",
+          ),
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  function handleDelete() {
-    console.log("Equipamento excluído:", equipment.id);
+    loadEquipment();
+  }, [id]);
 
-    // Futuramente:
-    // await api.delete(`/equipment/${equipment.id}`);
+  async function handleDelete() {
+    setDeleting(true);
+    setError("");
 
-    setOpenDeleteDialog(false);
-
-    router.push("/equipamentos");
+    try {
+      await equipmentService.remove(id);
+      router.push("/equipamentos");
+      router.refresh();
+    } catch (deleteError) {
+      setError(
+        getServiceErrorMessage(
+          deleteError,
+          "Não foi possível excluir o equipamento.",
+        ),
+      );
+      setOpenDeleteDialog(false);
+    } finally {
+      setDeleting(false);
+    }
   }
+
+  if (loading) {
+    return (
+      <LayoutDesktop>
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+          Carregando equipamento...
+        </div>
+      </LayoutDesktop>
+    );
+  }
+
+  if (!equipment) {
+    return (
+      <LayoutDesktop>
+        <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-red-700">{error || "Equipamento não encontrado."}</p>
+          <Link href="/equipamentos"><Button variant="secondary">Voltar</Button></Link>
+        </div>
+      </LayoutDesktop>
+    );
+  }
+
+  const formattedPrice = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(equipment.unitPrice);
 
   return (
     <LayoutDesktop>
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">{equipment.name}</h1>
-
-            <p className="text-gray-500">
-              Informações do equipamento.
-            </p>
+            <p className="text-gray-500">Informações do equipamento.</p>
           </div>
-
           <div className="flex gap-4">
-            <Link href={`/equipamentos/${equipment.id}/editar`}>
-              <Button>
-                Editar
-              </Button>
-            </Link>
-
-            <Button
-              variant="danger"
-              onClick={() => setOpenDeleteDialog(true)}
-            >
-              Deletar
-            </Button>
+            <Link href={`/equipamentos/${equipment.id}/editar`}><Button>Editar</Button></Link>
+            <Button variant="danger" onClick={() => setOpenDeleteDialog(true)}>Deletar</Button>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-8 shadow-sm">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+        {error && <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>}
 
-            <div className="flex justify-center">
-              <div className="relative h-80 w-80 rounded-xl border bg-gray-100">
-                <Image
-                  src={equipment.image}
-                  alt={equipment.name}
-                  fill
-                  className="object-contain p-6"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-
-              <div>
-                <p className="text-sm text-gray-500">
-                  Nome
-                </p>
-
-                <h2 className="text-xl font-semibold">
-                  {equipment.name}
-                </h2>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">
-                  Código SAP
-                </p>
-
-                <p className="text-lg">
-                  {equipment.sap || "-"}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">
-                  Número do Card
-                </p>
-
-                <p className="text-lg">
-                  {equipment.numberCard}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">
-                  Tag
-                </p>
-
-                <p className="text-lg">
-                  {equipment.tag || "-"}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">
-                  Patrimônio
-                </p>
-
-                <p className="text-lg">
-                  {equipment.patrimony || "-"}
-                </p>
-              </div>
-
-            </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Detail label="Nome" value={equipment.name} />
+            <Detail label="Código SAP" value={equipment.sap || "-"} />
+            <Detail label="Preço unitário" value={formattedPrice} />
+            <Detail label="Quantidade disponível" value={String(equipment.availableQuantity)} />
           </div>
         </div>
 
         <ConfirmDialog
           open={openDeleteDialog}
-          title="Excluir Equipamento"
+          title="Excluir equipamento"
           description="Tem certeza que deseja excluir este equipamento? Esta ação não poderá ser desfeita."
-          onCancel={() => setOpenDeleteDialog(false)}
+          confirmText={deleting ? "Excluindo..." : "Excluir"}
+          onCancel={() => !deleting && setOpenDeleteDialog(false)}
           onConfirm={handleDelete}
         />
       </div>
     </LayoutDesktop>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="mt-1 text-lg font-medium text-gray-900">{value}</p>
+    </div>
   );
 }

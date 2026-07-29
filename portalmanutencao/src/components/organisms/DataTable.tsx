@@ -29,17 +29,19 @@ export default function DataTable<T>({
         });
     };
 
-    const filteredData = useMemo(() => {
-        if (!searchTerm || searchKeys.length === 0) return data;
+    const tableData = Array.isArray(data) ? data : [];
 
-        return data.filter((item) =>
+    const filteredData = useMemo(() => {
+        if (!searchTerm || searchKeys.length === 0) return tableData;
+
+        return tableData.filter((item) =>
             searchKeys.some((key) => {
                 const value = item[key];
                 if (value === null || value === undefined) return false;
                 return String(value).toLowerCase().includes(searchTerm.toLowerCase());
             })
         );
-    }, [data, searchTerm, searchKeys]);
+    }, [tableData, searchTerm, searchKeys]);
 
     const getAlignmentClass = (align?: "left" | "center" | "right") => {
         switch (align) {
@@ -83,7 +85,7 @@ export default function DataTable<T>({
                 </div>
             )}
 
-            {/* VISUALIZAÇÃO MOBILE: CARDS (< 768px) */}
+            {/* VISUALIZAÃ‡ÃƒO MOBILE: CARDS (< 768px) */}
             <div className="block md:hidden divide-y divide-gray-100">
                 {filteredData.length === 0 ? (
                     <div className="p-8 text-center text-sm text-gray-400">
@@ -92,7 +94,7 @@ export default function DataTable<T>({
                 ) : (
                     filteredData.map((item: any, rowIndex) => {
                         const isExpanded = expandedRows.has(rowIndex);
-                        // No mobile, se não estiver expandido, mostra apenas as 2 primeiras colunas
+                        // No mobile, se nÃ£o estiver expandido, mostra apenas as 2 primeiras colunas
                         const visibleColumns = isExpanded ? columns : columns.slice(0, 2);
 
                         return (
@@ -120,7 +122,7 @@ export default function DataTable<T>({
                                     })}
                                 </div>
                                 
-                                {/* Botão para expandir/recolher o card inteiro */}
+                                {/* BotÃ£o para expandir/recolher o card inteiro */}
                                 <button
                                     onClick={() => toggleRow(rowIndex)}
                                     className="w-full flex items-center justify-center gap-2 py-2 mt-2 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
@@ -137,7 +139,7 @@ export default function DataTable<T>({
                 )}
             </div>
 
-            {/* VISUALIZAÇÃO DESKTOP: TABELA TRADICIONAL (>= 768px) */}
+            {/* VISUALIZAÃ‡ÃƒO DESKTOP: TABELA TRADICIONAL (>= 768px) */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-sm border-collapse">
                     <thead className="bg-gray-50 text-gray-500 uppercase text-[11px] font-bold tracking-wider border-y border-gray-100">
