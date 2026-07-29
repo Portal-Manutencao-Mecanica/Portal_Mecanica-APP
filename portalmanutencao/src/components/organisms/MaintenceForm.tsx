@@ -1,101 +1,222 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-
+import { Controller, useForm } from "react-hook-form";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import * as v from "valibot";
 import Button from "../atoms/Button";
 import Input from "../atoms/Input";
 import TextArea from "../atoms/TextArea";
+
+import UploadedFile from "../molecules/UploadedFile64";
 import { useAuth } from "@/hooks/useAuth";
-import type { Teacher } from "@/lib/api/types";
-import { getServiceErrorMessage } from "@/services/httpService";
-import { maintenanceRequestService } from "@/services/maintenanceRequestService";
-import { teacherService } from "@/services/teacherService";
+import { CascadingMultiSelect } from "../molecules/CascadingSelector";
+import { CascadingGroupProps } from "@/props/CascadingGroupProps";
+import { User } from "lucide-react";
+
+const IMAGE_BASE64_REGEX =
+  /^data:image\/(png|jpg|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
+
+const maintenanceSchema = v.object({
+  patrimony: v.pipe(
+    v.string("Informe o Patrimônio."),
+    v.nonEmpty("Informe o Patrimônio.")
+  ),
+  tag: v.optional(v.string()),
+  place: v.pipe(
+    v.string("Selecione a Área/Laboratório."),
+    v.nonEmpty("Selecione a Área/Laboratório.")
+  ),
+  equipmentName: v.pipe(
+    v.string("Informe o Nome do Equipamento."),
+    v.nonEmpty("Informe o Nome do Equipamento.")
+  ),
+  description: v.pipe(
+    v.string("Descreva o problema."),
+    v.nonEmpty("Descreva o problema.")
+  ),
+
+  studentIds: v.pipe(
+    v.array(
+      v.number("Cada ID de aluno deve ser um número."),
+      "Selecione ao menos um aluno."
+    ),
+    v.minLength(1, "Selecione pelo menos um aluno envolvido.")
+  ),
+
+  media: v.pipe(
+    v.array(
+      v.pipe(
+        v.string("A mídia precisa ser um texto em Base64."),
+        v.regex(IMAGE_BASE64_REGEX, "Formato de imagem inválido.")
+      ),
+      "Anexe pelo menos uma imagem."
+    ),
+    v.minLength(1, "Anexe pelo menos uma imagem do ocorrido.")
+  ),
+});
+
+type MaintenanceFormData = v.InferInput<typeof maintenanceSchema>;
+
+const MOCK_CLASSROOM_GROUPS: CascadingGroupProps[] = [
+  {
+    id: 1,
+    name: "MM 77 - Matutino",
+    items: [
+      { id: 101, name: "Ana Silva" },
+      { id: 102, name: "Bruno Costa" },
+      { id: 103, name: "Carla Souza" },
+    ],
+  },
+  {
+    id: 2,
+    name: "MM 78 - Matutino",
+    items: [
+      { id: 201, name: "Diego Oliveira" },
+      { id: 202, name: "Elena Santos" },
+      { id: 203, name: "Fernando Lima" },
+    ],
+  },
+  {
+    id: 3,
+    name: "MM 79 - Noturno",
+    items: [
+      { id: 301, name: "Gabriel Rocha" },
+      { id: 302, name: "Helena Martins" },
+    ],
+  },
+];
 
 export default function MaintenceForm() {
-  const router = useRouter();
   const { user } = useAuth();
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [form, setForm] = useState({
-    sector: "AREA_NAO_DESIGNADA",
-    priority: "MEDIA",
-    placeId: "",
-    machineId: "",
-    notifiedTeacherId: "",
-    description: "",
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<MaintenanceFormData>({
+    resolver: valibotResolver(maintenanceSchema),
+    defaultValues: {
+      patrimony: "",
+      tag: "",
+      place: "",
+      equipmentName: "",
+      description: "",
+      studentIds: [],
+      media: [],
+    },
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    teacherService.list().then(setTeachers).catch(() => setTeachers([]));
-  }, []);
+  const onSubmit = (formData: MaintenanceFormData) => {
+    const payloadToApi = {
+      ...formData,
+      createdAt: new Date().toISOString(),
+      notifiedTeacherId: user?.id,
+      studentIds: formData.studentIds,
+    };
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!user || user.role !== "ALUNO") return;
-    setIsSubmitting(true);
-
-    try {
-      await maintenanceRequestService.create({
-        sector: form.sector,
-        priority: form.priority,
-        assignedStudentIds: [user.id],
-        placeId: form.placeId,
-        machineId: form.machineId,
-        description: form.description,
-        notifiedTeacherId: form.notifiedTeacherId,
-      });
-      toast.success("Solicitação enviada ao professor.");
-      router.push("/ocorrencias");
-      router.refresh();
-    } catch (requestError) {
-      toast.error(getServiceErrorMessage(requestError, "Não foi possível enviar a solicitação."));
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  const isStudent = user?.role === "ALUNO";
+    console.log("Payload final para o Spring Boot:", payloadToApi);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="ui-surface space-y-6 p-6">
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-        <span className="block text-gray-500">Solicitante</span>
-        <strong>{user?.name ?? "Carregando sessão..."}</strong>
-        {isStudent && <p className="mt-1 text-gray-600">Sua identificação será vinculada automaticamente à solicitação.</p>}
-      </div>
-      {!isStudent && <p role="alert" className="rounded-lg bg-amber-50 p-4 text-sm text-amber-800">Somente alunos podem abrir solicitações de manutenção.</p>}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Input label="ID do local *" required value={form.placeId} onChange={(event) => setForm({ ...form, placeId: event.target.value })} />
-        <Input label="ID da máquina *" required value={form.machineId} onChange={(event) => setForm({ ...form, machineId: event.target.value })} />
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6"
+    >
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
         <div>
-          <label htmlFor="notified-teacher" className="ui-field-label">Professor responsável *</label>
-          <select id="notified-teacher" required className="ui-control mt-1.5" value={form.notifiedTeacherId} onChange={(event) => setForm({ ...form, notifiedTeacherId: event.target.value })}>
-            <option value="">Selecione um professor</option>
-            {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
-          </select>
+          <span className="text-gray-500 block">
+            Professor Notificado / Solicitante:
+          </span>
+          <strong className="text-gray-800">
+            {user?.name || "Carregando..."}
+          </strong>
         </div>
         <div>
-          <label htmlFor="sector" className="ui-field-label">Setor *</label>
-          <select id="sector" className="ui-control mt-1.5" value={form.sector} onChange={(event) => setForm({ ...form, sector: event.target.value })}>
-            <option value="AREA_NAO_DESIGNADA">Área não designada</option>
-            <option value="CENTRO_WEG">Centro WEG</option>
-            <option value="WEG_MANUTENCAO">WEG Manutenção</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="priority" className="ui-field-label">Prioridade *</label>
-          <select id="priority" className="ui-control mt-1.5" value={form.priority} onChange={(event) => setForm({ ...form, priority: event.target.value })}>
-            <option value="BAIXA">Baixa</option>
-            <option value="MEDIA">Média</option>
-            <option value="ALTA">Alta</option>
-          </select>
+          <span className="text-gray-500 block">Data / Hora do Registro:</span>
+          <strong className="text-gray-800">
+            {new Date().toLocaleString("pt-BR")}
+          </strong>
         </div>
       </div>
-      <TextArea label="Descrição *" required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting || !isStudent}>{isSubmitting ? "Enviando..." : "Enviar solicitação"}</Button>
+
+      {/* Componente de Seleção de Alunos */}
+      <Controller
+        name="studentIds"
+        control={control}
+        render={({ field, fieldState }) => (
+          <CascadingMultiSelect
+            label="Alunos Envolvidos *"
+            placeholder="Selecione a turma para escolher os alunos..."
+            groupHeader="Turmas"
+            itemHeader="Alunos da Turma"
+            groups={MOCK_CLASSROOM_GROUPS}
+            value={field.value}
+            onChange={field.onChange}
+            error={fieldState.error?.message}
+            badgeIcon={User}
+          />
+        )}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          label="Patrimônio *"
+          placeholder="Ex: 100020"
+          error={errors.patrimony?.message}
+          {...register("patrimony")}
+        />
+
+        <Input
+          label="TAG"
+          placeholder="Ex: TORNO-01"
+          error={errors.tag?.message}
+          {...register("tag")}
+        />
+
+        <Input
+          label="Laboratório / Área CentroWEG *"
+          placeholder="Ex: Laboratório de Usinagem"
+          error={errors.place?.message}
+          {...register("place")}
+        />
+
+        <Input
+          label="Nome Equipamento / Identificação do Conjunto *"
+          placeholder="Ex: Torno CNC Romi"
+          error={errors.equipmentName?.message}
+          {...register("equipmentName")}
+        />
+      </div>
+
+      <TextArea
+        label="Descreva sobre o Problema *"
+        placeholder="Identifique o que ocorreu no equipamento..."
+        error={errors.description?.message}
+        {...register("description")}
+      />
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Imagens da Anomalia (Anexe imagens pontuais) *
+        </label>
+
+        <Controller
+          name="media"
+          control={control}
+          render={({ field }) => (
+            <UploadedFile
+              onChange={(base64List) => field.onChange(base64List)}
+              error={errors.media?.message}
+            />
+          )}
+        />
+      </div>
+
+      <div className="flex justify-end pt-4 border-t border-gray-100">
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          Enviar Ocorrência
+        </Button>
       </div>
     </form>
   );

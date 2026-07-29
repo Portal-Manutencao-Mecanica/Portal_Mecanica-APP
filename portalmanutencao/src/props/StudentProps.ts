@@ -1,4 +1,4 @@
 export  interface StudentProps {
-    id: string;
+    id: number;
     name: string;
 }
