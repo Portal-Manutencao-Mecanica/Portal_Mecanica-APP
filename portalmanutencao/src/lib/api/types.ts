@@ -149,3 +149,81 @@ export interface MaintenanceRequestApi {
   machineId: string;
   machineName: string;
 }
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
+export type TaskSituation = "PENDENTE" | "EM_ANDAMENTO" | "CONCLUIDA";
+export type TaskCriticality = "BAIXA" | "MEDIA" | "ALTA";
+export type MaintenanceType = "PREVENTIVA" | "CORRETIVA" | "PREDITIVA" | "AUTONOMA";
+
+export interface MachineLog {
+  id: string;
+  title: string | null;
+  description: string | null;
+  executionReport: string | null;
+  taskSituation: TaskSituation;
+  machineId: string;
+  machineName: string;
+  servicePerformed: string | null;
+  responsibleTeacherId: string | null;
+  responsibleTeacherName: string | null;
+  teacherConcludedAt: string | null;
+  executionStartedAt: string | null;
+  executionEndedAt: string | null;
+  plannedAction: string | null;
+  taskCriticality: TaskCriticality;
+  placeId: string | null;
+  placeName: string | null;
+  maintenanceType: MaintenanceType | null;
+  classGroupId: string | null;
+  classGroupAcronym: string | null;
+  assignedStudentIds: string[];
+  reportLink: string | null;
+  registeredAt: string;
+}
+
+export interface CreateMachineLog {
+  title?: string;
+  description?: string;
+  executionReport?: string;
+  taskSituation: TaskSituation;
+  machineId: string;
+  servicePerformed?: string;
+  responsibleTeacherId?: string;
+  teacherConcludedAt?: string;
+  executionStartedAt?: string;
+  executionEndedAt?: string;
+  plannedAction?: string;
+  taskCriticality: TaskCriticality;
+  placeId?: string;
+  maintenanceType?: MaintenanceType;
+  classGroupId?: string;
+  assignedStudentIds?: string[];
+  reportLink?: string;
+}
+export type Teacher = Student;
+
+export interface CreateUserRequest {
+  name: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  organizationId?: string;
+}
+
+export interface CreatedUser {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: UserRole;
+}

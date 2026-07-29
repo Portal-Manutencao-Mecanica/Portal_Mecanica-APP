@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Button from "@/components/atoms/Button";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import MachineLogs from "@/components/organisms/MachineLogs";
 import type { Machine } from "@/lib/api/types";
 import { machineService } from "@/services/machineService";
 
@@ -49,6 +50,7 @@ export default function ViewMachinePage() {
           <Detail label="Tag" value={machine.tag || "-"} />
           <Detail label="Data de cadastro" value={new Intl.DateTimeFormat("pt-BR").format(new Date(machine.createdAt))} />
         </div>
+        <MachineLogs machine={machine} />
       </div>
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
