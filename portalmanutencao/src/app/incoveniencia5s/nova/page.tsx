@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
+import TextArea from "@/components/atoms/TextArea";
+import UploadedFile64 from "@/components/molecules/UploadedFile64";
+import DropDown from "@/components/atoms/DropDown";
 
 export default function NewInconveniencePage() {
   const router = useRouter();
@@ -31,6 +34,13 @@ export default function NewInconveniencePage() {
     });
   }
 
+  const handleSelectChange = (fieldName: string, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -38,6 +48,27 @@ export default function NewInconveniencePage() {
 
     router.push("/ocorrencias");
   }
+  const Places = {
+    MECANICA: "Laboratório Mecânica",
+    ELETRICA: "Laboratório Elétrica",
+    OFICINA: "Oficina",
+  } as const;
+
+  const Teachers = {
+    CARLOS: "Carlos Henrique",
+    JOAO: "João Pedro",
+  } as const;
+
+  const ClassGroups = {
+    TURMA_2025_1: "TIIN 2025/1",
+    TURMA_2025_2: "TIIN 2025/2",
+  } as const;
+
+  const RegistrationPeriods = {
+    MATUTINO: "Matutino",
+    VESPERTINO: "Vespertino",
+    NOTURNO: "Noturno",
+  } as const;
 
   return (
     <LayoutDesktop>
@@ -53,51 +84,29 @@ export default function NewInconveniencePage() {
           />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <select
-              name="place"
-              value={form.place}
-              onChange={handleChange}
-              className="rounded-lg border p-3"
-            >
-              <option value="">Selecione o Local</option>
-              <option>Laboratório Mecânica</option>
-              <option>Laboratório Elétrica</option>
-              <option>Oficina</option>
-            </select>
+            <DropDown
+              defaultSelection="Selecione o Local"
+              enumData={Places}
+              onSelect={(value) => handleSelectChange("place", value)}
+            />
 
-            <select
-              name="teacher"
-              value={form.teacher}
-              onChange={handleChange}
-              className="rounded-lg border p-3"
-            >
-              <option value="">Professor Notificado</option>
-              <option>Carlos Henrique</option>
-              <option>João Pedro</option>
-            </select>
+            <DropDown
+              defaultSelection="Professor Notificado"
+              enumData={Teachers}
+              onSelect={(value) => handleSelectChange("teacher", value)}
+            />
 
-            <select
-              name="classGroup"
-              value={form.classGroup}
-              onChange={handleChange}
-              className="rounded-lg border p-3"
-            >
-              <option value="">Turma</option>
-              <option>TIIN 2025/1</option>
-              <option>TIIN 2025/2</option>
-            </select>
+            <DropDown
+              defaultSelection="Turma"
+              enumData={ClassGroups}
+              onSelect={(value) => handleSelectChange("classGroup", value)}
+            />
 
-            <select
-              name="registrationPeriod"
-              value={form.registrationPeriod}
-              onChange={handleChange}
-              className="rounded-lg border p-3"
-            >
-              <option value="">Período</option>
-              <option>Matutino</option>
-              <option>Vespertino</option>
-              <option>Noturno</option>
-            </select>
+            <DropDown
+              defaultSelection="Período"
+              enumData={RegistrationPeriods}
+              onSelect={(value) => handleSelectChange("registrationPeriod", value)}
+            />
           </div>
 
           <Input
@@ -107,23 +116,16 @@ export default function NewInconveniencePage() {
             onChange={handleChange}
           />
 
-          <textarea
+          <TextArea
             name="description"
             value={form.description}
             onChange={handleChange}
             rows={6}
             placeholder="Descrição da ocorrência..."
-            className="w-full rounded-lg border p-3"
-          />
+            className="w-full rounded-lg border p-3" label={"Descrição"} />
 
           <div>
-            <label className="mb-2 block font-medium">Imagens</label>
-
-            <input
-              type="file"
-              multiple
-              className="w-full rounded-lg border p-3"
-            />
+            <UploadedFile64></UploadedFile64>
           </div>
 
           <div className="flex justify-end gap-4">
