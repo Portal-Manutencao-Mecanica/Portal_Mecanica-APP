@@ -5,7 +5,7 @@ import { EventInput } from "@fullcalendar/core";
 import { Plus, X } from "lucide-react";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Calendar from "@/components/organisms/Calendar";
-import { CalendarResponseDto, CreateCalendarEventDto } from "@/types/CalendarEvent";
+import { CalendarItemResponseDto, CalendarResponseDto, CreateCalendarEventDto } from "@/types/CalendarEvent";
 import { calendarService } from "@/services/calendarService";
 
 type CalendarForm = Required<CreateCalendarEventDto>;
@@ -14,11 +14,11 @@ type Modal = { type: "create" } | { type: "details"; event: CalendarResponseDto 
 const inputStyle = "w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-weg-blue focus:ring-2 focus:ring-weg-blue/20";
 const newForm = (scheduledFor: string): CalendarForm => ({ scheduledAction: "", criticality: "MEDIA", scheduledFor, requestedAt: new Date().toISOString().slice(0, 19), maintenanceType: "PREVENTIVA", equipmentId: "", machineId: "", placeId: "", studentId: "", teacherId: "", status: "PENDENTE" });
 const toInputDate = (value: string) => value.slice(0, 16);
-const toCalendarEvent = (event: CalendarResponseDto): EventInput => ({ id: event.id, title: event.scheduledAction, start: event.scheduledFor, extendedProps: event });
+const toCalendarEvent = (event: CalendarItemResponseDto): EventInput => ({ title: event.title, start: `${event.day}T${event.hour}` });
 const formatDate = (value: string | null) => value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value)) : "Não informado";
 
 export default function CalendarioPage() {
-  const [events, setEvents] = useState<CalendarResponseDto[]>([]);
+  const [events, setEvents] = useState<CalendarItemResponseDto[]>([]);
   const [modal, setModal] = useState<Modal | null>(null);
   const [form, setForm] = useState<CalendarForm>(() => newForm(toInputDate(new Date().toISOString())));
 
@@ -41,13 +41,13 @@ export default function CalendarioPage() {
 
   async function createEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const createdEvent = await calendarService.create({
+    await calendarService.create({
       ...form,
       requestedAt: new Date().toISOString().slice(0, 19),
       scheduledFor: new Date(form.scheduledFor).toISOString().slice(0, 19),
       studentId: form.studentId || undefined,
     });
-    setEvents((current) => [...current, createdEvent]);
+    setEvents(await calendarService.list());
     closeModal();
   }
 
@@ -58,7 +58,7 @@ export default function CalendarioPage() {
           <div><h1 className="text-2xl font-bold text-gray-800">Calendário de manutenção</h1><p className="text-sm text-gray-500">Clique em um dia para agendar uma manutenção.</p></div>
           <button type="button" onClick={() => openCreate(toInputDate(new Date().toISOString()))} className="flex cursor-pointer items-center gap-2 self-start rounded-lg bg-weg-blue px-4 py-2 font-medium text-white shadow-sm hover:bg-[#00579D]/85 sm:self-auto"><Plus className="h-4 w-4" />Novo evento</button>
         </div>
-        <Calendar events={events.map(toCalendarEvent)} onDateClick={(info) => openCreate(`${info.dateStr}T08:00`)} onEventClick={(info) => setModal({ type: "details", event: info.event.extendedProps as CalendarResponseDto })} />
+        <Calendar events={events.map(toCalendarEvent)} onDateClick={(info) => openCreate(`${info.dateStr}T08:00`)} />
       </main>
       {modal && <div role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title" onMouseDown={(event) => { if (event.target === event.currentTarget) closeModal(); }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">

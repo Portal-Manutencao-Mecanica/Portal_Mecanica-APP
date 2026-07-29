@@ -19,6 +19,12 @@ export type CalendarResponseDto = {
   status: string;
 };
 
+export type CalendarItemResponseDto = {
+  day: string;
+  hour: string;
+  title: string;
+};
+
 export type CreateCalendarEventDto = {
   scheduledAction: string;
   criticality: string;
