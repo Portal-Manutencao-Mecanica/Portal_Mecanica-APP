@@ -1,12 +1,12 @@
 import { StudentRow } from "../molecules/StudentRow";
 
 interface Student {
-  id: string;
+  id: number;
   name: string;
   email: string;
   numberCard: string;
   enabled: boolean;
-  classGroupIds: string[];
+  classGroups: string[];
 }
 
 interface Props {
@@ -41,7 +41,6 @@ export function StudentTable({ students }: Props) {
           <StudentRow
             key={student.id}
             {...student}
-            classGroups={student.classGroupIds}
           />
         ))}
 

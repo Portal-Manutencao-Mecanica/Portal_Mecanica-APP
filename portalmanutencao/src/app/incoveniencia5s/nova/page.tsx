@@ -7,7 +7,8 @@ import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import TextArea from "@/components/atoms/TextArea";
-import { inconvenienceService } from "@/services/inconvenienceService";
+import UploadedFile64 from "@/components/molecules/UploadedFile64";
+import DropDown from "@/components/atoms/DropDown";
 
 export default function NewInconveniencePage() {
   const router = useRouter();
@@ -33,20 +34,41 @@ export default function NewInconveniencePage() {
     });
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSelectChange = (fieldName: string, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await inconvenienceService.create({
-      inconvenience: form.inconvenience,
-      placeId: form.place,
-      notifiedTeacherId: form.teacher,
-      classGroupId: form.classGroup,
-      registrationPeriod: form.registrationPeriod,
-      involvedStudentIds: form.students.split(",").map((id) => id.trim()).filter(Boolean),
-      description: form.description,
-    });
-    router.push("/incoveniencia5s");
-    router.refresh();
+
+    console.log(form);
+
+    router.push("/ocorrencias");
   }
+  const Places = {
+    MECANICA: "Laboratório Mecânica",
+    ELETRICA: "Laboratório Elétrica",
+    OFICINA: "Oficina",
+  } as const;
+
+  const Teachers = {
+    CARLOS: "Carlos Henrique",
+    JOAO: "João Pedro",
+  } as const;
+
+  const ClassGroups = {
+    TURMA_2025_1: "TIIN 2025/1",
+    TURMA_2025_2: "TIIN 2025/2",
+  } as const;
+
+  const RegistrationPeriods = {
+    MATUTINO: "Matutino",
+    VESPERTINO: "Vespertino",
+    NOTURNO: "Noturno",
+  } as const;
 
   return (
     <LayoutDesktop>
@@ -62,29 +84,34 @@ export default function NewInconveniencePage() {
           />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Input name="place" label="ID do local *" required value={form.place} onChange={handleChange} />
-            <Input name="teacher" label="ID do professor *" required value={form.teacher} onChange={handleChange} />
-            <Input name="classGroup" label="ID da turma *" required value={form.classGroup} onChange={handleChange} />
+            <DropDown
+              defaultSelection="Selecione o Local"
+              enumData={Places}
+              onSelect={(value) => handleSelectChange("place", value)}
+            />
 
-            <select
-              name="registrationPeriod"
-              value={form.registrationPeriod}
-              onChange={handleChange}
-              className="ui-control"
-              required
-            >
-              <option value="">Período</option>
-              <option value="MATUTINO">Matutino</option>
-              <option value="VESPERTINO">Vespertino</option>
-              <option value="NOTURNO">Noturno</option>
-            </select>
+            <DropDown
+              defaultSelection="Professor Notificado"
+              enumData={Teachers}
+              onSelect={(value) => handleSelectChange("teacher", value)}
+            />
+
+            <DropDown
+              defaultSelection="Turma"
+              enumData={ClassGroups}
+              onSelect={(value) => handleSelectChange("classGroup", value)}
+            />
+
+            <DropDown
+              defaultSelection="Período"
+              enumData={RegistrationPeriods}
+              onSelect={(value) => handleSelectChange("registrationPeriod", value)}
+            />
           </div>
 
           <Input
             name="students"
-            label="IDs dos alunos envolvidos *"
-            placeholder="Separe os UUIDs por vírgula"
-            required
+            placeholder="Alunos envolvidos"
             value={form.students}
             onChange={handleChange}
           />
@@ -95,8 +122,11 @@ export default function NewInconveniencePage() {
             onChange={handleChange}
             rows={6}
             placeholder="Descrição da ocorrência..."
-            label="Descrição"
-          />
+            className="w-full rounded-lg border p-3" label={"Descrição"} />
+
+          <div>
+            <UploadedFile64></UploadedFile64>
+          </div>
 
           <div className="flex justify-end gap-4">
             <Button

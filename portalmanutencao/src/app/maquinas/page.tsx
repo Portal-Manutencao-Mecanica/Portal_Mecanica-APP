@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client';
 
 import Link from 'next/link';
@@ -32,6 +33,42 @@ export default function MachinesPage() {
     place: machine.placeName,
   }));
 
+=======
+import Link from "next/link";
+
+import Button from "@/components/atoms/Button";
+import { MachineTable } from "@/components/organisms/MachineTable";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+
+const machines = [
+  {
+    id: 1,
+    patrimony: "100001",
+    name: "Torno CNC",
+    place: "Laboratório A",
+    condition: "ATIVA",
+    tag: "CNC",
+  },
+  {
+    id: 2,
+    patrimony: "100002",
+    name: "Impressora 3D",
+    place: "Laboratório B",
+    condition: "MANUTENCAO",
+    tag: "3D",
+  },
+  {
+    id: 3,
+    patrimony: "100003",
+    name: "Fresadora",
+    place: "Laboratório C",
+    condition: "ATIVA",
+    tag: "FRESA",
+  },
+] as const;
+
+export default function MachinesPage() {
+>>>>>>> origin/develop
   return (
     <LayoutDesktop>
       <div className='max-w-7xl mx-auto p-4 md:p-8 space-y-6'>
@@ -48,11 +85,15 @@ export default function MachinesPage() {
           </Link>
         </div>
 
+<<<<<<< HEAD
         {isLoading && (
           <p className='rounded-lg border border-gray-200 bg-white p-6 text-gray-500'>
             Carregando m&aacute;quinas...
           </p>
         )}
+=======
+        <MachineTable machines={machines as any} />
+>>>>>>> origin/develop
 
         {error && (
           <p role='alert' className='rounded-lg bg-red-50 p-4 text-red-700'>

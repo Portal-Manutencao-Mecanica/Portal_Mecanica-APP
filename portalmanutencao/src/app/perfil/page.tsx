@@ -1,21 +1,30 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import UserPicture from "../../components/molecules/UserPicture";
-import { useAuth } from "@/hooks/useAuth";
-import { authService } from "@/services/authService";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
 
-  async function handleLogout() {
-    await authService.logout();
-    router.replace("/login");
-    router.refresh();
+  const user = {
+    name: "Alexandre Santos",
+    email: "alexandre@weg.net",
+    registration: "202500123",
+    role: "Administrador",
+    permission: "Administrador",
+  };
+
+  function handleLogout() {
+    // Futuramente:
+    // remover token
+    // localStorage.removeItem("token");
+    // cookies.delete("token");
+
+    router.push("/login");
   }
 
   return (
@@ -23,15 +32,7 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-7xl rounded-xl border bg-white p-8 shadow-sm">
         <h1 className="mb-8 text-3xl font-bold">Meu Perfil</h1>
 
-        {isLoading && <p className="text-gray-500">Carregando perfil...</p>}
-
-        {!isLoading && !user && (
-          <div className="rounded-lg bg-amber-50 p-4 text-amber-800">
-            Sua sessão expirou. Entre novamente para acessar o perfil.
-          </div>
-        )}
-
-        {user && <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div className="flex flex-col items-center">
             <div className="flex flex-col items-center">
               <UserPicture name={user.name} size={208} />
@@ -50,18 +51,18 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <p className="text-sm text-gray-500">Usuário</p>
-              <p className="text-lg">{user.username}</p>
+              <p className="text-sm text-gray-500">Matrícula</p>
+              <p className="text-lg">{user.registration}</p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-500">Perfil</p>
+              <p className="text-sm text-gray-500">Cargo</p>
               <p className="text-lg">{user.role}</p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-500">Organização</p>
-              <p className="text-lg">{user.organization?.name ?? "Não informada"}</p>
+              <p className="text-sm text-gray-500">Permissão</p>
+              <p className="text-lg">{user.permission}</p>
             </div>
 
             <div className="flex gap-4 pt-4">
@@ -72,7 +73,7 @@ export default function ProfilePage() {
               </Button>
             </div>
           </div>
-        </div>}
+        </div>
       </div>
     </LayoutDesktop>
   );

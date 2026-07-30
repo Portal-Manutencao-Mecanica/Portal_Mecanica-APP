@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
@@ -9,9 +9,45 @@ import SearchInput from "@/components/atoms/Input";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import { DataRowCard } from "@/components/molecules/DataRowCard";
 import { LabelStatus } from "@/types/LabelStatus";
+<<<<<<< HEAD
 import type { Inconvenience5S } from "@/lib/api/types";
 import { inconvenienceService } from "@/services/inconvenienceService";
 import { getServiceErrorMessage } from '@/services/httpService';
+=======
+
+const inconveniences = [
+  {
+    id: "1",
+    numberCard: "5S-0001",
+    inconvenience: "Cabos espalhados pelo laboratório",
+    place: "Laboratório Mecânica",
+    classGroup: "TIIN 2025/1",
+    notifiedTeacher: "Carlos Henrique",
+    createdAt: "27/07/2026",
+    status: "NAO_VISUALIZADA",
+  },
+  {
+    id: "2",
+    numberCard: "5S-0002",
+    inconvenience: "Ferramentas fora do local",
+    place: "Laboratório Elétrica",
+    classGroup: "TIIN 2025/2",
+    notifiedTeacher: "João Pedro",
+    createdAt: "26/07/2026",
+    status: "VISUALIZADA",
+  },
+  {
+    id: "3",
+    numberCard: "5S-0003",
+    inconvenience: "Resíduos no chão",
+    place: "Oficina",
+    classGroup: "TIIN 2025/1",
+    notifiedTeacher: "Maria Souza",
+    createdAt: "25/07/2026",
+    status: "RESOLVIDA",
+  },
+];
+>>>>>>> origin/develop
 
 function getStatus(status: string): {
   text: string;
@@ -46,6 +82,7 @@ function getStatus(status: string): {
 
 export default function InconveniencePage() {
   const [search, setSearch] = useState("");
+<<<<<<< HEAD
   const [inconveniences, setInconveniences] = useState<Inconvenience5S[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,13 +98,15 @@ export default function InconveniencePage() {
       })
       .finally(() => setIsLoading(false));
   }, []);
+=======
+>>>>>>> origin/develop
 
   const filteredInconveniences = inconveniences.filter(
     (item) =>
-      item.id.toLowerCase().includes(search.toLowerCase()) ||
+      item.numberCard.toLowerCase().includes(search.toLowerCase()) ||
       item.inconvenience.toLowerCase().includes(search.toLowerCase()) ||
-      item.placeName.toLowerCase().includes(search.toLowerCase()) ||
-      item.classGroupAcronym.toLowerCase().includes(search.toLowerCase()),
+      item.place.toLowerCase().includes(search.toLowerCase()) ||
+      item.classGroup.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -115,7 +154,7 @@ export default function InconveniencePage() {
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold">{item.id}</h2>
+                    <h2 className="text-lg font-semibold">{item.numberCard}</h2>
 
                     <LabelWithCircle status={label.status} text={label.text} />
                   </div>
@@ -124,20 +163,19 @@ export default function InconveniencePage() {
 
                   <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600">
                     <p>
-                      <strong>Local:</strong> {item.placeName}
+                      <strong>Local:</strong> {item.place}
                     </p>
 
                     <p>
-                      <strong>Professor:</strong> {item.notifiedTeacherName}
+                      <strong>Professor:</strong> {item.notifiedTeacher}
                     </p>
 
                     <p>
-                      <strong>Turma:</strong> {item.classGroupAcronym}
+                      <strong>Turma:</strong> {item.classGroup}
                     </p>
 
                     <p>
-                      <strong>Data:</strong>{" "}
-                      {new Intl.DateTimeFormat("pt-BR").format(new Date(item.createdAt))}
+                      <strong>Data:</strong> {item.createdAt}
                     </p>
                   </div>
                 </div>

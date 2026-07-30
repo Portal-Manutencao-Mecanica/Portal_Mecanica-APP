@@ -3,7 +3,7 @@ import Button from "../atoms/Button";
 import LabelWithCircle from "../molecules/LabelWithCircle";
 
 interface Props {
-  id: string;
+  id: number;
   patrimony: string;
   name: string;
   place: string;
