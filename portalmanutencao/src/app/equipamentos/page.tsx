@@ -14,12 +14,16 @@ import { getServiceErrorMessage } from "@/services/httpService";
 export default function EquipmentsPage() {
   const [search, setSearch] = useState("");
   const [equipments, setEquipments] = useState<Equipment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    equipmentService.list().then(setEquipments).catch((requestError) => {
-      setError(getServiceErrorMessage(requestError, "Falha ao carregar equipamentos."));
-    });
+    equipmentService.list()
+      .then(setEquipments)
+      .catch((requestError: unknown) => {
+        setError(getServiceErrorMessage(requestError, "Falha ao carregar equipamentos."));
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filteredEquipments = equipments.filter(
@@ -52,8 +56,14 @@ export default function EquipmentsPage() {
         />
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {error && <p className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
-          {filteredEquipments.map((equipment) => (
+          {isLoading && <p className='text-gray-500'>Carregando equipamentos...</p>}
+          {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
+          {!isLoading && !error && filteredEquipments.length === 0 && (
+            <p className='rounded-lg border border-gray-200 bg-white p-6 text-gray-600'>
+              Nenhum equipamento encontrado.
+            </p>
+          )}
+          {!isLoading && !error && filteredEquipments.map((equipment) => (
             <EquipmentCard
               key={equipment.id}
               equipment={equipment}

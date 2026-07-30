@@ -1,10 +1,11 @@
-import "server-only";
+import 'server-only';
 
-import axios from "axios";
-import { cookies } from "next/headers";
+import axios from 'axios';
+import { cookies } from 'next/headers';
 
-import { AUTH_COOKIE, getApiUrl } from "@/lib/api/config";
-import type { ClassGroup } from "@/lib/api/types";
+import { getCollectionItems } from '@/lib/api/collections';
+import { AUTH_COOKIE, getApiUrl } from '@/lib/api/config';
+import type { ClassGroup } from '@/lib/api/types';
 
 async function getAuthorizationHeader() {
   const cookieStore = await cookies();
@@ -14,11 +15,12 @@ async function getAuthorizationHeader() {
 
 export const classGroupService = {
   async list() {
-    const { data } = await axios.get<ClassGroup[]>(`${getApiUrl()}/turma`, {
+    const { data } = await axios.get<unknown>(`${getApiUrl()}/turma`, {
       headers: await getAuthorizationHeader(),
+      params: { page: 0, size: 100 },
       timeout: 15_000,
     });
-    return data;
+    return getCollectionItems<ClassGroup>(data, 'turmas');
   },
 
   async getById(id: string) {

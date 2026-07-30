@@ -1,14 +1,17 @@
-import type { CreateEquipment, Equipment } from "@/lib/api/types";
-import { browserApi } from "./httpService";
+import { getCollectionItems } from '@/lib/api/collections';
+import type { CreateEquipment, Equipment } from '@/lib/api/types';
+import { browserApi } from './httpService';
 
 export const equipmentService = {
   async list() {
-    const { data } = await browserApi.get<Equipment[]>("/equipamento");
-    return data;
+    const { data } = await browserApi.get<unknown>('/equipamento', {
+      params: { page: 0, size: 100 },
+    });
+    return getCollectionItems<Equipment>(data, 'equipamentos');
   },
 
   async create(equipment: CreateEquipment) {
-    const { data } = await browserApi.post<Equipment>("/equipamento", equipment);
+    const { data } = await browserApi.post<Equipment>('/equipamento', equipment);
     return data;
   },
 

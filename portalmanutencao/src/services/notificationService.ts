@@ -1,4 +1,5 @@
-import type { Notification, Page } from '@/lib/api/types';
+import { getCollectionItems } from '@/lib/api/collections';
+import type { Notification } from '@/lib/api/types';
 import { browserApi } from './httpService';
 
 interface NotificationListOptions {
@@ -8,10 +9,10 @@ interface NotificationListOptions {
 
 export const notificationService = {
   async list({ page = 0, size = 100 }: NotificationListOptions = {}) {
-    const { data } = await browserApi.get<Page<Notification>>('/notification', {
+    const { data } = await browserApi.get<unknown>('/notification', {
       params: { page, size },
     });
-    return data.content;
+    return getCollectionItems<Notification>(data, 'notifica\u00e7\u00f5es');
   },
 
   async getById(id: string) {
