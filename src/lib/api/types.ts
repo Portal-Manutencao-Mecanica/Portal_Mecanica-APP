@@ -55,6 +55,12 @@ export interface ClassGroup {
   students: ClassGroupPerson[];
 }
 
+export interface CreateClassGroup {
+  acronym: string;
+  teacherIds: string[];
+  studentIds: string[];
+}
+
 export interface Student {
   id: string;
   numberCard: string;
@@ -86,11 +92,24 @@ export interface Machine {
   id: string;
   name: string;
   patrimony: string;
-  condition: "ATIVA" | "MANUTENCAO" | "INATIVA";
+  condition: "CONFORME" | "NAO_CONFORME";
   tag: string;
   placeId: string;
   placeName: string;
   createdAt: string;
+}
+
+export interface Place {
+  id: string;
+  name: string;
+}
+
+export interface CreateMachine {
+  name: string;
+  patrimony: string;
+  condition: Machine["condition"];
+  tag?: string;
+  placeId: string;
 }
 
 export interface Buy {
@@ -214,13 +233,38 @@ export interface CreateMachineLog {
 }
 export type Teacher = Student;
 
-export interface CreateUserRequest {
+interface CreateUserBaseRequest {
   name: string;
   username: string;
   email: string;
-  role: UserRole;
   organizationId?: string;
 }
+
+export type CreateUserRequest =
+  | (CreateUserBaseRequest & {
+      role: "ALUNO";
+      studentData: { classGroupIds: string[] };
+      teacherData?: never;
+      coordinatorData?: never;
+    })
+  | (CreateUserBaseRequest & {
+      role: "PROFESSOR";
+      teacherData: { classGroupIds: string[] };
+      studentData?: never;
+      coordinatorData?: never;
+    })
+  | (CreateUserBaseRequest & {
+      role: "COORDENADOR";
+      coordinatorData: Record<string, never>;
+      studentData?: never;
+      teacherData?: never;
+    })
+  | (CreateUserBaseRequest & {
+      role: "ADMIN";
+      studentData?: never;
+      teacherData?: never;
+      coordinatorData?: never;
+    });
 
 export interface CreatedUser {
   id: string;
@@ -228,4 +272,10 @@ export interface CreatedUser {
   username: string;
   email: string;
   role: UserRole;
+  status: string;
+  passwordChangeRequired: boolean;
+  organization: OrganizationSummary;
+  credentialsSent: boolean;
+  emailStatus: string;
+  createdAt: string;
 }

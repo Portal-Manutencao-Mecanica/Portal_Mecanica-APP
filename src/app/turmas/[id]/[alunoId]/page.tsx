@@ -1,116 +1,66 @@
+"use client";
+
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import type { ClassGroup, Student } from "@/lib/api/types";
+import { classGroupBrowserService } from "@/services/classGroupBrowserService";
+import { getServiceErrorMessage, browserApi } from "@/services/httpService";
 
-interface Student {
-  id: number;
-  numberCard: string;
-  name: string;
-  email: string;
-  role: string;
-  enabled: boolean;
-  classGroupIds: number[];
-}
+interface Props { params: Promise<{ id: string; alunoId: string }>; }
 
-interface ClassGroup {
-  id: number;
-  acronym: string;
-}
+export default function StudentPage({ params }: Props) {
+  const { id, alunoId } = use(params);
+  const [student, setStudent] = useState<Student | null>(null);
+  const [classGroups, setClassGroups] = useState<ClassGroup[]>([]);
 
-interface Props {
-  params: Promise<{
-    id: string;
-    alunoId: string;
-  }>;
-}
-
-export default async function StudentPage({ params }: Props) {
-  const { id, alunoId } = await params;
-
-  try {
-    const response = await fetch(`http://localhost:8080/api/aluno/${alunoId}`);
-
-    if (!response.ok) {
-      throw new Error(`Falha ao buscar o aluno: ${response.status}`);
+  useEffect(() => {
+    async function loadStudent() {
+      try {
+        const { data } = await browserApi.get<Student>(`/aluno/${encodeURIComponent(alunoId)}`);
+        setStudent(data);
+        setClassGroups(await Promise.all(data.classGroupIds.map((classGroupId) => classGroupBrowserService.getById(classGroupId))));
+      } catch (error) {
+        toast.error(getServiceErrorMessage(error, "Não foi possível carregar o perfil do aluno."));
+      }
     }
 
-    const student: Student = await response.json();
-    const classGroups = await Promise.all(
-      student.classGroupIds.map(async (classGroupId): Promise<ClassGroup> => {
-        const classGroupResponse = await fetch(
-          `http://localhost:8080/api/turma/${classGroupId}`
-        );
+    void loadStudent();
+  }, [alunoId]);
 
-        if (!classGroupResponse.ok) {
-          throw new Error(`Falha ao buscar a turma: ${classGroupId}`);
-        }
+  if (!student) return <LayoutDesktop><p className="p-8 text-center text-gray-500">Carregando aluno...</p></LayoutDesktop>;
 
-        return classGroupResponse.json();
-      })
-    );
+  return (
+    <LayoutDesktop>
+      <div className="mx-auto max-w-7xl space-y-6 p-8">
+        <Link href={`/turmas/${id}`}><Button variant="secondary">Voltar</Button></Link>
 
-    return (
-      <LayoutDesktop>
-        <div className="max-w-7xl mx-auto p-8 space-y-6">
-          <Link href={`/turmas/${id}`}>
-            <Button>← Voltar</Button>
-          </Link>
-
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-8 mt-5">
-            <h1 className="text-3xl font-bold mb-8">Perfil do Aluno</h1>
-
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <p className="text-sm text-gray-500">ID do aluno</p>
-                <p className="text-lg font-semibold">{student.id}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Nome</p>
-                <p className="text-lg font-semibold">{student.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Número do crachá</p>
-                <p className="text-lg font-semibold">{student.numberCard}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">E-mail</p>
-                <p className="text-lg font-semibold">{student.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Cargo</p>
-                <p className="text-lg font-semibold">{student.role}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Status</p>
-                <LabelWithCircle
-                  status={student.enabled ? "positive" : "negative"}
-                  text={student.enabled ? "Ativo" : "Inativo"}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-8">
-            <h2 className="text-2xl font-semibold mb-5">Turmas</h2>
-            <div className="flex flex-wrap gap-3">
-              {classGroups.map((group) => (
-                <Link
-                  key={group.id}
-                  href={`/turmas/${group.id}`}
-                  className="rounded-lg bg-weg-blue px-4 py-2 text-white"
-                >
-                  {group.acronym}
-                </Link>
-              ))}
-            </div>
+        <div className="mt-5 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <h1 className="mb-8 text-3xl font-bold">Perfil do aluno</h1>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <Detail label="Nome">{student.name}</Detail>
+            <Detail label="Número do crachá">{student.numberCard}</Detail>
+            <Detail label="E-mail">{student.email}</Detail>
+            <Detail label="Cargo">{student.role}</Detail>
+            <Detail label="Status"><LabelWithCircle status={student.enabled ? "positive" : "negative"} text={student.enabled ? "Ativo" : "Inativo"} /></Detail>
           </div>
         </div>
-      </LayoutDesktop>
-    );
-  } catch (error) {
-    console.error("Erro ao carregar o perfil do aluno:", error);
-    return null;
-  }
+
+        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <h2 className="mb-5 text-2xl font-semibold">Turmas</h2>
+          <div className="flex flex-wrap gap-3">
+            {classGroups.map((group) => <Link key={group.id} href={`/turmas/${group.id}`} className="rounded-lg bg-weg-blue px-4 py-2 text-white">{group.acronym}</Link>)}
+          </div>
+        </div>
+      </div>
+    </LayoutDesktop>
+  );
+}
+
+function Detail({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div><p className="text-sm text-gray-500">{label}</p><div className="text-lg font-semibold">{children}</div></div>;
 }
