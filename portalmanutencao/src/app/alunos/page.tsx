@@ -1,22 +1,37 @@
-"use client";
+import Link from "next/link";
 
-import { useEffect, useState } from "react";
+import Button from "@/components/atoms/Button";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { StudentTable } from "@/components/organisms/StudentTable";
-import type { Student } from "@/lib/api/types";
-import { studentService } from "@/services/studentService";
-import { getServiceErrorMessage } from "@/services/httpService";
+
+const students = [
+  {
+    id: 1,
+    name: "Carlos Henrique",
+    email: "carlos@weg.com",
+    numberCard: "123456",
+    enabled: true,
+    classGroups: ["ES01", "ADS02"],
+  },
+  {
+    id: 2,
+    name: "Ana Paula",
+    email: "ana@weg.com",
+    numberCard: "456321",
+    enabled: true,
+    classGroups: ["ES01"],
+  },
+  {
+    id: 3,
+    name: "Pedro Lucas",
+    email: "pedro@weg.com",
+    numberCard: "987654",
+    enabled: false,
+    classGroups: ["ADS02"],
+  },
+];
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    studentService.list().then(setStudents).catch((requestError) => {
-      setError(getServiceErrorMessage(requestError, "Falha ao carregar alunos."));
-    });
-  }, []);
-
   return (
     <LayoutDesktop>
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
@@ -37,11 +52,7 @@ export default function StudentsPage() {
     
         </div>
 
-        {error ? (
-          <p className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>
-        ) : (
-          <StudentTable students={students} />
-        )}
+        <StudentTable students={students} />
 
       </div>
     </LayoutDesktop>

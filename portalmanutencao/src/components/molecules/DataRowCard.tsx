@@ -2,12 +2,14 @@ import { DataRowCardProps } from "@/props/DataRowCardProps";
 
 export function DataRowCard({ children, actions }: DataRowCardProps) {
   return (
-    <div className="ui-surface flex w-full flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 items-center gap-6">
+    <div className="flex items-center justify-between py-5 px-6 w-340 max-w-7xl bg-weg-card-white rounded-lg shadow-md ">
+      
+      <div className="flex items-center gap-10">
         {children}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      
+      <div className="flex items-center gap-5">
         {actions}
       </div>
     </div>

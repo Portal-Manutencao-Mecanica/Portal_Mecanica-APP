@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
@@ -9,9 +9,36 @@ import SearchInput from "@/components/atoms/Input";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import { DataRowCard } from "@/components/molecules/DataRowCard";
 import { LabelStatus } from "../../props/LabelProps";
-import type { Buy } from "@/lib/api/types";
-import { buyService } from "@/services/buyService";
-import { getServiceErrorMessage } from '@/services/httpService';
+
+const buys = [
+  {
+    id: "1",
+    numberCard: "COMP-0001",
+    createdBy: "João Silva",
+    classGroup: "TIIN 2025/1",
+    createdAt: "24/07/2026",
+    totalItems: 4,
+    status: "NAO_VISUALIZADO",
+  },
+  {
+    id: "2",
+    numberCard: "COMP-0002",
+    createdBy: "Maria Souza",
+    classGroup: "TIIN 2025/2",
+    createdAt: "23/07/2026",
+    totalItems: 2,
+    status: "APROVADO",
+  },
+  {
+    id: "3",
+    numberCard: "COMP-0003",
+    createdBy: "Carlos Henrique",
+    classGroup: "TIIN 2025/1",
+    createdAt: "22/07/2026",
+    totalItems: 6,
+    status: "REPROVADO",
+  },
+];
 
 function getStatus(status: string): {
   text: string;
@@ -53,26 +80,16 @@ function getStatus(status: string): {
 export default function BuyPage() {
   const [search, setSearch] = useState("");
   const [buys, setBuys] = useState<Buy[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    buyService.list()
-      .then(setBuys)
-      .catch((requestError: unknown) => {
-        setError(getServiceErrorMessage(
-          requestError,
-          'Falha ao carregar solicita\u00e7\u00f5es de compra.',
-        ));
-      })
-      .finally(() => setIsLoading(false));
+    buyService.list().then(setBuys).catch(() => setBuys([]));
   }, []);
 
   const filteredBuys = buys.filter(
     (buy) =>
-      buy.id.toLowerCase().includes(search.toLowerCase()) ||
-      buy.createdByName.toLowerCase().includes(search.toLowerCase()) ||
-      buy.classGroupAcronym.toLowerCase().includes(search.toLowerCase()),
+      buy.numberCard.toLowerCase().includes(search.toLowerCase()) ||
+      buy.createdBy.toLowerCase().includes(search.toLowerCase()) ||
+      buy.classGroup.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -116,27 +133,26 @@ export default function BuyPage() {
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold">{buy.id}</h2>
+                    <h2 className="text-lg font-semibold">{buy.numberCard}</h2>
 
                     <LabelWithCircle status={label.status} text={label.text} />
                   </div>
 
                   <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600">
                     <p>
-                      <strong>Professor:</strong> {buy.createdByName}
+                      <strong>Professor:</strong> {buy.createdBy}
                     </p>
 
                     <p>
-                      <strong>Turma:</strong> {buy.classGroupAcronym}
+                      <strong>Turma:</strong> {buy.classGroup}
                     </p>
 
                     <p>
-                      <strong>Data:</strong>{" "}
-                      {new Intl.DateTimeFormat("pt-BR").format(new Date(buy.createdAt))}
+                      <strong>Data:</strong> {buy.createdAt}
                     </p>
 
                     <p>
-                      <strong>Itens:</strong> {buy.items.length}
+                      <strong>Itens:</strong> {buy.totalItems}
                     </p>
                   </div>
                 </div>
