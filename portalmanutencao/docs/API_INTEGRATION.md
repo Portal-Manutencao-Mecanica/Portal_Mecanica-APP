@@ -35,31 +35,26 @@ MAINTENANCE_API_URL=http://localhost:8080/api
 Para desenvolvimento local, copie o arquivo para `.env.local` e altere o valor
 caso a API esteja em outro endereço. A URL deve incluir o contexto `/api`.
 
-### Usuário de teste em desenvolvimento
+### Usuários de teste em desenvolvimento
 
-A API não permite definir manualmente a senha de usuários comuns criados por
-`POST /users`; ela gera credenciais temporárias aleatórias. Por isso, o acesso
-de teste usa o seed oficial de administrador do perfil `dev`.
+A migration Flyway `V3__seed_test_users_for_all_roles.sql` da API cria uma
+conta para cada perfil quando `seed_test_users` está habilitado. O perfil
+Spring `dev` já define esse placeholder como `true`.
 
-Na configuração da API Spring Boot, use:
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador | `admin@teste.local` | `Senha@123` |
+| Coordenador | `coordenador@teste.local` | `Senha@123` |
+| Professor | `professor@teste.local` | `Senha@123` |
+| Aluno | `aluno@teste.local` | `Senha@123` |
+
+O endpoint `POST /api/auth/login` exige um e-mail válido; usernames não são
+aceitos pelo DTO atual. As contas são destinadas somente a desenvolvimento e
+homologação. Em outro perfil da API, é necessário habilitar explicitamente:
 
 ```env
-SPRING_PROFILES_ACTIVE=dev
-DEV_ADMIN_PASSWORD=user123@
+SEED_TEST_USERS=true
 ```
-
-Ao iniciar a API, ela cria:
-
-```text
-E-mail real na API: admin@local.com
-Usuário curto no frontend: user
-Senha: user123@
-```
-
-Em desenvolvimento, `authService` converte o identificador curto `user` para
-`admin@local.com` antes de chamar o endpoint real de login. Esse alias é
-desabilitado automaticamente no build de produção. A senha nunca fica gravada
-no frontend; ela precisa ser configurada no processo da API.
 
 ## 3. Dependência adicionada
 
@@ -105,11 +100,15 @@ e o envia como Bearer token para a API.
 
 Disponibiliza:
 
-- `list()` para `GET /api/notification`;
+- `list()` para `GET /api/notification`, extraindo `content` da resposta
+  paginada do Spring Data;
+- `getById(id)` para `GET /api/notification/{id}`;
+- `unreadCount()` para `GET /api/notification/unread-count`;
 - `markAllAsRead()` para `PATCH /api/notification/read-all`;
+- `markAsRead(id)` para `PATCH /api/notification/{id}/read`;
 - `toggleRead(id)` para
-  `PATCH /api/notification/{id}/toggle-read`, preparado para as telas de
-  detalhe.
+  `PATCH /api/notification/{id}/toggle-read`;
+- `delete(id)` para `DELETE /api/notification/{id}`.
 
 ### `src/services/upstreamApiService.ts`
 
@@ -271,10 +270,17 @@ Proxy autenticado para os services do navegador:
 `src/app/notificacoes/page.tsx`:
 
 - removeu toda a lista mock;
-- carrega notificações reais;
+- carrega notificações reais a partir de `content` da página devolvida pela API;
 - exibe loading e erros;
 - implementa “marcar todas como lidas”;
 - usa atualização otimista e restaura os dados se a API rejeitar a operação.
+
+`src/app/notificacoes/[id]/page.tsx`:
+
+- removeu a notificação fixa;
+- carrega o registro real pelo UUID da rota;
+- alterna o estado lida/não lida no backend;
+- apresenta estados de carregamento e erro sem alterar o componente visual.
 
 `src/components/organisms/Header.tsx`:
 
@@ -516,8 +522,12 @@ arquivos de `src/services`.
 | Listar turmas | GET | `/api/turma` |
 | Detalhar turma | GET | `/api/turma/{id}` |
 | Listar notificações | GET | `/api/notification` |
+| Detalhar notificação | GET | `/api/notification/{id}` |
+| Contar não lidas | GET | `/api/notification/unread-count` |
 | Marcar todas como lidas | PATCH | `/api/notification/read-all` |
+| Marcar como lida | PATCH | `/api/notification/{id}/read` |
 | Alternar leitura | PATCH | `/api/notification/{id}/toggle-read` |
+| Excluir notificação | DELETE | `/api/notification/{id}` |
 | Listar alunos | GET | `/api/alunos` |
 | Listar equipamentos | GET | `/api/equipamento` |
 | Criar equipamento | POST | `/api/equipamento` |
