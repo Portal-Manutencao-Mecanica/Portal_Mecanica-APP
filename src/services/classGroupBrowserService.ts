@@ -1,4 +1,4 @@
-import type { ClassGroup, Page } from "@/lib/api/types";
+import type { ClassGroup, CreateClassGroup, Page } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const classGroupBrowserService = {
@@ -8,6 +8,10 @@ export const classGroupBrowserService = {
   },
   async getById(id: string) {
     const { data } = await browserApi.get<ClassGroup>(`/turma/${encodeURIComponent(id)}`);
+    return data;
+  },
+  async create(classGroup: CreateClassGroup) {
+    const { data } = await browserApi.post<ClassGroup>("/turma", classGroup);
     return data;
   },
   async updateAcronym(id: string, acronym: string) {
