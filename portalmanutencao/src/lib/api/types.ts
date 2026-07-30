@@ -14,6 +14,11 @@ export interface UserProfile {
   status: string;
   passwordChangeRequired: boolean;
   organization: OrganizationSummary | null;
+  numberCard: string;
+  enabled: boolean;
+  accountNonLocked: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LoginResponse {
