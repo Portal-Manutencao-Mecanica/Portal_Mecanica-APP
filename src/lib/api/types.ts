@@ -85,11 +85,24 @@ export interface Machine {
   id: string;
   name: string;
   patrimony: string;
-  condition: "ATIVA" | "MANUTENCAO" | "INATIVA";
+  condition: "CONFORME" | "NAO_CONFORME";
   tag: string;
   placeId: string;
   placeName: string;
   createdAt: string;
+}
+
+export interface Place {
+  id: string;
+  name: string;
+}
+
+export interface CreateMachine {
+  name: string;
+  patrimony: string;
+  condition: Machine["condition"];
+  tag?: string;
+  placeId: string;
 }
 
 export interface Buy {
