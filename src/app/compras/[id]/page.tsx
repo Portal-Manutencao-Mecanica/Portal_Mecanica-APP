@@ -1,0 +1,10 @@
+"use client";
+import { use, useEffect, useState } from "react";
+import Link from "next/link";
+import { toast } from "sonner";
+import Button from "@/components/atoms/Button";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import type { Buy } from "@/lib/api/types";
+import { buyService } from "@/services/buyService";
+import { getServiceErrorMessage } from "@/services/httpService";
+export default function BuyDetailsPage({params}:{params:Promise<{id:string}>}){const {id}=use(params);const [buy,setBuy]=useState<Buy|null>(null);useEffect(()=>{buyService.getById(id).then(setBuy).catch((e)=>toast.error(getServiceErrorMessage(e,"Não foi possível carregar a solicitação.")));},[id]);if(!buy)return <LayoutDesktop><p className="p-8 text-center text-gray-500">Carregando solicitação...</p></LayoutDesktop>;return <LayoutDesktop><div className="mx-auto max-w-6xl space-y-6 p-6"><div className="flex justify-between"><div><h1 className="text-3xl font-bold">Solicitação de compra</h1><p className="text-gray-500">{buy.classGroupAcronym} · {buy.createdByName}</p></div><Link href="/compras"><Button variant="secondary">Voltar</Button></Link></div><section className="rounded-xl border bg-white p-6"><h2 className="font-semibold">Justificativa</h2><p className="mt-2 text-gray-600">{buy.purchaseJustification}</p></section><section className="rounded-xl border bg-white p-6"><h2 className="mb-4 font-semibold">Itens solicitados</h2><div className="space-y-3">{buy.items.map((item)=><div key={item.id} className="grid gap-2 rounded-lg bg-gray-50 p-4 md:grid-cols-4"><span className="font-medium">{item.equipmentName}</span><span>Quantidade: {item.quantity}</span><span>SAP: {item.sap||"Não informado"}</span><span>{item.technicalSpecification}</span></div>)}</div></section></div></LayoutDesktop>}
