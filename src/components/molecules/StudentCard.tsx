@@ -5,8 +5,8 @@ import Link from "next/link";
 import Button from "../atoms/Button";
 
 interface StudentCardProps {
-  classGroupId: number;
-  studentId: number;
+  classGroupId: string;
+  studentId: string;
   name: string;
 }
 
