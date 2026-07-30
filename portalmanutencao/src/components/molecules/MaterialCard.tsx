@@ -12,7 +12,7 @@ export default function MaterialCard({
     title,
 }: MaterialCardProps) {
     return (
-        <Link href={`/complementar-material/${id}`}>
+        <Link href={`/material-complementar/${id}`}>
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer">
 
                 <div className="flex h-56 items-center justify-center bg-gray-100">
