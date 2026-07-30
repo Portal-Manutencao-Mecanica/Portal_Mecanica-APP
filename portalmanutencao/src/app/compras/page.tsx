@@ -79,6 +79,11 @@ function getStatus(status: string): {
 
 export default function BuyPage() {
   const [search, setSearch] = useState("");
+  const [buys, setBuys] = useState<Buy[]>([]);
+
+  useEffect(() => {
+    buyService.list().then(setBuys).catch(() => setBuys([]));
+  }, []);
 
   const filteredBuys = buys.filter(
     (buy) =>
@@ -107,7 +112,14 @@ export default function BuyPage() {
         />
 
         <div className="space-y-4">
-          {filteredBuys.map((buy) => {
+          {isLoading && <p className='text-gray-500'>Carregando solicita&ccedil;&otilde;es...</p>}
+          {error && <p role='alert' className='rounded-lg bg-red-50 p-4 text-red-700'>{error}</p>}
+          {!isLoading && !error && filteredBuys.length === 0 && (
+            <p className='rounded-lg border border-gray-200 bg-white p-6 text-gray-600'>
+              Nenhuma solicita&ccedil;&atilde;o de compra encontrada.
+            </p>
+          )}
+          {!isLoading && !error && filteredBuys.map((buy) => {
             const label = getStatus(buy.status);
 
             return (
