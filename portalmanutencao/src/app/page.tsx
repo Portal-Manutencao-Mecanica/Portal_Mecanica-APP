@@ -1,4 +1,4 @@
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { redirect } from 'next/navigation';
 
 export default function Home() {
     return (

@@ -28,6 +28,21 @@ const equipments: EquipmentProps[] = [
 
 export default function EquipmentsPage() {
   const [search, setSearch] = useState("");
+<<<<<<< HEAD
+  const [equipments, setEquipments] = useState<Equipment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    equipmentService.list()
+      .then(setEquipments)
+      .catch((requestError: unknown) => {
+        setError(getServiceErrorMessage(requestError, "Falha ao carregar equipamentos."));
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+=======
+>>>>>>> origin/develop
 
   const filteredEquipments = equipments.filter(
     (equipment) =>
@@ -59,7 +74,18 @@ export default function EquipmentsPage() {
         />
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+<<<<<<< HEAD
+          {isLoading && <p className='text-gray-500'>Carregando equipamentos...</p>}
+          {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
+          {!isLoading && !error && filteredEquipments.length === 0 && (
+            <p className='rounded-lg border border-gray-200 bg-white p-6 text-gray-600'>
+              Nenhum equipamento encontrado.
+            </p>
+          )}
+          {!isLoading && !error && filteredEquipments.map((equipment) => (
+=======
           {filteredEquipments.map((equipment) => (
+>>>>>>> origin/develop
             <EquipmentCard
               key={equipment.id}
               equipment={equipment}
