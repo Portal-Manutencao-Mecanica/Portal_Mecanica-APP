@@ -1,10 +1,13 @@
-import type { Machine } from "@/lib/api/types";
-import { browserApi } from "./httpService";
+import { getCollectionItems } from '@/lib/api/collections';
+import type { Machine } from '@/lib/api/types';
+import { browserApi } from './httpService';
 
 export const machineService = {
   async list() {
-    const { data } = await browserApi.get<Machine[]>("/maquinas");
-    return data;
+    const { data } = await browserApi.get<unknown>('/maquinas', {
+      params: { page: 0, size: 100 },
+    });
+    return getCollectionItems<Machine>(data, 'm\u00e1quinas');
   },
 
   async getById(id: string) {
@@ -17,17 +20,17 @@ export const machineService = {
   async create(machine: {
     name: string;
     patrimony: string;
-    condition: Machine["condition"];
+    condition: Machine['condition'];
     tag: string;
     placeId: string;
   }) {
-    const { data } = await browserApi.post<Machine>("/maquinas", machine);
+    const { data } = await browserApi.post<Machine>('/maquinas', machine);
     return data;
   },
 
   async update(
     id: string,
-    machine: Pick<Machine, "name" | "patrimony" | "condition" | "tag">,
+    machine: Pick<Machine, 'name' | 'patrimony' | 'condition' | 'tag'>,
   ) {
     const { data } = await browserApi.patch<Machine>(
       `/maquinas/${encodeURIComponent(id)}`,

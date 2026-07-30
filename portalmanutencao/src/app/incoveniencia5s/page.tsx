@@ -11,6 +11,7 @@ import { DataRowCard } from "@/components/molecules/DataRowCard";
 import { LabelStatus } from "@/types/LabelStatus";
 import type { Inconvenience5S } from "@/lib/api/types";
 import { inconvenienceService } from "@/services/inconvenienceService";
+import { getServiceErrorMessage } from '@/services/httpService';
 
 function getStatus(status: string): {
   text: string;
@@ -46,9 +47,19 @@ function getStatus(status: string): {
 export default function InconveniencePage() {
   const [search, setSearch] = useState("");
   const [inconveniences, setInconveniences] = useState<Inconvenience5S[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    inconvenienceService.list().then(setInconveniences).catch(() => setInconveniences([]));
+    inconvenienceService.list()
+      .then(setInconveniences)
+      .catch((requestError: unknown) => {
+        setError(getServiceErrorMessage(
+          requestError,
+          'Falha ao carregar inconveni\u00eancias 5S.',
+        ));
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filteredInconveniences = inconveniences.filter(
@@ -83,7 +94,14 @@ export default function InconveniencePage() {
         />
 
         <div className="space-y-4">
-          {filteredInconveniences.map((item) => {
+          {isLoading && <p className='text-gray-500'>Carregando inconveni&ecirc;ncias...</p>}
+          {error && <p role='alert' className='rounded-lg bg-red-50 p-4 text-red-700'>{error}</p>}
+          {!isLoading && !error && filteredInconveniences.length === 0 && (
+            <p className='rounded-lg border border-gray-200 bg-white p-6 text-gray-600'>
+              Nenhuma inconveni&ecirc;ncia 5S encontrada.
+            </p>
+          )}
+          {!isLoading && !error && filteredInconveniences.map((item) => {
             const label = getStatus(item.status);
 
             return (

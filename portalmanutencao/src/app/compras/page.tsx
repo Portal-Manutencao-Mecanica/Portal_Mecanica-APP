@@ -11,6 +11,7 @@ import { DataRowCard } from "@/components/molecules/DataRowCard";
 import { LabelStatus } from "../../props/LabelProps";
 import type { Buy } from "@/lib/api/types";
 import { buyService } from "@/services/buyService";
+import { getServiceErrorMessage } from '@/services/httpService';
 
 function getStatus(status: string): {
   text: string;
@@ -52,9 +53,19 @@ function getStatus(status: string): {
 export default function BuyPage() {
   const [search, setSearch] = useState("");
   const [buys, setBuys] = useState<Buy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    buyService.list().then(setBuys).catch(() => setBuys([]));
+    buyService.list()
+      .then(setBuys)
+      .catch((requestError: unknown) => {
+        setError(getServiceErrorMessage(
+          requestError,
+          'Falha ao carregar solicita\u00e7\u00f5es de compra.',
+        ));
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filteredBuys = buys.filter(
@@ -84,7 +95,14 @@ export default function BuyPage() {
         />
 
         <div className="space-y-4">
-          {filteredBuys.map((buy) => {
+          {isLoading && <p className='text-gray-500'>Carregando solicita&ccedil;&otilde;es...</p>}
+          {error && <p role='alert' className='rounded-lg bg-red-50 p-4 text-red-700'>{error}</p>}
+          {!isLoading && !error && filteredBuys.length === 0 && (
+            <p className='rounded-lg border border-gray-200 bg-white p-6 text-gray-600'>
+              Nenhuma solicita&ccedil;&atilde;o de compra encontrada.
+            </p>
+          )}
+          {!isLoading && !error && filteredBuys.map((buy) => {
             const label = getStatus(buy.status);
 
             return (
