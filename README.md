@@ -1,189 +1,36 @@
-﻿# Portal_Mecanica-APP
-# Guia de GitFlow - Portal Mecânica
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Fluxo de trabalho do projeto
+## Getting Started
 
-Todas as alterações devem seguir o fluxo abaixo:
+First, run the development server:
 
-``` text
-develop
-   ↓
-feature/minha-feature
-   ↓
-Pull Request
-   ↓
-develop
-   ↓
-Pull Request
-   ↓
-main
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-**Nunca faça commits diretamente na `main` ou na `develop`.**
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-------------------------------------------------------------------------
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## 1. Atualizar a branch develop
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Antes de iniciar qualquer tarefa:
+## Learn More
 
-``` bash
-git checkout develop
-git pull origin develop
-```
+To learn more about Next.js, take a look at the following resources:
 
-Isso garante que você possui a versão mais recente do projeto.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-------------------------------------------------------------------------
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## 2. Criar uma branch para sua funcionalidade
+## Deploy on Vercel
 
-Crie uma branch a partir da `develop`:
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-``` bash
-git checkout -b feature/nome-da-feature
-```
-
-Exemplos:
-
-``` bash
-git checkout -b feature/login
-git checkout -b feature/cadastro-usuario
-git checkout -b feature/dashboard
-git checkout -b feature/ordem-servico
-```
-
-Envie a branch para o GitHub:
-
-``` bash
-git push -u origin feature/login
-```
-
-------------------------------------------------------------------------
-
-## 3. Trabalhar normalmente
-
-Faça suas alterações no projeto.
-
-Verifique os arquivos alterados:
-
-``` bash
-git status
-```
-
-Adicione os arquivos:
-
-``` bash
-git add .
-```
-
-------------------------------------------------------------------------
-
-## 4. Convenção de commits
-
-Todos os commits devem seguir o padrão:
-
-``` text
-tipo(escopo): descrição
-```
-
-### Tipos permitidos
-
-  Tipo       Utilização
-  ---------- --------------------------------------------
-  feat       Nova funcionalidade
-  fix        Correção de bug
-  refactor   Refatoração sem alteração de comportamento
-  docs       Documentação
-  style      Formatação
-  test       Testes
-  chore      Configurações e dependências
-
-### Exemplos
-
-``` bash
-git commit -m "feat(auth): adiciona autenticação JWT"
-git commit -m "feat(user): implementa cadastro de usuários"
-git commit -m "fix(login): corrige validação de senha"
-git commit -m "docs(readme): atualiza instruções de instalação"
-git commit -m "refactor(service): reorganiza camada de serviços"
-git commit -m "chore(deps): atualiza dependências"
-```
-
-------------------------------------------------------------------------
-
-## 5. Enviar alterações
-
-Envie os commits para sua branch:
-
-``` bash
-git push
-```
-
-ou
-
-``` bash
-git push origin feature/login
-```
-
-------------------------------------------------------------------------
-
-## 6. Abrir Pull Request
-
-No GitHub:
-
--   Base branch: `develop`
--   Compare branch: `feature/sua-feature`
-
-Exemplo:
-
-``` text
-feature/login
-      ↓
-develop
-```
-
-------------------------------------------------------------------------
-
-## 7. Revisão técnica
-
-O Pull Request será revisado pelo responsável técnico.
-
-O PR poderá ser:
-
--   Aprovado e mergeado;
--   Retornado para ajustes;
--   Solicitado para correções adicionais.
-
-------------------------------------------------------------------------
-
-## Regras do projeto
-
--   Nunca trabalhar diretamente na `main`;
--   Nunca trabalhar diretamente na `develop`;
--   Sempre criar uma `feature/*`;
--   Todo código deve passar por Pull Request;
--   Todo Pull Request precisa de aprovação antes do merge;
--   Após o merge, a branch da feature pode ser removida.
-
-------------------------------------------------------------------------
-
-## Exemplo completo
-
-``` bash
-git checkout develop
-git pull origin develop
-
-git checkout -b feature/login
-
-git add .
-git commit -m "feat(auth): adiciona autenticação JWT"
-
-git push -u origin feature/login
-```
-
-Depois disso:
-
-``` text
-feature/login -> Pull Request -> develop
-```
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
