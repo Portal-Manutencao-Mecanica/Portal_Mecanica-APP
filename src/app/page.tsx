@@ -26,6 +26,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
+import { useAuth } from "@/hooks/useAuth";
 
 interface OcorrenciaHome {
   id: string;
@@ -38,6 +39,7 @@ interface OcorrenciaHome {
 }
 
 export default function Home() {
+  const { user } = useAuth();
   // 1. Estatísticas Rápidas
   const stats: StatCardProps[] = [
     { label: "Máquinas Operacionais", value: "18/20", icon: CheckCircle2 },
@@ -131,7 +133,7 @@ export default function Home() {
         {/* ================= CABEÇALHO LISINHO (SEM CARD/BACKGROUND) ================= */}
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold text-gray-800">
-            Bem-vindo de volta, Alexander! 👋
+            Bem-vindo de volta, {user?.name}! 👋
           </h1>
           <p className="text-sm text-gray-500">
             Aqui está o resumo geral das operações e manutenções da oficina hoje.

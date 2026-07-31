@@ -3,29 +3,25 @@ import axios from "axios";
 import type { ApiErrorPayload } from "@/lib/api/types";
 
 export const browserApi = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "/api",
   timeout: 15_000,
 });
 
 export const authApi = axios.create({
-  baseURL: "http://localhost:8080/api/auth",
+  baseURL: "/api/auth",
   timeout: 15_000,
 });
 
-browserApi.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const accessToken = localStorage.getItem("@App:accessToken");
-    if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+browserApi.interceptors.response.use(undefined, (error) => {
+  if (
+    typeof window !== "undefined" &&
+    axios.isAxiosError(error) &&
+    error.response?.status === 401
+  ) {
+    window.dispatchEvent(new Event("maintenance:unauthorized"));
   }
-  return config;
-});
 
-authApi.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const accessToken = localStorage.getItem("@App:accessToken");
-    if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  return config;
+  return Promise.reject(error);
 });
 
 export function getServiceErrorMessage(
