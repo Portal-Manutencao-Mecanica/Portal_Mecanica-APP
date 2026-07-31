@@ -25,7 +25,7 @@ const loginSchema = v.object({
   password: v.pipe(v.string(), v.minLength(1, "Informe sua senha.")),
 });
 
-export default function LoginForm() {
+export function LoginForm() {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -47,11 +47,10 @@ export default function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     const result = v.safeParse(loginSchema, { email, password });
 
     if (!result.success) {
-      toast.error(result.issues[0]?.message ?? "Verifique os dados informados.");
+      toast.error(result.issues[0]?.message ?? "Revise os dados de acesso.");
       return;
     }
 
@@ -74,12 +73,7 @@ export default function LoginForm() {
       }
       router.refresh();
     } catch (error) {
-      toast.error(
-        getServiceErrorMessage(
-          error,
-          "E-mail ou senha incorretos. Verifique suas credenciais."
-        )
-      );
+      toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail e senha."));
     } finally {
       setLoading(false);
     }
@@ -123,7 +117,7 @@ export default function LoginForm() {
                   setEmail(testUser.email);
                   setPassword(TEST_PASSWORD);
                 }}
-                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium transition-colors hover:bg-blue-100"
+                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium text-[#00579D] transition-colors hover:bg-blue-100"
               >
                 {testUser.label}
               </button>
@@ -139,7 +133,7 @@ export default function LoginForm() {
       <div className="flex items-center justify-start pt-1">
         <Link
           href="/login/forgot-password"
-          className="text-xs font-semibold bg-weg-blue hover:underline transition-all"
+          className="text-xs font-semibold text-[#00579D] hover:underline transition-all"
         >
           Esqueceu sua senha?
         </Link>
