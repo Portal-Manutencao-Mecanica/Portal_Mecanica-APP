@@ -1,5 +1,5 @@
 export interface CircleLabelProps{
     color : string,
-    height : string, 
+    height : string,
     width : string
 }

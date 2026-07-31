@@ -1,6 +1,6 @@
 import Button from "@/components/atoms/Button";
-import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import { NotificationDetailProps } from "@/props/NotificationDetailProps";
+import LabelWithCircle from "../molecules/LabelWithCircle";
 
 export default function NotificationDetailSection({
   notification,
@@ -19,17 +19,9 @@ export default function NotificationDetailSection({
         {/* Status com LabelWithCircle e Botão Dinâmico */}
         <div className="flex items-center gap-3">
           {notification.statusRead ? (
-            <LabelWithCircle
-              status="positive"
-              text="Lida"
-              size="sm"
-            />
+            <LabelWithCircle status="positive" text="Lida" />
           ) : (
-            <LabelWithCircle
-              status="negative"
-              text="Não lida"
-              size="sm"
-            />
+            <LabelWithCircle status="negative" text="Não lida" />
           )}
 
           {onMarkAsRead && (

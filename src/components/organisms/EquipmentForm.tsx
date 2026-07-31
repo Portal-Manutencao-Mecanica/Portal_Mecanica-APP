@@ -99,43 +99,43 @@ export default function EquipmentForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Input 
-          id="name" 
-          label="Nome do equipamento *" 
-          value={name} 
-          onChange={(event) => setName(event.target.value)} 
-          placeholder="Ex.: Motor WEG 2CV" 
-          required 
+        <Input
+          id="name"
+          label="Nome do equipamento *"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Ex.: Motor WEG 2CV"
+          required
         />
-        
-        <Input 
-          id="sap" 
-          label="Código SAP" 
-          value={sap} 
-          onChange={(event) => setSap(event.target.value)} 
-          placeholder="Ex.: 123456" 
+
+        <Input
+          id="sap"
+          label="Código SAP"
+          value={sap}
+          onChange={(event) => setSap(event.target.value)}
+          placeholder="Ex.: 123456"
         />
-        
-        <Input 
-          id="unitPrice" 
-          label="Preço unitário *" 
-          type="text" 
-          inputMode="decimal" 
-          value={unitPrice} 
-          onChange={(event) => setUnitPrice(event.target.value)} 
-          placeholder="Ex.: 199,90" 
-          required 
+
+        <Input
+          id="unitPrice"
+          label="Preço unitário *"
+          type="text"
+          inputMode="decimal"
+          value={unitPrice}
+          onChange={(event) => setUnitPrice(event.target.value)}
+          placeholder="Ex.: 199,90"
+          required
         />
-        
-        <Input 
-          id="availableQuantity" 
-          label="Quantidade disponível *" 
-          type="text" 
-          inputMode="numeric" 
-          value={availableQuantity} 
-          onChange={(event) => setAvailableQuantity(event.target.value)} 
-          placeholder="Ex.: 10" 
-          required 
+
+        <Input
+          id="availableQuantity"
+          label="Quantidade disponível *"
+          type="text"
+          inputMode="numeric"
+          value={availableQuantity}
+          onChange={(event) => setAvailableQuantity(event.target.value)}
+          placeholder="Ex.: 10"
+          required
         />
 
         {/* 3. Componente de Upload ocupando 2 colunas para melhor usabilidade */}
@@ -143,11 +143,11 @@ export default function EquipmentForm({
           <label className="block text-sm font-medium text-gray-700">
             Imagem do Equipamento
           </label>
-          <UploadedFile64 
+          <UploadedFile64
             onChange={(base64List) => {
               // Pega a primeira imagem convertida em Base64 enviada pelo componente
               setMedia(base64List[0] || "");
-            }} 
+            }}
           />
         </div>
       </div>
