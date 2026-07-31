@@ -48,6 +48,7 @@ export interface Notification {
 
 export interface ClassGroupPerson {
   id: string;
+  numberCard: string;
   name: string;
   email: string;
 }
