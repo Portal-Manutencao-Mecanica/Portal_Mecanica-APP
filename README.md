@@ -1,5 +1,32 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Integração com a API
+
+O frontend usa a API
+[`Manutencao-API`](https://github.com/Portal-Manutencao-Mecanica/Manutencao-API)
+por meio de rotas server-side do Next.js. Os tokens de acesso e renovação ficam em
+cookies `httpOnly`; eles não são expostos ao JavaScript do navegador.
+
+Copie `.env.example` para `.env.local` caso a API não esteja disponível em
+`http://127.0.0.1:8080/api`:
+
+```env
+MAINTENANCE_API_URL=http://127.0.0.1:8080/api
+```
+
+No perfil `dev`, o Flyway da API disponibiliza as contas abaixo. Todas usam a
+senha `Senha@123`:
+
+| Perfil | E-mail |
+| --- | --- |
+| Administrador | `admin@teste.local` |
+| Coordenador | `coordenador@teste.local` |
+| Professor | `professor@teste.local` |
+| Aluno | `aluno@teste.local` |
+
+Durante o desenvolvimento, a tela de login oferece atalhos para preencher essas
+credenciais.
+
 ## Getting Started
 
 First, run the development server:
