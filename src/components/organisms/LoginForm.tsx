@@ -89,20 +89,19 @@ export function LoginForm() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="Digite seu e-mail"
           autoComplete="email"
-          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          className="rounded-xl border-gray-300 focus:border-weg-blue"
           required
         />
         <Input
           label="Senha"
           type="password"
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           placeholder="Digite sua senha"
           autoComplete="current-password"
-          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          className="rounded-xl border-gray-300 focus:border-weg-blue"
           required
         />
-      </div>
 
       {process.env.NODE_ENV === "development" && (
         <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">
@@ -144,7 +143,7 @@ export function LoginForm() {
         type="submit"
         variant="primary"
         disabled={loading || isLoadingSession}
-        className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
+        className="w-full py-3 mt-2 rounded-xl bg-weg-blue hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
       >
         {loading || isLoadingSession ? "Entrando..." : "Entrar"}
       </Button>
