@@ -8,15 +8,24 @@ import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { authService } from "@/services/authService";
-import { getServiceErrorMessage, saveSession } from "@/services/httpService";
+import { getServiceErrorMessage } from "@/services/httpService";
+import { useAuth } from "@/hooks/useAuth";
+
+const TEST_USERS = [
+  { label: "Administrador", email: "admin@teste.local" },
+  { label: "Coordenador", email: "coordenador@teste.local" },
+  { label: "Professor", email: "professor@teste.local" },
+  { label: "Aluno", email: "aluno@teste.local" },
+] as const;
+
+const TEST_PASSWORD = "Senha@123";
 
 const loginSchema = v.object({
   email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
   password: v.pipe(v.string(), v.minLength(1, "Informe sua senha.")),
 });
 
-export default function LoginForm() {
+export function LoginForm() {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -38,17 +47,16 @@ export default function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     const result = v.safeParse(loginSchema, { email, password });
 
     if (!result.success) {
-      toast.error(result.issues[0]?.message ?? "Verifique os dados informados.");
+      toast.error(result.issues[0]?.message ?? "Revise os dados de acesso.");
       return;
     }
 
     setLoading(true);
-
-      saveSession(session);
+    try {
+      const user = await login(result.output);
 
       toast.success("Acesso realizado com sucesso.");
       if (user.passwordChangeRequired) {
@@ -65,41 +73,36 @@ export default function LoginForm() {
       }
       router.refresh();
     } catch (error) {
-      toast.error(
-        getServiceErrorMessage(
-          error,
-          "E-mail ou senha incorretos. Verifique suas credenciais."
-        )
-      );
+      toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail e senha."));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-5">
-      <Input
-        label="E-mail"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Digite seu e-mail"
-        autoComplete="email"
-        className="rounded-xl border-gray-300 focus:border-[#00579D]"
-        required
-      />
-
-      <div className="flex flex-col gap-2">
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <div className="flex flex-col gap-4">
+        <Input
+          label="E-mail"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Digite seu e-mail"
+          autoComplete="email"
+          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          required
+        />
         <Input
           label="Senha"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) => setPassword(event.target.value)}
           placeholder="Digite sua senha"
           autoComplete="current-password"
           className="rounded-xl border-gray-300 focus:border-[#00579D]"
           required
         />
+      </div>
 
       {process.env.NODE_ENV === "development" && (
         <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">

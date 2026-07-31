@@ -68,8 +68,8 @@ export default function MachineForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="border-b pb-2 text-lg font-semibold text-gray-800">Informações da máquina</h2>
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
+      <h2 className=" pb-2 text-lg font-semibold text-gray-800">Informações da máquina</h2>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Field label="Número de patrimônio *" error={errors.patrimony?.message}>

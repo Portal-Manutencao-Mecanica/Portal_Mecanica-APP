@@ -10,7 +10,13 @@ export default function CreateMachinePage() {
     
     return (
         <LayoutDesktop>
-            <MachineForm></MachineForm>
+            <main>
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">
+                        Cadastro de Máquina
+                </h1>
+                <MachineForm/>
+            </main>
+            
         </LayoutDesktop>
     );
 }
