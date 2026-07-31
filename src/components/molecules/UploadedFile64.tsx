@@ -5,12 +5,13 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { FileImage, Trash2, Upload } from "lucide-react";
 import formatBytes from "@/utils/formatBytes";
 
-interface UploadedFileProps {
+interface UploadedFileProps  {
     onChange?: (base64List: string[]) => void;
     error?: string;
+    id? : string
 }
 
-export default function UploadedFile({ onChange, error }: UploadedFileProps) {
+export default function UploadedFile64({ onChange, error }: UploadedFileProps) {
     const {
         files,
         isDragging,
