@@ -110,7 +110,7 @@ export default function UploadCsv({ onChange, error }: UploadedCsvProps) {
                   className="p-1.5 text-gray-400 hover:bg-gray-200 rounded-lg transition-colors"
                   title="Remover arquivo"
                 >
-                  <Trash2 className="w-5 h-5 text-gray-400 cursor-pointer" />
+                  <Trash2 className="w-5  h-5 text-gray-400 cursor-pointer" />
                 </button>
               </div>
 
