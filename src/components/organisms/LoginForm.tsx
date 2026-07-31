@@ -41,7 +41,7 @@ export default function LoginForm() {
       });
 
       toast.success("Login realizado com sucesso!");
-      router.push("/dashboard"); // Altere para a rota inicial pós-login do seu sistema
+      router.push("/dashboard");
     } catch (error) {
       toast.error(
         getServiceErrorMessage(
@@ -79,7 +79,7 @@ export default function LoginForm() {
           required
         />
 
-        {/* Links: Primeiro acesso (esquerda) e Esqueceu a senha (direita) */}
+        {/* Links ajustados conforme design */}
         <div className="flex items-center justify-between text-xs pt-1">
           <Link
             href="/login/first-access"
@@ -88,9 +88,10 @@ export default function LoginForm() {
             Primeiro acesso?
           </Link>
 
+          {/* Esqueceu a senha em cinza */}
           <Link
             href="/login/forgot-password"
-            className="font-semibold text-gray-500 hover:text-[#00579D] hover:underline transition-all"
+            className="text-gray-400 hover:text-gray-600 hover:underline transition-all"
           >
             Esqueceu a senha?
           </Link>

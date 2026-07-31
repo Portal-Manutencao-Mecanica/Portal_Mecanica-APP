@@ -16,8 +16,9 @@ export interface ResetPasswordCredentials {
   password: string;
 }
 
-export interface FirstAccessParams {
+export interface ValidateTemporaryPasswordParams {
   email: string;
+  temporaryPassword: string;
 }
 
 export interface CompleteFirstAccessParams {
@@ -63,8 +64,8 @@ export const authService = {
     return data;
   },
 
-  async requestFirstAccess(payload: FirstAccessParams) {
-    const { data } = await authApi.post<{ message: string }>("/auth/first-access", payload);
+  async validateTemporaryPassword(payload: ValidateTemporaryPasswordParams) {
+    const { data } = await authApi.post<{ valid: boolean }>("/auth/first-access/validate", payload);
     return data;
   },
 

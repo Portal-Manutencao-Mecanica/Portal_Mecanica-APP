@@ -14,35 +14,44 @@ import { getServiceErrorMessage } from "@/services/httpService";
 
 const firstAccessSchema = v.object({
     email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
+    temporaryPassword: v.pipe(v.string(), v.minLength(1, "Informe a senha temporária.")),
 });
 
 export function FirstAccessForm() {
     const router = useRouter();
     const [email, setEmail] = useState("");
+    const [temporaryPassword, setTemporaryPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const result = v.safeParse(firstAccessSchema, { email });
+        const result = v.safeParse(firstAccessSchema, { email, temporaryPassword });
 
         if (!result.success) {
-            toast.error(result.issues[0]?.message ?? "Informe seu e-mail.");
+            toast.error(result.issues[0]?.message ?? "Preencha todos os campos.");
             return;
         }
 
         setLoading(true);
 
         try {
-            await authService.requestFirstAccess({ email: result.output.email });
-            toast.success("Enviamos sua senha temporária para o seu e-mail!");
+            // Valida se a senha temporária fornecida está correta no backend
+            await authService.validateTemporaryPassword({
+                email: result.output.email,
+                temporaryPassword: result.output.temporaryPassword,
+            });
 
-            // Avança para a etapa de troca de senha passando o e-mail via URL
-            router.push(`/login/first-access/change-password?email=${encodeURIComponent(result.output.email)}`);
+            // Avança para a tela de alteração definindo e-mail e a senha temporária na URL ou state
+            router.push(
+                `/login/first-access/change-password?email=${encodeURIComponent(
+                    result.output.email
+                )}&tempPass=${encodeURIComponent(result.output.temporaryPassword)}`
+            );
         } catch (error) {
             toast.error(
                 getServiceErrorMessage(
                     error,
-                    "Não foi possível processar o primeiro acesso. Verifique o e-mail digitado."
+                    "Credenciais incorretas. Verifique seu e-mail e a senha temporária."
                 )
             );
         } finally {
@@ -65,20 +74,32 @@ export function FirstAccessForm() {
             <div className="flex flex-col gap-1">
                 <h2 className="text-lg font-bold text-gray-800">Primeiro Acesso</h2>
                 <p className="text-xs text-gray-500">
-                    Informe seu e-mail corporativo. Enviaremos uma senha temporária para você realizar o seu primeiro cadastro.
+                    Informe seu e-mail corporativo e a senha temporária recebida para cadastrar sua nova senha.
                 </p>
             </div>
 
-            <Input
-                label="E-mail"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Digite seu e-mail"
-                autoComplete="email"
-                className="rounded-xl border-gray-300 focus:border-[#00579D]"
-                required
-            />
+            <div className="flex flex-col gap-4">
+                <Input
+                    label="E-mail"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="Digite seu e-mail"
+                    autoComplete="email"
+                    className="rounded-xl border-gray-300 focus:border-[#00579D]"
+                    required
+                />
+
+                <Input
+                    label="Senha temporária"
+                    type="password"
+                    value={temporaryPassword}
+                    onChange={(event) => setTemporaryPassword(event.target.value)}
+                    placeholder="Digite sua senha temporária"
+                    className="rounded-xl border-gray-300 focus:border-[#00579D]"
+                    required
+                />
+            </div>
 
             <Button
                 type="submit"
@@ -86,7 +107,7 @@ export function FirstAccessForm() {
                 disabled={loading}
                 className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
             >
-                {loading ? "Gerando senha..." : "Solicitar senha temporária"}
+                {loading ? "Validando..." : "Avançar"}
             </Button>
         </form>
     );
