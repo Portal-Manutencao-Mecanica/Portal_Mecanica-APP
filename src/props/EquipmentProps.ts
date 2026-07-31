@@ -5,5 +5,5 @@ export interface EquipmentProps {
   tag?: string
   patrimony?: string;
   unitPrice: number;
-  availableQuantity: number;
+  availableQuantity?: number;
 }

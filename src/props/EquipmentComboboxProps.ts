@@ -2,7 +2,8 @@ import { EquipmentProps } from "./EquipmentProps";
 
 export interface EquipmentComboboxProps {
   options: EquipmentProps[];
-  value?: string;
+  value?: string; 
+  selectedName?: string; 
   onChange: (selected: EquipmentProps | { isNew: true; name: string }) => void;
   error?: string;
 }
