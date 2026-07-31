@@ -12,13 +12,15 @@ interface RetryRequestConfig extends InternalAxiosRequestConfig {
 }
 
 export const browserApi = axios.create({
-  baseURL: "/api",
+  baseURL: "/backend",
   timeout: 15_000,
+  withCredentials: true,
 });
 
 export const authApi = axios.create({
   baseURL: "/api/auth",
   timeout: 15_000,
+  withCredentials: true,
 });
 
 let refreshPromise: Promise<LoginResponse> | null = null;
