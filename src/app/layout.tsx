@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { Roboto } from 'next/font/google';
 import "./globals.css";
+
+
+const roboto = Roboto({
+  weight: ['600'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: "Portal de Manutencao",
@@ -14,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={`${roboto.variable}`}>
       <body className="flex min-h-full flex-col">
         <AuthProvider>{children}</AuthProvider>
         <Toaster position="top-right" richColors closeButton />

@@ -73,12 +73,7 @@ export function LoginForm() {
       }
       router.refresh();
     } catch (error) {
-      toast.error(
-        getServiceErrorMessage(
-          error,
-          "Não foi possível entrar. Verifique seu e-mail e senha."
-        )
-      );
+      toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail e senha."));
     } finally {
       setLoading(false);
     }

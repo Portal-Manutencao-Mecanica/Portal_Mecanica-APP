@@ -17,7 +17,7 @@ export default function TermsOfUseForm() {
             </div>
 
             {/* Conteúdo */}
-            <div className="rounded-xl bg-weg-card-white p-8 shadow-sm">
+            <div className="rounded-lg bg-weg-card-white p-8 shadow-sm">
 
                 {/* 1 */}
                 <section className="mb-8">
@@ -215,16 +215,6 @@ export default function TermsOfUseForm() {
                     </p>
                 </div>
 
-            </div>
-
-            {/* Voltar */}
-            <div className="mt-6">
-                <Link
-                    href="/"
-                    className="font-medium text-weg-blue hover:underline"
-                >
-                    Voltar para o início
-                </Link>
             </div>
 
         </div>
