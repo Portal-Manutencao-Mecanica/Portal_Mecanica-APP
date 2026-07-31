@@ -3,7 +3,6 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as v from "valibot";
 
@@ -17,9 +16,9 @@ const forgotPasswordSchema = v.object({
 });
 
 export default function ForgotPasswordForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [instructionsSent, setInstructionsSent] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,11 +32,9 @@ export default function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      await authService.forgotPassword(result.output.email);
-      toast.success("Enviamos o código de verificação para o seu e-mail.");
-
-      // Redireciona para a rota aninhada do verify-code
-      router.push(`/login/forgot-password/verify-code?email=${encodeURIComponent(result.output.email)}`);
+      const response = await authService.forgotPassword(result.output.email);
+      setInstructionsSent(true);
+      toast.success(response.message);
     } catch (error) {
       toast.error(
         getServiceErrorMessage(
@@ -79,13 +76,27 @@ export default function ForgotPasswordForm() {
         required
       />
 
+      {instructionsSent && (
+        <p
+          role="status"
+          className="rounded-xl border border-green-200 bg-green-50 p-3 text-xs text-green-800"
+        >
+          Caso o e-mail esteja cadastrado, o link temporário de redefinição foi
+          enviado. Consulte também a caixa de spam.
+        </p>
+      )}
+
       <Button
         type="submit"
         variant="primary"
         disabled={loading}
         className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
       >
-        {loading ? "Enviando..." : "Enviar instruções"}
+        {loading
+          ? "Enviando..."
+          : instructionsSent
+            ? "Reenviar instruções"
+            : "Enviar instruções"}
       </Button>
     </form>
   );
