@@ -18,6 +18,17 @@ export interface ChangePasswordCredentials {
   passwordConfirmation: string;
 }
 
+export interface ValidateTemporaryPasswordParams {
+  email: string;
+  temporaryPassword: string;
+}
+
+export interface CompleteFirstAccessParams {
+  email: string;
+  temporaryPassword: string;
+  newPassword: string;
+}
+
 export const authService = {
   async login(credentials: LoginCredentials) {
     const { data } = await authApi.post<AuthSession>("/login", {

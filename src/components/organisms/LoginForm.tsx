@@ -25,7 +25,7 @@ const loginSchema = v.object({
   password: v.pipe(v.string(), v.minLength(1, "Informe sua senha.")),
 });
 
-export function LoginForm() {
+export default function LoginForm() {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -47,10 +47,11 @@ export function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     const result = v.safeParse(loginSchema, { email, password });
 
     if (!result.success) {
-      toast.error(result.issues[0]?.message ?? "Revise os dados de acesso.");
+      toast.error(result.issues[0]?.message ?? "Verifique os dados informados.");
       return;
     }
 
@@ -73,7 +74,12 @@ export function LoginForm() {
       }
       router.refresh();
     } catch (error) {
-      toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail e senha."));
+      toast.error(
+        getServiceErrorMessage(
+          error,
+          "E-mail ou senha incorretos. Verifique suas credenciais."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -96,13 +102,12 @@ export function LoginForm() {
           label="Senha"
           type="password"
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           placeholder="Digite sua senha"
           autoComplete="current-password"
           className="rounded-xl border-gray-300 focus:border-weg-blue"
           required
         />
-      </div>
 
       {process.env.NODE_ENV === "development" && (
         <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">
