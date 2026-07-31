@@ -1,5 +1,5 @@
 import type { LoginResponse, UserProfile } from "@/lib/api/types";
-import { authApi } from "./httpService";
+import { authApi, clearSession } from "./httpService";
 
 export interface LoginCredentials {
   email: string;
@@ -33,7 +33,15 @@ export const authService = {
   },
 
   async logout() {
-    await authApi.post("/logout");
+    const refreshToken = typeof window === "undefined"
+      ? null
+      : localStorage.getItem("@App:refreshToken");
+
+    try {
+      if (refreshToken) await authApi.post("/logout", { refreshToken });
+    } finally {
+      clearSession();
+    }
   },
 
   async forgotPassword(email: string) {
