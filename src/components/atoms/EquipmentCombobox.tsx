@@ -5,6 +5,7 @@ import { EquipmentComboboxProps } from "@/props/EquipmentComboboxProps";
 export default function EquipamentCombobox({
     options,
     value,
+    selectedName,
     onChange,
     error,
 }: EquipmentComboboxProps) {
@@ -12,9 +13,14 @@ export default function EquipamentCombobox({
     const [searchTerm, setSearchTerm] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
 
+    // Tenta achar o equipamento pelo ID
     const selectedEquipment = options.find((opt) => opt.id === value);
 
-    // Fecha o dropdown ao clicar fora
+    // Se achou nas opções, formata. Se não, usa o selectedName que veio do formulário
+    const displayName = selectedEquipment
+        ? `${selectedEquipment.name}${selectedEquipment.patrimony ? ` (Pat: ${selectedEquipment.patrimony})` : ""}`
+        : selectedName || "";
+
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -41,28 +47,20 @@ export default function EquipamentCombobox({
                 Equipamento *
             </label>
 
-            {/* Input de Seleção / Gatilho */}
             <div
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full p-2.5 bg-white border rounded-lg text-sm flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 ${
-                    error ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full p-2.5 bg-white border rounded-lg text-sm flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 ${error ? "border-red-500" : "border-gray-300"
+                    }`}
             >
-                <span className={selectedEquipment ? "text-gray-900" : "text-gray-400"}>
-                    {selectedEquipment
-                        ? `${selectedEquipment.name} ${
-                              selectedEquipment.patrimony
-                                  ? `(Pat: ${selectedEquipment.patrimony})`
-                                  : ""
-                          }`
-                        : "Pesquisar por nome, patrimônio ou TAG..."}
+                <span className={displayName ? "text-gray-900 font-medium" : "text-gray-400"}>
+                    {displayName || "Pesquisar por nome, patrimônio ou TAG..."}
                 </span>
                 <ChevronsUpDown className="w-4 h-4 text-gray-400" />
             </div>
 
             {error && <span className="text-xs text-red-500 mt-1 block">{error}</span>}
 
-            {/* Menu Dropdown Pesquisável */}
+            {/* Menu Dropdown */}
             {isOpen && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                     <div className="p-2 border-b border-gray-100 flex items-center gap-2 bg-gray-50">
@@ -77,9 +75,8 @@ export default function EquipamentCombobox({
                         />
                     </div>
 
-                    <ul className="max-h-56 overflow-y-auto divide-y divide-gray-50 text-sm">
+                    <ul className="max-h-56 overflow-y-auto divide-y  divide-gray-50 text-sm">
                         {filteredOptions.length > 0 ? (
-                            // Removida a tipagem gigante manual - 'opt' é inferido automaticamente
                             filteredOptions.map((opt) => (
                                 <li
                                     key={opt.id}
@@ -88,17 +85,24 @@ export default function EquipamentCombobox({
                                         setIsOpen(false);
                                         setSearchTerm("");
                                     }}
-                                    className="p-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between transition-colors"
+                                    // 1. Adicionado 'group' aqui no li
+                                    className="group p-2.5 hover:bg-weg-blue cursor-pointer flex items-center justify-between transition-colors"
                                 >
                                     <div>
-                                        <strong className="block text-gray-800">{opt.name}</strong>
-                                        <span className="text-xs text-gray-500">
+                                        {/* 2. Alterado para group-hover:text-white */}
+                                        <span className="block text-semi-bold text-gray-800 group-hover:text-white transition-colors">
+                                            {opt.name}
+                                        </span>
+                                        {/* 3. Ajustado para group-hover:text-blue-100 (ou white) */}
+                                        <span className="text-xs text-gray-500 group-hover:text-blue-100 transition-colors">
                                             {opt.patrimony && `Pat: ${opt.patrimony} `}
                                             {opt.tag && `| TAG: ${opt.tag}`}
                                         </span>
                                     </div>
-                                    {opt.id === value && (
-                                        <Check className="w-4 h-4 text-blue-600" />
+
+                                    {(opt.id === value || opt.name === selectedName) && (
+                                        /* Dica extra: Se quiser que o ícone do Check também fique branco no hover */
+                                        <Check className="w-4 h-4 text-weg-blue group-hover:text-white transition-colors" />
                                     )}
                                 </li>
                             ))
@@ -108,7 +112,6 @@ export default function EquipamentCombobox({
                             </li>
                         )}
 
-                        {/* Opção dinâmica de Criar Novo Equipamento */}
                         {searchTerm.trim() !== "" && (
                             <li
                                 onClick={() => {
