@@ -9,7 +9,7 @@ import * as v from "valibot";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { authService } from "@/services/authService";
-import { getServiceErrorMessage } from "@/services/httpService";
+import { getServiceErrorMessage, saveSession } from "@/services/httpService";
 
 const loginSchema = v.object({
   email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
@@ -35,9 +35,7 @@ export function LoginForm() {
     try {
       const session = await authService.login(result.output);
 
-      localStorage.setItem("@App:user", JSON.stringify(session.user));
-      localStorage.setItem("@App:accessToken", session.accessToken);
-      localStorage.setItem("@App:refreshToken", session.refreshToken);
+      saveSession(session);
 
       toast.success("Acesso realizado com sucesso.");
       router.push("/");

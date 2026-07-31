@@ -13,6 +13,7 @@ import { getServiceErrorMessage } from "@/services/httpService";
 export default function TurmasPage() {
   const [groups, setGroups] = useState<ClassGroupTableItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   useEffect(() => {
     classGroupBrowserService.list()
@@ -21,6 +22,10 @@ export default function TurmasPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const visibleGroups = groups.filter((group) =>
+    statusFilter === "ALL" || (statusFilter === "ACTIVE" ? group.enabled : !group.enabled),
+  );
+
   return (
     <LayoutDesktop>
       <div className="mx-auto max-w-7xl space-y-5 p-8">
@@ -28,7 +33,7 @@ export default function TurmasPage() {
           <div><h1 className="text-3xl font-bold">Turmas</h1><p className="text-gray-500">Visualize e gerencie as turmas cadastradas.</p></div>
           <Link href="/turmas/criar"><Button>Nova turma</Button></Link>
         </div>
-        {loading ? <p className="text-center text-gray-500">Carregando turmas...</p> : <ClassGroupTable classGroups={groups} />}
+        {loading ? <p className="text-center text-gray-500">Carregando turmas...</p> : <ClassGroupTable classGroups={visibleGroups} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} />}
       </div>
     </LayoutDesktop>
   );
