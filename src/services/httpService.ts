@@ -3,12 +3,12 @@ import axios from "axios";
 import type { ApiErrorPayload } from "@/lib/api/types";
 
 export const browserApi = axios.create({
-  baseURL: "/api",
+  baseURL: "http://localhost:8080/api",
   timeout: 15_000,
 });
 
 export const authApi = axios.create({
-  baseURL: "/api/auth",
+  baseURL: "http://localhost:8080/api/auth",
   timeout: 15_000,
 });
 

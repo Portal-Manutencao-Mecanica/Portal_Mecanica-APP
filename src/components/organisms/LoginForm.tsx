@@ -25,22 +25,73 @@ export function LoginForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const result = v.safeParse(loginSchema, { email, password });
-    if (!result.success) { toast.error(result.issues[0]?.message ?? "Revise os dados de acesso."); return; }
+
+    if (!result.success) {
+      toast.error(result.issues[0]?.message ?? "Revise os dados de acesso.");
+      return;
+    }
+
     setLoading(true);
     try {
       const session = await authService.login(result.output);
+
       localStorage.setItem("@App:user", JSON.stringify(session.user));
       localStorage.setItem("@App:accessToken", session.accessToken);
       localStorage.setItem("@App:refreshToken", session.refreshToken);
-      localStorage.setItem("@App:accessToken", session.accessToken);
-      localStorage.setItem("@App:refreshToken", session.refreshToken);
+
       toast.success("Acesso realizado com sucesso.");
       router.push("/");
       router.refresh();
     } catch (error) {
       toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail e senha."));
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
-  return <form onSubmit={handleSubmit} className="flex w-full flex-col gap-12 md:gap-12"><div className="flex flex-col gap-4"><Input label="E-mail" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Digite seu e-mail" autoComplete="email" required /><Input label="Senha" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Digite sua senha" autoComplete="current-password" required /></div><Button type="submit" variant="primary" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button><p className="pt-2 text-center text-sm text-gray-700"><Link href="/login/forgot-password" className="font-bold hover:underline">Esqueceu sua senha? Clique aqui.</Link></p></form>;
+  return (
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <div className="flex flex-col gap-4">
+        <Input
+          label="E-mail"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Digite seu e-mail"
+          autoComplete="email"
+          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          required
+        />
+        <Input
+          label="Senha"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="Digite sua senha"
+          autoComplete="current-password"
+          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          required
+        />
+      </div>
+
+      {/* Link de 'Esqueceu sua senha' com fonte e cor padronizadas */}
+      <div className="flex items-center justify-start pt-1">
+        <Link
+          href="/login/forgot-password"
+          className="text-xs font-semibold text-[#00579D] hover:underline transition-all"
+        >
+          Esqueceu sua senha?
+        </Link>
+      </div>
+
+      <Button
+        type="submit"
+        variant="primary"
+        disabled={loading}
+        className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
+      >
+        {loading ? "Entrando..." : "Entrar"}
+      </Button>
+    </form>
+  );
 }
