@@ -1,5 +1,5 @@
-import type { AuthSession, UserProfile } from "@/lib/api/types";
-import { authApi, browserApi } from "./httpService";
+import type { LoginResponse, UserProfile } from "@/lib/api/types";
+import { authApi, clearSession } from "./httpService";
 
 export interface LoginCredentials {
   email: string;
@@ -35,7 +35,15 @@ export const authService = {
   },
 
   async logout() {
-    await authApi.post("/logout");
+    const refreshToken = typeof window === "undefined"
+      ? null
+      : localStorage.getItem("@App:refreshToken");
+
+    try {
+      if (refreshToken) await authApi.post("/logout", { refreshToken });
+    } finally {
+      clearSession();
+    }
   },
 
   async forgotPassword(email: string) {
@@ -55,9 +63,5 @@ export const authService = {
   async resetPassword(payload: ResetPasswordCredentials) {
     const { data } = await authApi.post<{ message: string }>("/password/reset", payload);
     return data;
-  },
-
-  async changePassword(payload: ChangePasswordCredentials) {
-    await browserApi.patch("/users/me/password", payload);
   },
 };

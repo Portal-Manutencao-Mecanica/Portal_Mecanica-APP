@@ -8,17 +8,8 @@ import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { getServiceErrorMessage } from "@/services/httpService";
-import { useAuth } from "@/hooks/useAuth";
-
-const TEST_USERS = [
-  { label: "Administrador", email: "admin@teste.local" },
-  { label: "Coordenador", email: "coordenador@teste.local" },
-  { label: "Professor", email: "professor@teste.local" },
-  { label: "Aluno", email: "aluno@teste.local" },
-] as const;
-
-const TEST_PASSWORD = "Senha@123";
+import { authService } from "@/services/authService";
+import { getServiceErrorMessage, saveSession } from "@/services/httpService";
 
 const loginSchema = v.object({
   email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
@@ -56,7 +47,9 @@ export function LoginForm() {
 
     setLoading(true);
     try {
-      const user = await login(result.output);
+      const session = await authService.login(result.output);
+
+      saveSession(session);
 
       toast.success("Acesso realizado com sucesso.");
       if (user.passwordChangeRequired) {

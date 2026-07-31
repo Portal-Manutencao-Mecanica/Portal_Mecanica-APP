@@ -1,54 +1,74 @@
-'use client'
+"use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
 
 export function Breadcrumbs() {
-    const pathname = usePathname();
-    
-    const pathSegments = pathname.split('/').filter((segment) => segment !== '');
+  const pathname = usePathname();
+  const [dynamicLabels, setDynamicLabels] = useState<Record<number, string>>({});
+  const pathSegments = pathname.split("/").filter(Boolean);
 
-    if (pathSegments.length === 0) return null;
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const labels: Record<number, string> = {};
 
-    const formatPathName = (segment: string) => {
-        const dictionary: Record<string, string> = {
-            'maquinas': 'Máquinas',
-            'ocorrencias': 'Ocorrências',
-            'compras': 'Compras',
-            'alunos': 'Alunos'
-        };
-        
-        return dictionary[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    if (pathSegments[0] === "turmas") {
+      const classGroupName = searchParams.get("turma");
+      const studentName = searchParams.get("aluno");
+
+      if (classGroupName && pathSegments[1]) labels[1] = `Turma ${classGroupName}`;
+      if (studentName && pathSegments[2] && pathSegments[2] !== "editar") labels[2] = studentName;
+    }
+
+    setDynamicLabels(labels);
+  }, [pathname]);
+
+  if (pathSegments.length === 0) return null;
+
+  function formatPathName(segment: string, index: number) {
+    if (dynamicLabels[index]) return dynamicLabels[index];
+
+    const dictionary: Record<string, string> = {
+      maquinas: "Máquinas",
+      ocorrencias: "Ocorrências",
+      compras: "Compras",
+      alunos: "Alunos",
+      turmas: "Turmas",
+      criar: "Criar turma",
+      editar: "Editar turma",
     };
 
-    return (
-        <nav aria-label="Breadcrumb" className="mb-6 flex items-center text-sm text-gray-500 select-none">
-            <Link href="/" className="hover:text-weg-blue transition-colors flex items-center gap-1  no-underline hover:underline" aria-label="Página Inicial">
-                <Home className="w-4 h-4" />
-                <p>Página Inicial</p>
-            </Link>
-            
-            {pathSegments.map((segment, index) => {
-                const href = `/${pathSegments.slice(0, index + 1).join('/')}`;
-                const isLast = index === pathSegments.length - 1;
+    return dictionary[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+  }
 
-                return (
-                    <div key={href} className="flex items-center">
-                        <ChevronRight className="w-4 h-4 mx-2 text-gray-400 shrink-0" />
-                        
-                        {isLast ? (
-                            <span className="font-semibold text-weg-blue " aria-current="page">
-                                {formatPathName(segment)}
-                            </span>
-                        ) : (
-                            <Link href={href} className="hover:text-weg-blue transition-colors no-underline hover:underline">
-                                {formatPathName(segment)}
-                            </Link>
-                        )}
-                    </div>
-                );
-            })}
-        </nav>
-    );
+  return (
+    <nav aria-label="Breadcrumb" className="mb-6 flex items-center text-sm text-gray-500 select-none">
+      <Link href="/" className="flex items-center gap-1 no-underline transition-colors hover:text-weg-blue hover:underline" aria-label="Página inicial">
+        <Home className="h-4 w-4" />
+        <p>Página inicial</p>
+      </Link>
+
+      {pathSegments.map((segment, index) => {
+        const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
+        const isLast = index === pathSegments.length - 1;
+
+        return (
+          <div key={href} className="flex items-center">
+            <ChevronRight className="mx-2 h-4 w-4 shrink-0 text-gray-400" />
+            {isLast ? (
+              <span className="font-semibold text-weg-blue" aria-current="page">
+                {formatPathName(segment, index)}
+              </span>
+            ) : (
+              <Link href={href} className="no-underline transition-colors hover:text-weg-blue hover:underline">
+                {formatPathName(segment, index)}
+              </Link>
+            )}
+          </div>
+        );
+      })}
+    </nav>
+  );
 }
