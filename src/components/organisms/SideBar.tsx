@@ -17,19 +17,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
-import { User } from "@/props/UserAvatarProps";
 import { SideBarProps } from "@/props/SideBarProps";
+import { useAuth } from "@/hooks/useAuth";
 
 export function SideBar({
   isMobileMenuOpen = false,
   closeMobileMenu,
 }: SideBarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const currentUser: User = {
-    name: "Alexandre Santos",
-    role: "Administrador",
-  };
+  const { user } = useAuth();
 
   const menuItems = [
     { icon: MonitorCog, label: "Máquinas", href: "/maquinas" },
@@ -173,7 +169,11 @@ export function SideBar({
         {/* Perfil no Rodapé */}
         <div className="flex items-center pt-2 shrink-0 border-t border-white/10 md:border-t-0 mt-1 w-full justify-start">
           <UserAvatar
-            user={currentUser}
+            user={{
+              name: user?.name ?? "Usuário",
+              role: user?.role,
+              email: user?.email,
+            }}
             isExpanded={isExpanded || isMobileMenuOpen}
           />
         </div>

@@ -5,6 +5,8 @@ export default function ForgotPasswd() {
     return (
         <LoginTemplate
             form={<ForgotPasswordPage />}
+            title="Recuperar senha"
+            subtitle="Informe seu e-mail para receber o link de redefinição"
         />
     );
 }
