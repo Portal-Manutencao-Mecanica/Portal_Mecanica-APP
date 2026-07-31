@@ -16,6 +16,16 @@ export interface ResetPasswordCredentials {
   password: string;
 }
 
+export interface FirstAccessParams {
+  email: string;
+}
+
+export interface CompleteFirstAccessParams {
+  email: string;
+  temporaryPassword: string;
+  newPassword: string;
+}
+
 export const authService = {
   async login(credentials: LoginCredentials) {
     const { data } = await authApi.post<LoginResponse>("/login", {
@@ -50,6 +60,16 @@ export const authService = {
 
   async resetPassword(payload: ResetPasswordCredentials) {
     const { data } = await authApi.post<{ message: string }>("/password/reset", payload);
+    return data;
+  },
+
+  async requestFirstAccess(payload: FirstAccessParams) {
+    const { data } = await authApi.post<{ message: string }>("/auth/first-access", payload);
+    return data;
+  },
+
+  async completeFirstAccess(payload: CompleteFirstAccessParams) {
+    const { data } = await authApi.post<{ message: string }>("/auth/first-access/complete", payload);
     return data;
   },
 };
