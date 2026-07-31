@@ -6,6 +6,16 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface VerifyCodeCredentials {
+  email: string;
+  code: string;
+}
+
+export interface ResetPasswordCredentials {
+  token: string;
+  password: string;
+}
+
 export const authService = {
   async login(credentials: LoginCredentials) {
     const { data } = await authApi.post<LoginResponse>("/login", {
@@ -30,6 +40,16 @@ export const authService = {
     const { data } = await authApi.post<{ message: string }>("/password/forgot", {
       email,
     });
+    return data;
+  },
+
+  async verifyCode(payload: VerifyCodeCredentials) {
+    const { data } = await authApi.post<{ token: string; message?: string }>("/password/verify-code", payload);
+    return data;
+  },
+
+  async resetPassword(payload: ResetPasswordCredentials) {
+    const { data } = await authApi.post<{ message: string }>("/password/reset", payload);
     return data;
   },
 };
