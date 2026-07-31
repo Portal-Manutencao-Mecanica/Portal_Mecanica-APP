@@ -12,12 +12,12 @@ interface RetryRequestConfig extends InternalAxiosRequestConfig {
 }
 
 export const browserApi = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "/api",
   timeout: 15_000,
 });
 
 export const authApi = axios.create({
-  baseURL: "http://localhost:8080/api/auth",
+  baseURL: "/api/auth",
   timeout: 15_000,
 });
 

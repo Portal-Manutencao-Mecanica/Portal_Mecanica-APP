@@ -1,24 +1,27 @@
-import { UserProfileProps } from "@/props/UserProfileProps";
-import { useEffect, useState } from "react";
+"use client";
+
+import { createContext, useContext } from "react";
+
+import type { UserProfile } from "@/lib/api/types";
+import type { LoginCredentials } from "@/services/authService";
+
+export interface AuthContextValue {
+  user: UserProfile | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (credentials: LoginCredentials) => Promise<UserProfile>;
+  logout: () => Promise<void>;
+  refreshSession: () => Promise<UserProfile | null>;
+}
+
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function useAuth() {
-    const [user, setUser] = useState<UserProfileProps | null>(null);
+  const context = useContext(AuthContext);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem("@App:user");
-        
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else {
-            const mockUser: UserProfileProps = {
-                id: 1,
-                name: "Arthur Mourão",
-                email: "arthur@professor.com",
-                role: "ALUNO",
-            };
-            setUser(mockUser);
-        }
-    }, []);
+  if (!context) {
+    throw new Error("useAuth deve ser usado dentro de AuthProvider.");
+  }
 
-    return { user };
+  return context;
 }

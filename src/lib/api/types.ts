@@ -25,6 +25,11 @@ export interface LoginResponse {
   user: UserProfile;
 }
 
+export type AuthSession = Pick<
+  LoginResponse,
+  "expiresIn" | "passwordChangeRequired" | "user"
+>;
+
 export interface ApiErrorPayload {
   status?: number;
   error?: string;
