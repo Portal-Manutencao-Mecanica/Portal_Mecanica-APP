@@ -4,26 +4,26 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-import Button from "@/components/atoms/Button";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { ClassGroup, Student } from "@/lib/api/types";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
-import { getServiceErrorMessage, browserApi } from "@/services/httpService";
+import { getServiceErrorMessage } from "@/services/httpService";
+import { studentService } from "@/services/studentService";
 
 interface Props { params: Promise<{ id: string; alunoId: string }>; }
 
 export default function StudentPage({ params }: Props) {
-  const { id, alunoId } = use(params);
+  const { alunoId } = use(params);
   const [student, setStudent] = useState<Student | null>(null);
   const [classGroups, setClassGroups] = useState<ClassGroup[]>([]);
 
   useEffect(() => {
     async function loadStudent() {
       try {
-        const { data } = await browserApi.get<Student>(`/aluno/${encodeURIComponent(alunoId)}`);
-        setStudent(data);
-        setClassGroups(await Promise.all(data.classGroupIds.map((classGroupId) => classGroupBrowserService.getById(classGroupId))));
+        const loadedStudent = await studentService.getById(alunoId);
+        setStudent(loadedStudent);
+        setClassGroups(await Promise.all(loadedStudent.classGroupIds.map((classGroupId) => classGroupBrowserService.getById(classGroupId))));
       } catch (error) {
         toast.error(getServiceErrorMessage(error, "Não foi possível carregar o perfil do aluno."));
       }
@@ -37,8 +37,6 @@ export default function StudentPage({ params }: Props) {
   return (
     <LayoutDesktop>
       <div className="mx-auto max-w-7xl space-y-6 p-8">
-        <Link href={`/turmas/${id}`}><Button variant="secondary">Voltar</Button></Link>
-
         <div className="mt-5 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
           <h1 className="mb-8 text-3xl font-bold">Perfil do aluno</h1>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -53,7 +51,7 @@ export default function StudentPage({ params }: Props) {
         <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
           <h2 className="mb-5 text-2xl font-semibold">Turmas</h2>
           <div className="flex flex-wrap gap-3">
-            {classGroups.map((group) => <Link key={group.id} href={`/turmas/${group.id}`} className="rounded-lg bg-weg-blue px-4 py-2 text-white">{group.acronym}</Link>)}
+            {classGroups.map((group) => <Link key={group.id} href={{ pathname: `/turmas/${group.id}`, query: { turma: group.acronym } }} className="rounded-lg bg-weg-blue px-4 py-2 text-white">{group.acronym}</Link>)}
           </div>
         </div>
       </div>

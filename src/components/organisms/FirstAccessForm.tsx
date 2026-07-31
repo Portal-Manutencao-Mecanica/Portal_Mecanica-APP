@@ -1,114 +1,130 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
+import { useAuth } from "@/hooks/useAuth";
 import { authService } from "@/services/authService";
 import { getServiceErrorMessage } from "@/services/httpService";
 
-const firstAccessSchema = v.object({
-    email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
-    temporaryPassword: v.pipe(v.string(), v.minLength(1, "Informe a senha temporária.")),
-});
+const passwordSchema = v.pipe(
+  v.string(),
+  v.minLength(8, "A senha deve ter pelo menos 8 caracteres."),
+  v.maxLength(128, "A senha deve ter no máximo 128 caracteres."),
+  v.regex(/[A-Z]/, "Inclua pelo menos uma letra maiúscula."),
+  v.regex(/[a-z]/, "Inclua pelo menos uma letra minúscula."),
+  v.regex(/[0-9]/, "Inclua pelo menos um número."),
+  v.regex(/[^A-Za-z0-9]/, "Inclua pelo menos um caractere especial."),
+);
+
+const firstAccessSchema = v.pipe(
+  v.object({
+    currentPassword: v.pipe(
+      v.string(),
+      v.minLength(1, "Informe a senha temporária."),
+    ),
+    newPassword: passwordSchema,
+    passwordConfirmation: v.string(),
+  }),
+  v.forward(
+    v.partialCheck(
+      [["newPassword"], ["passwordConfirmation"]],
+      (input) => input.newPassword === input.passwordConfirmation,
+      "As senhas digitadas não coincidem.",
+    ),
+    ["passwordConfirmation"],
+  ),
+);
 
 export function FirstAccessForm() {
-    const router = useRouter();
-    const [email, setEmail] = useState("");
-    const [temporaryPassword, setTemporaryPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { isLoading, user, logout } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const result = v.safeParse(firstAccessSchema, { email, temporaryPassword });
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user) router.replace("/login");
+    else if (!user.passwordChangeRequired) router.replace("/");
+  }, [isLoading, router, user]);
 
-        if (!result.success) {
-            toast.error(result.issues[0]?.message ?? "Preencha todos os campos.");
-            return;
-        }
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const result = v.safeParse(firstAccessSchema, {
+      currentPassword,
+      newPassword,
+      passwordConfirmation,
+    });
 
-        setLoading(true);
-
-        try {
-            // Valida se a senha temporária fornecida está correta no backend
-            await authService.validateTemporaryPassword({
-                email: result.output.email,
-                temporaryPassword: result.output.temporaryPassword,
-            });
-
-            // Avança para a tela de alteração definindo e-mail e a senha temporária na URL ou state
-            router.push(
-                `/login/first-access/change-password?email=${encodeURIComponent(
-                    result.output.email
-                )}&tempPass=${encodeURIComponent(result.output.temporaryPassword)}`
-            );
-        } catch (error) {
-            toast.error(
-                getServiceErrorMessage(
-                    error,
-                    "Credenciais incorretas. Verifique seu e-mail e a senha temporária."
-                )
-            );
-        } finally {
-            setLoading(false);
-        }
+    if (!result.success) {
+      toast.error(result.issues[0]?.message ?? "Revise as senhas informadas.");
+      return;
     }
 
-    return (
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-5">
-            <div>
-                <Link
-                    href="/login"
-                    className="inline-flex items-center gap-2 text-xs font-semibold text-[#00579D] hover:underline transition-all"
-                >
-                    <Image src="/chevron-left.svg" alt="Voltar" width={16} height={16} className="w-4 h-4" />
-                    Voltar para o login
-                </Link>
-            </div>
+    setSubmitting(true);
+    try {
+      await authService.changePassword(result.output);
+      await logout();
+      toast.success("Senha atualizada. Entre novamente com a nova senha.");
+      router.replace("/login");
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        getServiceErrorMessage(error, "Não foi possível alterar sua senha."),
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
-            <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-bold text-gray-800">Primeiro Acesso</h2>
-                <p className="text-xs text-gray-500">
-                    Informe seu e-mail corporativo e a senha temporária recebida para cadastrar sua nova senha.
-                </p>
-            </div>
+  if (isLoading || !user || !user.passwordChangeRequired) {
+    return <p className="text-sm text-gray-500">Validando sua sessão...</p>;
+  }
 
-            <div className="flex flex-col gap-4">
-                <Input
-                    label="E-mail"
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="Digite seu e-mail"
-                    autoComplete="email"
-                    className="rounded-xl border-gray-300 focus:border-[#00579D]"
-                    required
-                />
+  return (
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+        Sua conta usa uma senha temporária. Defina uma nova senha antes de
+        continuar.
+      </p>
 
-                <Input
-                    label="Senha temporária"
-                    type="password"
-                    value={temporaryPassword}
-                    onChange={(event) => setTemporaryPassword(event.target.value)}
-                    placeholder="Digite sua senha temporária"
-                    className="rounded-xl border-gray-300 focus:border-[#00579D]"
-                    required
-                />
-            </div>
+      <Input
+        label="Senha temporária"
+        type="password"
+        value={currentPassword}
+        onChange={(event) => setCurrentPassword(event.target.value)}
+        autoComplete="current-password"
+        required
+      />
+      <Input
+        label="Nova senha"
+        type="password"
+        value={newPassword}
+        onChange={(event) => setNewPassword(event.target.value)}
+        autoComplete="new-password"
+        required
+      />
+      <Input
+        label="Confirmar nova senha"
+        type="password"
+        value={passwordConfirmation}
+        onChange={(event) => setPasswordConfirmation(event.target.value)}
+        autoComplete="new-password"
+        required
+      />
+      <p className="text-xs text-gray-500">
+        Use de 8 a 128 caracteres, com maiúscula, minúscula, número e símbolo.
+      </p>
 
-            <Button
-                type="submit"
-                variant="primary"
-                disabled={loading}
-                className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
-            >
-                {loading ? "Validando..." : "Avançar"}
-            </Button>
-        </form>
-    );
+      <Button type="submit" className="mt-2 w-full py-3" disabled={submitting}>
+        {submitting ? "Alterando..." : "Definir nova senha"}
+      </Button>
+    </form>
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ import * as v from "valibot";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { authService } from "@/services/authService";
-import { getServiceErrorMessage } from "@/services/httpService";
+import { getServiceErrorMessage, saveSession } from "@/services/httpService";
 
 const loginSchema = v.object({
   email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
@@ -18,9 +18,23 @@ const loginSchema = v.object({
 
 export default function LoginForm() {
   const router = useRouter();
+  const {
+    isAuthenticated,
+    isLoading: isLoadingSession,
+    login,
+    user: authenticatedUser,
+  } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoadingSession) {
+      router.replace(
+        authenticatedUser?.passwordChangeRequired ? "/primeiro-acesso" : "/",
+      );
+    }
+  }, [authenticatedUser, isAuthenticated, isLoadingSession, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,14 +48,22 @@ export default function LoginForm() {
 
     setLoading(true);
 
-    try {
-      await authService.login({
-        email: result.output.email,
-        password: result.output.password,
-      });
+      saveSession(session);
 
-      toast.success("Login realizado com sucesso!");
-      router.push("/dashboard");
+      toast.success("Acesso realizado com sucesso.");
+      if (user.passwordChangeRequired) {
+        router.push("/primeiro-acesso");
+      } else {
+        const returnTo = new URLSearchParams(window.location.search).get(
+          "returnTo",
+        );
+        router.push(
+          returnTo?.startsWith("/") && !returnTo.startsWith("//")
+            ? returnTo
+            : "/",
+        );
+      }
+      router.refresh();
     } catch (error) {
       toast.error(
         getServiceErrorMessage(
@@ -79,32 +101,49 @@ export default function LoginForm() {
           required
         />
 
-        {/* Links ajustados conforme design */}
-        <div className="flex items-center justify-between text-xs pt-1">
-          <Link
-            href="/login/first-access"
-            className="font-semibold text-[#00579D] hover:underline transition-all"
-          >
-            Primeiro acesso?
-          </Link>
-
-          {/* Esqueceu a senha em cinza */}
-          <Link
-            href="/login/forgot-password"
-            className="text-gray-400 hover:text-gray-600 hover:underline transition-all"
-          >
-            Esqueceu a senha?
-          </Link>
+      {process.env.NODE_ENV === "development" && (
+        <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">
+          <p className="mb-2 text-xs font-semibold text-gray-700">
+            Contas de teste do Flyway
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {TEST_USERS.map((testUser) => (
+              <button
+                key={testUser.email}
+                type="button"
+                onClick={() => {
+                  setEmail(testUser.email);
+                  setPassword(TEST_PASSWORD);
+                }}
+                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium text-[#00579D] transition-colors hover:bg-blue-100"
+              >
+                {testUser.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-gray-500">
+            Selecione um perfil para preencher as credenciais de desenvolvimento.
+          </p>
         </div>
+      )}
+
+      {/* Link de 'Esqueceu sua senha' com fonte e cor padronizadas */}
+      <div className="flex items-center justify-start pt-1">
+        <Link
+          href="/login/forgot-password"
+          className="text-xs font-semibold text-[#00579D] hover:underline transition-all"
+        >
+          Esqueceu sua senha?
+        </Link>
       </div>
 
       <Button
         type="submit"
         variant="primary"
-        disabled={loading}
+        disabled={loading || isLoadingSession}
         className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
       >
-        {loading ? "Entrando..." : "Entrar"}
+        {loading || isLoadingSession ? "Entrando..." : "Entrar"}
       </Button>
     </form>
   );

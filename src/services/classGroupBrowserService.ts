@@ -14,8 +14,23 @@ export const classGroupBrowserService = {
     const { data } = await browserApi.post<ClassGroup>("/turma", classGroup);
     return data;
   },
-  async updateAcronym(id: string, acronym: string) {
-    const { data } = await browserApi.patch<ClassGroup>(`/turma/${encodeURIComponent(id)}`, { acronym });
+  async update(id: string, classGroup: CreateClassGroup) {
+    const { data } = await browserApi.put<ClassGroup>(
+      `/turma/${encodeURIComponent(id)}`,
+      classGroup,
+    );
+    return data;
+  },
+  async deactivate(id: string) {
+    const { data } = await browserApi.patch<ClassGroup>(
+      `/turma/${encodeURIComponent(id)}/inativar`,
+    );
+    return data;
+  },
+  async reactivate(id: string) {
+    const { data } = await browserApi.patch<ClassGroup>(
+      `/turma/${encodeURIComponent(id)}/reativar`,
+    );
     return data;
   },
 };

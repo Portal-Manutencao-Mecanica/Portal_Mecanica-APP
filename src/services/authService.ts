@@ -1,19 +1,21 @@
 import type { LoginResponse, UserProfile } from "@/lib/api/types";
-import { authApi } from "./httpService";
+import { authApi, clearSession } from "./httpService";
 
 export interface LoginCredentials {
   email: string;
   password: string;
 }
 
-export interface VerifyCodeCredentials {
-  email: string;
-  code: string;
-}
-
 export interface ResetPasswordCredentials {
   token: string;
-  password: string;
+  newPassword: string;
+  passwordConfirmation: string;
+}
+
+export interface ChangePasswordCredentials {
+  currentPassword: string;
+  newPassword: string;
+  passwordConfirmation: string;
 }
 
 export interface ValidateTemporaryPasswordParams {
@@ -29,7 +31,7 @@ export interface CompleteFirstAccessParams {
 
 export const authService = {
   async login(credentials: LoginCredentials) {
-    const { data } = await authApi.post<LoginResponse>("/login", {
+    const { data } = await authApi.post<AuthSession>("/login", {
       ...credentials,
       email: credentials.email.trim(),
     });
@@ -44,7 +46,15 @@ export const authService = {
   },
 
   async logout() {
-    await authApi.post("/logout");
+    const refreshToken = typeof window === "undefined"
+      ? null
+      : localStorage.getItem("@App:refreshToken");
+
+    try {
+      if (refreshToken) await authApi.post("/logout", { refreshToken });
+    } finally {
+      clearSession();
+    }
   },
 
   async forgotPassword(email: string) {
@@ -54,23 +64,15 @@ export const authService = {
     return data;
   },
 
-  async verifyCode(payload: VerifyCodeCredentials) {
-    const { data } = await authApi.post<{ token: string; message?: string }>("/password/verify-code", payload);
-    return data;
+  async validateResetToken(token: string) {
+    const { data } = await authApi.get<{ valid: boolean }>("/password/validate", {
+      params: { token },
+    });
+    return data.valid;
   },
 
   async resetPassword(payload: ResetPasswordCredentials) {
     const { data } = await authApi.post<{ message: string }>("/password/reset", payload);
-    return data;
-  },
-
-  async validateTemporaryPassword(payload: ValidateTemporaryPasswordParams) {
-    const { data } = await authApi.post<{ valid: boolean }>("/auth/first-access/validate", payload);
-    return data;
-  },
-
-  async completeFirstAccess(payload: CompleteFirstAccessParams) {
-    const { data } = await authApi.post<{ message: string }>("/auth/first-access/complete", payload);
     return data;
   },
 };
