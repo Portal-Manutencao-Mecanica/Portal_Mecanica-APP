@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Button from "../atoms/Button";
-import LabelWithCircle from "../molecules/LabelWithCircle";
+import LabelWithCircle from "./LabelWithCircle";
 
 interface Props {
   id: number;
