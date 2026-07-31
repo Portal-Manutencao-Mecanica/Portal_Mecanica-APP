@@ -122,7 +122,7 @@ export default function UploadedFile({ onChange, error }: UploadedFileProps) {
                                     e.stopPropagation();
                                     removeFile(index);
                                 }}
-                                className="p-1.5 text-gray-400 hover:bg-gray-300/50 rounded-lg transition-colors"
+                                className="p-1.5 text-gray-400 cursor-pointer hover:bg-gray-300/50 rounded-lg transition-colors"
                                 title="Remover arquivo"
                             >
                                 <Trash2 className="w-5 h-5" />
