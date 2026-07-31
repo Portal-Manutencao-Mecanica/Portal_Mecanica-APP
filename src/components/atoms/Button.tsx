@@ -5,6 +5,7 @@ export default function Button({
     icon: Icon,
     children,
     className = "",
+    type = "button",
     ...props
 }: ButtonProps) {
 
@@ -21,6 +22,7 @@ export default function Button({
 
     return (
         <button 
+            type={type}
             className={`${baseStyle} ${selectedVariant} ${className}`}
             {...props}
         >

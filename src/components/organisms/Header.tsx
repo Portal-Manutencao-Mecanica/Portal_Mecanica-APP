@@ -1,10 +1,13 @@
 "use client";
 
-import { Bell, Settings, CircleQuestionMark, Menu } from "lucide-react";
-import Link from "next/link";
+import { Bell, CircleQuestionMark, Menu, Settings } from "lucide-react";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import NotificationItem from "@/components/atoms/NotificationItem";
+import type { Notification } from "@/lib/api/types";
+import { notificationService } from "@/services/notificationService";
 
 interface HeaderProps {
   onOpenMobileMenu?: () => void;
@@ -12,92 +15,83 @@ interface HeaderProps {
 
 export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications] = useState([
-    {
-      id: 1,
-      title: "Ocorrência Aprovada",
-      about: "A ocorrência do Professor Manutenção foi validada.",
-      isUnread: true,
-    },
-    {
-      id: 2,
-      title: "Sistema Atualizado",
-      about: "O portal recebeu uma nova versão hoje.",
-      isUnread: false,
-    },
-    {
-      id: 3,
-      title: "Manutenção Concluída",
-      about: "Máquina Torno CNC liberada para uso.",
-      isUnread: true,
-    },
-  ]);
+  const loadNotifications = useCallback(async () => {
+    try {
+      const [page, count] = await Promise.all([
+        notificationService.list(0, 5),
+        notificationService.unreadCount(),
+      ]);
+      setNotifications(page.content);
+      setUnreadCount(count);
+    } catch {
+      // The layout can briefly render while the session is being replaced.
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  }, []);
 
-  const hasUnreadNotifications = notifications.some((notif) => notif.isUnread);
+  useEffect(() => {
+    async function loadInitialNotifications() {
+      await loadNotifications();
+    }
+
+    void loadInitialNotifications();
+    function handleNotificationChange() {
+      void loadNotifications();
+    }
+
+    window.addEventListener("notifications:changed", handleNotificationChange);
+    return () => window.removeEventListener("notifications:changed", handleNotificationChange);
+  }, [loadNotifications]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsNotificationOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleToggleMenu = () => {
-    setIsNotificationOpen(!isNotificationOpen);
-  };
+  function handleToggleMenu() {
+    setIsNotificationOpen((current) => {
+      const willOpen = !current;
+      if (willOpen) void loadNotifications();
+      return willOpen;
+    });
+  }
 
   return (
-    <header className="bg-weg-blue w-full h-16 md:h-20 px-4 md:px-5 shadow-md relative z-30 flex items-center shrink-0">
-      <nav className="w-full flex items-center justify-between gap-2 md:gap-4 relative">
-
-        {/* Esquerda: Botão Menu Mobile + Logo WEG */}
-        <div className="flex items-center gap-2 shrink-0 z-10">
+    <header className="relative z-30 flex h-16 w-full shrink-0 items-center bg-weg-blue px-4 shadow-md md:h-20 md:px-5">
+      <nav className="relative flex w-full items-center justify-between gap-2 md:gap-4">
+        <div className="z-10 flex shrink-0 items-center gap-2">
           <button
             onClick={onOpenMobileMenu}
-            className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+            className="cursor-pointer rounded-lg p-2 text-white transition-colors hover:bg-white/10 md:hidden"
             aria-label="Abrir menu"
           >
             <Menu size={24} />
           </button>
-
-          <Link
-            href="/"
-            aria-label="Ir para a página inicial"
-            className="hidden sm:flex items-center shrink-0"
-          >
-            <Image
-              src="/brand/logo-icon.svg"
-              alt="WEG logo"
-              width={39}
-              height={25}
-              priority
-            />
+          <Link href="/" aria-label="Ir para a página inicial" className="hidden shrink-0 items-center sm:flex">
+            <Image src="/brand/logo-icon.svg" alt="WEG logo" width={39} height={25} priority />
           </Link>
         </div>
 
-        {/* Título do Portal (Centralizado na tela/header) */}
-        <h1 className="absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-3xl text-white font-semibold truncate text-center pointer-events-none max-w-[50%]">
+        <h1 className="pointer-events-none absolute left-1/2 max-w-[50%] -translate-x-1/2 truncate text-center text-base font-semibold text-white sm:text-xl md:text-3xl">
           Portal da Manutenção
         </h1>
 
-        {/* Botões da Direita */}
-        <div className="shrink-0 z-10">
+        <div className="z-10 shrink-0">
           <ul className="flex items-center gap-1 md:gap-4">
-            {/* Oculto no celular, visível na Sidebar mobile se necessário */}
             <li className="hidden sm:block">
-              <Link href={"/faq"}>
-                <button
-                  className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                  aria-label="Ajuda"
-                >
+              <Link href="/faq">
+                <button className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-white/10" aria-label="Ajuda">
                   <CircleQuestionMark color="white" size={24} />
                 </button>
               </Link>
@@ -106,69 +100,55 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
             <li ref={dropdownRef} className="relative">
               <button
                 onClick={handleToggleMenu}
-                className={`relative transition-colors h-10 w-10 md:h-12 md:w-12 flex justify-center items-center rounded-lg cursor-pointer ${isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"
-                  }`}
+                className={`relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg transition-colors md:h-12 md:w-12 ${isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"}`}
                 aria-label="Notificações"
+                aria-expanded={isNotificationOpen}
               >
                 <Bell color="white" size={24} />
-
-                {hasUnreadNotifications && (
-                  <span className="absolute top-2.5 right-2.5 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-weg-blue"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute right-2.5 top-2.5 flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-weg-blue bg-red-500" />
                   </span>
                 )}
               </button>
 
-              {/* Dropdown de Notificações */}
               {isNotificationOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#FAFAFA] text-weg-blue rounded-lg shadow-2xl border border-weg-blue z-50 flex flex-col">
-                  <div className="px-4 pt-3 py-2 text-xs font-bold text-weg-blue uppercase tracking-wider mb-1 flex justify-between items-center">
-                    <span>Notificações Recentes</span>
+                <div className="absolute right-0 top-full z-50 mt-2 flex w-72 flex-col rounded-lg border border-weg-blue bg-[#FAFAFA] text-weg-blue shadow-2xl sm:w-80">
+                  <div className="mb-1 flex items-center justify-between px-4 py-2 pt-3 text-xs font-bold uppercase tracking-wider">
+                    <span>Notificações recentes</span>
+                    {unreadCount > 0 && <span>{unreadCount} não lida{unreadCount === 1 ? "" : "s"}</span>}
                   </div>
-
                   <div className="max-h-75 overflow-y-auto">
-                    {notifications.map((notif) => (
-                      <NotificationItem
-                        key={notif.id}
-                        title={notif.title}
-                        about={notif.about}
-                        isUnread={notif.isUnread}
-                        onClick={() =>
-                          console.log(`Clicou na notificação ${notif.id}`)
-                        }
-                        id={""}
-                      />
-                    ))}
+                    {notifications.length === 0 ? (
+                      <p className="px-4 py-6 text-center text-sm text-gray-500">Nenhuma notificação recente.</p>
+                    ) : (
+                      notifications.map((notification) => (
+                        <NotificationItem
+                          key={notification.id}
+                          id={notification.id}
+                          title={notification.title}
+                          about={notification.about}
+                          isUnread={!notification.statusRead}
+                          onClick={() => setIsNotificationOpen(false)}
+                        />
+                      ))
+                    )}
                   </div>
-
-                  <div className="h-px bg-weg-blue/30 my-1" />
-
-                  <Link
-                    href="/notificacoes"
-                    onClick={() => setIsNotificationOpen(false)}
-                    className="group px-4 py-2.5 hover:bg-weg-blue/85 hover:text-[#FAFAFA] rounded-b-md cursor-pointer flex items-center justify-between transition-colors"
-                  >
-                    <span className="text-sm font-medium">
-                      Ver todas as notificações
-                    </span>
+                  <div className="my-1 h-px bg-weg-blue/30" />
+                  <Link href="/notificacoes" onClick={() => setIsNotificationOpen(false)} className="flex cursor-pointer items-center justify-between rounded-b-md px-4 py-2.5 text-sm font-medium transition-colors hover:bg-weg-blue/85 hover:text-[#FAFAFA]">
+                    Ver todas as notificações
                   </Link>
                 </div>
               )}
             </li>
 
-            {/* Oculto no celular, visível na Sidebar mobile se necessário */}
             <li className="hidden sm:block">
-
-              <Link href={"/configuracao"}>
-                <button
-                  className="transition-colors hover:bg-white/10 h-12 w-12 flex justify-center items-center rounded-lg cursor-pointer"
-                  aria-label="Configurações"
-                >
+              <Link href="/configuracao">
+                <button className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-white/10" aria-label="Configurações">
                   <Settings color="white" size={24} />
                 </button>
               </Link>
-
             </li>
           </ul>
         </div>

@@ -1,11 +1,13 @@
 'use client'
 
 import { InputProps } from "@/props/InputProps";
-import { forwardRef, useState } from "react";
+import { forwardRef, useId, useState } from "react";
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ label, error, maxLength, onChange, className = '', ...props }, ref) => {
+    ({ id, label, error, maxLength, onChange, className = '', ...props }, ref) => {
         const [currentLength, setCurrentLength] = useState(0);
+        const generatedId = useId();
+        const inputId = id ?? generatedId;
 
         const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
             setCurrentLength(event.target.value.length);
@@ -15,7 +17,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className="w-full flex flex-col gap-1.5 ">
                 {label && (
-                    <label className="text-sm font-medium text-gray-700">
+                    <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
                         {label}
                     </label>
                 )}
@@ -35,6 +37,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 >
                     <input
                         ref={ref}
+                        id={inputId}
                         maxLength={maxLength}
                         onChange={handleInputChange}
                         className="w-full bg-transparent outline-none border-none text-black placeholder-gray-400 italic"

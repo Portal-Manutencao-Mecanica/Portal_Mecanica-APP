@@ -1,7 +1,13 @@
+import type {
+  MaintenanceType,
+  TaskCriticality,
+  TaskSituation,
+} from "@/lib/api/types";
+
 export type CalendarResponseDto = {
   id: string;
   scheduledAction: string;
-  criticality: string;
+  criticality: TaskCriticality;
   createdAt: string;
   scheduledFor: string;
   requestedAt: string | null;
@@ -15,20 +21,26 @@ export type CalendarResponseDto = {
   machineName: string | null;
   placeId: string | null;
   placeName: string | null;
-  maintenanceType: string;
-  status: string;
+  maintenanceType: MaintenanceType;
+  status: TaskSituation;
+};
+
+export type CalendarItem = {
+  day: string;
+  hour: string;
+  title: string;
 };
 
 export type CreateCalendarEventDto = {
   scheduledAction: string;
-  criticality: string;
+  criticality: TaskCriticality;
   scheduledFor: string;
   requestedAt: string;
-  maintenanceType: string;
+  maintenanceType: MaintenanceType;
   equipmentId: string;
   machineId: string;
   placeId: string;
   studentId?: string;
   teacherId: string;
-  status: string;
+  status?: TaskSituation;
 };

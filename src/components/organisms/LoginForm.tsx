@@ -153,6 +153,7 @@ export default function LoginForm() {
       >
         {loading || isLoadingSession ? "Entrando..." : "Entrar"}
       </Button>
+      </div>
     </form>
   );
 }

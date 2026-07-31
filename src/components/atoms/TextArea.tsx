@@ -1,9 +1,11 @@
 import { TextAreaProps } from "@/props/TextAreaProps";
-import { forwardRef, useState } from "react";
+import { forwardRef, useId, useState } from "react";
 
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-    ({ label, error, maxLength, onChange, rows = 4, className = '', ...props }, ref) => {
+    ({ id, label, error, maxLength, onChange, rows = 4, className = '', ...props }, ref) => {
         const [currentLength, setCurrentLength] = useState(0);
+        const generatedId = useId();
+        const inputId = id ?? generatedId;
 
         const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
             setCurrentLength(event.target.value.length);
@@ -14,7 +16,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
             <div className="w-full flex flex-col gap-1.5">
                 {/* Label */}
                 {label && (
-                    <label className="text-sm font-medium text-gray-700">
+                    <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
                         {label}
                     </label>
                 )}
@@ -35,6 +37,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 >
                     <textarea
                         ref={ref}
+                        id={inputId}
                         rows={rows}
                         maxLength={maxLength}
                         onChange={handleTextareaChange}

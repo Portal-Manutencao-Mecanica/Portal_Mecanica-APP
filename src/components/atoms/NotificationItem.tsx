@@ -33,9 +33,11 @@ export default function NotificationItem({
         )}
       </div>
 
-      <span className="text-xs text-gray-500 group-hover:text-white/80 mt-0.5 line-clamp-1">
-        {about}
-      </span>
+      {about && (
+        <span className="text-xs text-gray-500 group-hover:text-white/80 mt-0.5 line-clamp-1">
+          {about}
+        </span>
+      )}
     </Link>
   );
 }

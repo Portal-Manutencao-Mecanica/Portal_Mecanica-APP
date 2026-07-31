@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
+import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { getServiceErrorMessage } from "@/services/httpService";
@@ -80,7 +81,7 @@ export default function EditMachinePage({ params }: PageProps) {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <Input label="Número de patrimônio *" value={form.patrimony} onChange={(event) => setForm({ ...form, patrimony: event.target.value })} />
               <Input label="Nome da máquina *" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
-              <label className="text-sm font-medium">Condição *<select value={form.condition} onChange={(event) => setForm({ ...form, condition: event.target.value as typeof form.condition })} className="mt-1 w-full rounded-lg border p-3"><option value="CONFORME">Conforme</option><option value="NAO_CONFORME">Não conforme</option></select></label>
+              <DropDown label="Condição *" defaultSelection="Selecione uma condição" enumData={{ CONFORME: "Conforme", NAO_CONFORME: "Não conforme" }} value={form.condition} onSelect={(value) => setForm({ ...form, condition: value as typeof form.condition })} />
               <Input label="Tag" value={form.tag} onChange={(event) => setForm({ ...form, tag: event.target.value })} />
             </div>
             <div className="flex justify-end gap-3 border-t pt-4"><Link href={`/maquinas/${id}`}><Button type="button" variant="secondary">Cancelar</Button></Link><Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Salvar alterações"}</Button></div>
