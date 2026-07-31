@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as v from "valibot";
 
@@ -16,6 +17,7 @@ const forgotPasswordSchema = v.object({
 });
 
 export default function ForgotPasswordForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,9 +31,13 @@ export default function ForgotPasswordForm() {
     }
 
     setLoading(true);
+
     try {
       await authService.forgotPassword(result.output.email);
-      toast.success("Enviamos as instruções de recuperação para o seu e-mail.");
+      toast.success("Enviamos o código de verificação para o seu e-mail.");
+
+      // Redireciona para a rota aninhada do verify-code
+      router.push(`/login/forgot-password/verify-code?email=${encodeURIComponent(result.output.email)}`);
     } catch (error) {
       toast.error(
         getServiceErrorMessage(
@@ -46,7 +52,6 @@ export default function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-5">
-      {/* Botão com Seta de Voltar para o Login */}
       <div>
         <Link
           href="/login"
@@ -63,7 +68,6 @@ export default function ForgotPasswordForm() {
         </Link>
       </div>
 
-      {/* Input de E-mail Arredondado */}
       <Input
         label="E-mail"
         type="email"
@@ -75,7 +79,6 @@ export default function ForgotPasswordForm() {
         required
       />
 
-      {/* Botão Principal em Azul WEG e Arredondado */}
       <Button
         type="submit"
         variant="primary"
