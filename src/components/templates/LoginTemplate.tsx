@@ -3,7 +3,11 @@
 import { LoginTemplateProps } from "@/props/LoginTemplateProps";
 import Image from "next/image";
 
-export function LoginTemplate({ form }: LoginTemplateProps) {
+export function LoginTemplate({
+    form,
+    title = "Entrar",
+    subtitle = "Acesse com suas credenciais do portal",
+}: LoginTemplateProps) {
     return (
         <main className="flex min-h-screen w-full flex-col md:flex-row overflow-hidden bg-slate-50">
 
@@ -44,8 +48,8 @@ export function LoginTemplate({ form }: LoginTemplateProps) {
 
                     {/* Cabeçalho do Login */}
                     <div className="w-full text-left mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">Entrar</h1>
-                        <p className="text-sm text-gray-500">Acesse com suas credenciais do portal</p>
+                        <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+                        <p className="text-sm text-gray-500">{subtitle}</p>
                     </div>
 
                     {/* Formulário de Login */}

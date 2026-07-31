@@ -1,4 +1,6 @@
 
 export interface LoginTemplateProps{
-    form : React.ReactNode
+    form: React.ReactNode;
+    title?: string;
+    subtitle?: string;
 }
