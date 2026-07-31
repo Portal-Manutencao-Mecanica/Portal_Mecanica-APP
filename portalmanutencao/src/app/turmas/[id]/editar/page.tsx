@@ -31,7 +31,7 @@ export default function EditClassPage({ params }: PageProps) {
   useEffect(() => {
     async function loadClass() {
       try {
-        const response = await fetch(`http://localhost:8080/api/turma/${id}`);
+        const response = await fetch(`/api/turma/${id}`);
         if (!response.ok) throw new Error("Não foi possível carregar os dados da turma.");
         const classGroup: ClassGroup = await response.json();
         setAcronym(classGroup.acronym ?? "");
@@ -55,7 +55,7 @@ export default function EditClassPage({ params }: PageProps) {
 
     setSaving(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/turma/${id}`, {
+      const response = await fetch(`/api/turma/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ acronym: result.output.acronym, teachers: (result.output.teachers ?? "").split(",").map((name) => name.trim()).filter(Boolean) }),

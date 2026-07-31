@@ -37,11 +37,8 @@ export function MachineRow({
       <span>{patrimony}</span>
       <span>{name}</span>
       <span>{place}</span>
-      <LabelWithCircle
-        status={status}
-        text={text}
-      />
-      
+      <LabelWithCircle status={status} text={text} />
+
       <span>{tag ?? "-"}</span>
       <div className="flex justify-end gap-2">
         <Link href={`/maquinas/${id}`}>
