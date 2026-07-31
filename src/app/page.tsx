@@ -126,89 +126,86 @@ export default function Home() {
 
   return (
     <LayoutDesktop>
-      <div className="flex flex-col gap-6 pb-6">
-        
-        {/* ================= CABEÇALHO LISINHO (SEM CARD/BACKGROUND) ================= */}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Bem-vindo de volta, Alexander! 👋
-          </h1>
-          <p className="text-sm text-gray-500">
-            Aqui está o resumo geral das operações e manutenções da oficina hoje.
-          </p>
-        </div>
+  {/* Grid Principal dividindo a tela inteira em 2 colunas */}
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start pb-6">
+    
+    {/* ================= COLUNA DA ESQUERDA (2/3 da tela) ================= */}
+    <div className="lg:col-span-2 flex flex-col gap-6">
+      
+      {/* 1. Título e Subtítulo Principal */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Bem-vindo de volta, Alexander! 👋
+        </h1>
+        <p className="text-sm text-gray-500">
+          Aqui está o resumo geral das operações e manutenções da oficina hoje.
+        </p>
+      </div>
 
-        {/* ================= LAYOUT PRINCIPAL EM 2 COLUNAS ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          
-          {/* COLUNA DA ESQUERDA (2/3 da Tela) */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            
-            {/* Indicadores Principais */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {stats.map((stat, index) => (
-                <StatCard key={index} {...stat} />
-              ))}
-            </section>
+      {/* 2. Bloco Superior: Cards de Indicadores (Grid 2x2) */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {stats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+      </section>
 
-            {/* Tabela de Ocorrências Recentes */}
-            <section className="w-full bg-white rounded-lg border border-gray-100 shadow-md p-6 flex flex-col gap-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-weg-blue">
-                    Ocorrências Recentes
-                  </h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Últimos apontamentos de manutenção no portal
-                  </p>
-                </div>
-
-                <Link
-                  href="/ocorrencias"
-                  className="p-1.5 text-weg-blue hover:bg-weg-blue/10 rounded-lg transition-colors"
-                  title="Ver todas as ocorrências"
-                >
-                  <Link2 className="w-5 h-5" />
-                </Link>
-              </div>
-
-              <Table columns={columns} data={recentOcorrencias} variant="plain" />
-            </section>
+      {/* 3. Bloco Inferior: Tabela de Ocorrências Recentes */}
+      <section className="w-full bg-white rounded-lg border border-gray-100 shadow-md p-6 flex flex-col gap-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-weg-blue">
+              Ocorrências Recentes
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Últimos apontamentos de manutenção no portal
+            </p>
           </div>
 
-          {/* COLUNA DA DIREITA / LATERAL (1/3 da Tela - Action Cards) */}
-          <aside className="flex flex-col gap-6">
-            
-            {/* Módulos Principais Empilhados na Lateral */}
-            <section className="flex flex-col gap-3">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="text-base font-bold text-gray-800">
-                  Navegação Rápida
-                </h2>
-                <span className="text-xs text-gray-400">Atalhos</span>
-              </div>
+          <Link
+            href="/ocorrencias"
+            className="p-1.5 text-weg-blue hover:bg-weg-blue/10 rounded-lg transition-colors"
+            title="Ver todas as ocorrências"
+          >
+            <Link2 className="w-5 h-5" />
+          </Link>
+        </div>
 
-              <div className="flex flex-col gap-3">
-                {quickActions.map((action, index) => (
-                  <ActionCard key={index} {...action} />
-                ))}
-              </div>
-            </section>
+        <Table columns={columns} data={recentOcorrencias} variant="plain" />
+      </section>
+    </div>
 
-            {/* Card Informativo Extra na Lateral */}
-            <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-lg flex items-start gap-3">
-              <Bell className="w-5 h-5 text-weg-blue shrink-0 mt-0.5" />
-              <div className="text-xs">
-                <p className="font-semibold text-gray-800">Manutenção Preventiva</p>
-                <p className="text-gray-500 mt-0.5">
-                  Agendada revisão nos tornos CNC para a próxima sexta-feira às 14:00.
-                </p>
-              </div>
-            </div>
+    {/* ================= COLUNA DA DIREITA (1/3 da tela) ================= */}
+    <aside className="flex flex-col gap-6 ">
+      
+      {/* 1. Título "Links Rápidos" (Alinhado no topo com o H1 da esquerda) */}
+      <div className="flex flex-col  justify-between  pb-[0.8rem]">
+        <h2 className="text-xl font-bold text-gray-800">
+          Links Rápidos
+        </h2>
+        <span className="text-xs text-gray-400">Atalhos</span>
+      </div>
 
-          </aside>
+      {/* 2. Bloco Superior: Lista de Cards de Navegação */}
+      <section className="flex flex-col gap-3">
+        {quickActions.map((action, index) => (
+          <ActionCard key={index} {...action} />
+        ))}
+      </section>
+
+      {/* 3. Bloco Inferior: Card Informativo Extra */}
+      <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-lg flex items-start gap-3">
+        <Bell className="w-5 h-5 text-weg-blue shrink-0 mt-0.5" />
+        <div className="text-xs">
+          <p className="font-semibold text-gray-800">Manutenção Preventiva</p>
+          <p className="text-gray-500 mt-0.5">
+            Agendada revisão nos tornos CNC para a próxima sexta-feira às 14:00.
+          </p>
         </div>
       </div>
-    </LayoutDesktop>
+
+    </aside>
+
+  </div>
+</LayoutDesktop>
   );
 }
