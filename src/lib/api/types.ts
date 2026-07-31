@@ -85,7 +85,7 @@ export interface CreateEquipment {
   sap?: string;
   unitPrice: number;
   availableQuantity: number;
-  media : any;
+  media?: string;
 }
 
 export interface Machine {
