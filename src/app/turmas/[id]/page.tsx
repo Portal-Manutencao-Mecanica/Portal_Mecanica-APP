@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
 import { StudentCard } from "@/components/molecules/StudentCard";
+import ConfirmDialog from "@/components/organisms/ConfirmDialog";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { ClassGroup } from "@/lib/api/types";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
@@ -17,6 +18,7 @@ interface Props { params: Promise<{ id: string }>; }
 export default function ClassGroupPage({ params }: Props) {
   const { id } = use(params);
   const [classGroup, setClassGroup] = useState<ClassGroup | null>(null);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
   const [reactivating, setReactivating] = useState(false);
 
@@ -27,8 +29,9 @@ export default function ClassGroupPage({ params }: Props) {
   }, [id]);
 
   async function deactivateClassGroup() {
-    if (!classGroup || !window.confirm(`Inativar a turma ${classGroup.acronym}?`)) return;
+    if (!classGroup || deactivating) return;
 
+    setDeactivateDialogOpen(false);
     setDeactivating(true);
     try {
       setClassGroup(await classGroupBrowserService.deactivate(id));
@@ -66,7 +69,7 @@ export default function ClassGroupPage({ params }: Props) {
             <Button icon={Pencil}>Editar turma</Button>
           </Link>
           {classGroup.enabled ? (
-            <Button variant="danger" icon={Power} disabled={deactivating} onClick={deactivateClassGroup}>
+            <Button variant="danger" icon={Power} disabled={deactivating} onClick={() => setDeactivateDialogOpen(true)}>
               {deactivating ? "Inativando..." : "Inativar turma"}
             </Button>
           ) : (
@@ -87,6 +90,16 @@ export default function ClassGroupPage({ params }: Props) {
           )) : <p className="rounded-xl border bg-white p-6 text-gray-500">Nenhum aluno vinculado a esta turma.</p>}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deactivateDialogOpen}
+        title="Inativar turma"
+        description={`Tem certeza de que deseja inativar a turma ${classGroup.acronym}?`}
+        confirmText="Inativar turma"
+        confirmVariant="danger"
+        onCancel={() => setDeactivateDialogOpen(false)}
+        onConfirm={() => void deactivateClassGroup()}
+      />
     </LayoutDesktop>
   );
 }
