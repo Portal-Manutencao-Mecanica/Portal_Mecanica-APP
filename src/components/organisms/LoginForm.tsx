@@ -25,7 +25,7 @@ const loginSchema = v.object({
   password: v.pipe(v.string(), v.minLength(1, "Informe sua senha.")),
 });
 
-export default function LoginForm() {
+export function LoginForm() {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -40,18 +40,17 @@ export default function LoginForm() {
   useEffect(() => {
     if (isAuthenticated && !isLoadingSession) {
       router.replace(
-        authenticatedUser?.passwordChangeRequired ? "/primeiro-acesso" : "/",
+        authenticatedUser?.passwordChangeRequired ? "/primeiro-acesso" : "/"
       );
     }
   }, [authenticatedUser, isAuthenticated, isLoadingSession, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     const result = v.safeParse(loginSchema, { email, password });
 
     if (!result.success) {
-      toast.error(result.issues[0]?.message ?? "Verifique os dados informados.");
+      toast.error(result.issues[0]?.message ?? "Revise os dados de acesso.");
       return;
     }
 
@@ -64,12 +63,12 @@ export default function LoginForm() {
         router.push("/primeiro-acesso");
       } else {
         const returnTo = new URLSearchParams(window.location.search).get(
-          "returnTo",
+          "returnTo"
         );
         router.push(
           returnTo?.startsWith("/") && !returnTo.startsWith("//")
             ? returnTo
-            : "/",
+            : "/"
         );
       }
       router.refresh();
@@ -77,7 +76,7 @@ export default function LoginForm() {
       toast.error(
         getServiceErrorMessage(
           error,
-          "E-mail ou senha incorretos. Verifique suas credenciais."
+          "Não foi possível entrar. Verifique seu e-mail e senha."
         )
       );
     } finally {
@@ -95,19 +94,20 @@ export default function LoginForm() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="Digite seu e-mail"
           autoComplete="email"
-          className="rounded-xl border-gray-300 focus:border-weg-blue"
+          className="rounded-xl border-gray-300 focus:border-[#00579D]"
           required
         />
         <Input
           label="Senha"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) => setPassword(event.target.value)}
           placeholder="Digite sua senha"
           autoComplete="current-password"
-          className="rounded-xl border-gray-300 focus:border-weg-blue"
+          className="rounded-xl border-gray-300 focus:border-[#00579D]"
           required
         />
+      </div>
 
       {process.env.NODE_ENV === "development" && (
         <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3">
@@ -123,14 +123,15 @@ export default function LoginForm() {
                   setEmail(testUser.email);
                   setPassword(TEST_PASSWORD);
                 }}
-                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium transition-colors hover:bg-blue-100"
+                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium text-[#00579D] transition-colors hover:bg-blue-100"
               >
                 {testUser.label}
               </button>
             ))}
           </div>
           <p className="mt-2 text-[11px] text-gray-500">
-            Selecione um perfil para preencher as credenciais de desenvolvimento.
+            Selecione um perfil para preencher as credenciais de
+            desenvolvimento.
           </p>
         </div>
       )}
@@ -139,7 +140,7 @@ export default function LoginForm() {
       <div className="flex items-center justify-start pt-1">
         <Link
           href="/login/forgot-password"
-          className="text-xs font-semibold bg-weg-blue hover:underline transition-all"
+          className="text-xs font-semibold text-[#00579D] hover:underline transition-all"
         >
           Esqueceu sua senha?
         </Link>
@@ -149,7 +150,7 @@ export default function LoginForm() {
         type="submit"
         variant="primary"
         disabled={loading || isLoadingSession}
-        className="w-full py-3 mt-2 rounded-xl bg-weg-blue hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
+        className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
       >
         {loading || isLoadingSession ? "Entrando..." : "Entrar"}
       </Button>

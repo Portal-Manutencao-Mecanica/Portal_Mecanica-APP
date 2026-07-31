@@ -8,6 +8,7 @@ export default function ConfirmDialog({
   title,
   description,
   confirmText = "Confirmar",
+  confirmVariant = "primary",
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
@@ -29,7 +30,7 @@ export default function ConfirmDialog({
             Cancelar
           </Button>
 
-          <Button  onClick={onConfirm}>
+          <Button variant={confirmVariant} onClick={onConfirm}>
             {confirmText}
           </Button>
         </div>
