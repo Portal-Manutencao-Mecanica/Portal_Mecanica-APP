@@ -1,13 +1,10 @@
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
-import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { AUTH_COOKIE, REFRESH_COOKIE } from "@/lib/api/config";
+import { AUTH_COOKIE, getApiUrl, REFRESH_COOKIE } from "@/lib/api/config";
 import { clearSessionCookies, setSessionCookies } from "@/lib/api/session";
-import { binaryFromUpstream, upstreamUnavailableResponse } from "@/lib/api/proxyResponse";
+import { upstreamUnavailableResponse } from "@/lib/api/proxyResponse";
 import type { LoginResponse } from "@/lib/api/types";
 import { refreshUpstreamSession } from "@/services/sessionService";
-import { upstreamApi } from "@/services/upstreamApiService";
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
@@ -32,26 +29,50 @@ async function forward(
   headers["X-Forwarded-For"] =
     request.headers.get("x-forwarded-for") ?? "127.0.0.1";
 
-  const config: AxiosRequestConfig<ArrayBuffer> = {
-    url: `/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`,
+  const url =
+    `${getApiUrl()}/${path.map(encodeURIComponent).join("/")}` +
+    request.nextUrl.search;
+
+  return fetch(url, {
     method,
     headers,
-    responseType: "arraybuffer",
-  };
+    body:
+      method === "GET" || method === "HEAD"
+        ? undefined
+        : requestBody,
+    cache: "no-store",
+  });
+}
 
-  if (method !== "GET" && method !== "HEAD") {
-    config.data = requestBody;
+async function responseFromUpstream(upstreamResponse: Response) {
+  const headers = new Headers();
+  const contentType = upstreamResponse.headers.get("content-type");
+  const contentDisposition = upstreamResponse.headers.get(
+    "content-disposition",
+  );
+
+  if (contentType) headers.set("Content-Type", contentType);
+  if (contentDisposition) {
+    headers.set("Content-Disposition", contentDisposition);
   }
+  headers.set("Cache-Control", "no-store");
 
-  return upstreamApi.request<ArrayBuffer>(config);
+  const body =
+    upstreamResponse.status === 204
+      ? null
+      : await upstreamResponse.arrayBuffer();
+
+  return new NextResponse(body, {
+    status: upstreamResponse.status,
+    headers,
+  });
 }
 
 async function handle(request: NextRequest, context: RouteContext) {
   try {
     const { path } = await context.params;
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get(AUTH_COOKIE)?.value;
-    const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+    const accessToken = request.cookies.get(AUTH_COOKIE)?.value;
+    const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
     const requestBody =
       request.method === "GET" || request.method === "HEAD"
         ? undefined
@@ -77,9 +98,7 @@ async function handle(request: NextRequest, context: RouteContext) {
       }
     }
 
-    const response = binaryFromUpstream(
-      upstreamResponse as AxiosResponse<ArrayBuffer>,
-    );
+    const response = await responseFromUpstream(upstreamResponse);
 
     if (refreshedSession) {
       setSessionCookies(response, refreshedSession);

@@ -3,13 +3,15 @@ import axios from "axios";
 import type { ApiErrorPayload } from "@/lib/api/types";
 
 export const browserApi = axios.create({
-  baseURL: "/api",
+  baseURL: "/backend",
   timeout: 15_000,
+  withCredentials: true,
 });
 
 export const authApi = axios.create({
   baseURL: "/api/auth",
   timeout: 15_000,
+  withCredentials: true,
 });
 
 browserApi.interceptors.response.use(undefined, (error) => {
