@@ -1,17 +1,24 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   User,
   Mail,
   Shield,
   Building2,
   LogOut,
-  Lock,
 } from "lucide-react";
 
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
+import { useAuth } from "@/hooks/useAuth";
+
 export default function PerfilPage() {
+  const router = useRouter();
+  const { logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const usuario = {
     nome: "Professor de Teste",
     email: "professor@teste.local",
@@ -21,8 +28,17 @@ export default function PerfilPage() {
     iniciais: "PT",
   };
 
-  const handleLogout = () => {
-    console.log("Saindo da conta...");
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.replace("/login");
+      router.refresh();
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const handleAlterarSenha = () => {
@@ -148,9 +164,11 @@ export default function PerfilPage() {
               <Button
                 variant="danger"
                 onClick={handleLogout}
+                icon={LogOut}
+                disabled={isLoggingOut}
                 className="text-xs font-semibold w-full sm:w-auto"
               >
-                <span>Sair da Conta</span>
+                <span>{isLoggingOut ? "Saindo..." : "Sair da Conta"}</span>
               </Button>
             </div>
           </div>
