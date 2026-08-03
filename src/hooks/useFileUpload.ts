@@ -24,7 +24,7 @@ export function useFileUpload() {
     const processFile = (file: File): Promise<UploadedFileProps> => {
       return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.readAsText(file);
+        reader.readAsDataURL(file);
 
         reader.onload = () => {
           resolve({

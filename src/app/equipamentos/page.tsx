@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
 import DataTable from "@/components/organisms/DataTable";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { Equipment } from "@/lib/api/types";
@@ -33,7 +35,7 @@ export default function EquipmentsPage() {
       }
     }
 
-    loadEquipments();
+    void loadEquipments();
   }, []);
 
   const columns = useMemo<ColumnProps<Equipment>[]>(
@@ -45,11 +47,7 @@ export default function EquipmentsPage() {
       {
         header: "Ações",
         align: "right",
-        render: (equipment) => (
-          <Link href={`/equipamentos/${equipment.id}`}>
-            <Button variant="secondary">Ver detalhes</Button>
-          </Link>
-        ),
+        render: (equipment) => <Link href={`/equipamentos/${equipment.id}`}><Button variant="secondary">Ver detalhes</Button></Link>,
       },
     ],
     [],
@@ -58,26 +56,17 @@ export default function EquipmentsPage() {
   return (
     <LayoutDesktop>
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Equipamentos</h1>
-            <p className="text-gray-500">Gerencie todos os equipamentos cadastrados.</p>
-          </div>
-          <Link href="/equipamentos/novo"><Button>Novo equipamento</Button></Link>
-        </div>
-
+        <PageHeader
+          title="Equipamentos"
+          description="Gerencie todos os equipamentos cadastrados."
+          actions={<Link href="/equipamentos/novo"><Button>Novo equipamento</Button></Link>}
+        />
         {loading ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">Carregando equipamentos...</div>
+          <PageFeedback message="Carregando equipamentos..." />
         ) : error ? (
-          <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>
+          <PageFeedback variant="error" message={error} />
         ) : (
-          <DataTable
-            data={equipments}
-            columns={columns}
-            searchKeys={["name", "sap"]}
-            searchPlaceholder="Pesquisar por nome ou código SAP..."
-            emptyMessage="Nenhum equipamento encontrado."
-          />
+          <DataTable data={equipments} columns={columns} searchKeys={["name", "sap"]} searchPlaceholder="Pesquisar por nome ou código SAP..." emptyMessage="Nenhum equipamento encontrado." />
         )}
       </div>
     </LayoutDesktop>

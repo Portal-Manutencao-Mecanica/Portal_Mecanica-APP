@@ -1,2 +1,8 @@
-export interface NotificationData { id: string; email: string; title: string; about: string; description: string; statusRead: boolean; }
-export interface NotificationDetailProps { notification: NotificationData; onMarkAsRead?: () => void; }
+import type { Notification } from "@/lib/api/types";
+
+export type NotificationData = Notification;
+
+export interface NotificationDetailProps {
+  notification: NotificationData;
+  onMarkAsRead?: () => void;
+}

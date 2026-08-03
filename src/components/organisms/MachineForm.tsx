@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { toast } from "sonner";
 import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
+import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
 import type { Place } from "@/lib/api/types";
 import { getServiceErrorMessage } from "@/services/httpService";
@@ -33,11 +34,15 @@ export default function MachineForm() {
   const {
     register,
     handleSubmit,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<MachineFormData>({
     resolver: valibotResolver(machineSchema),
     defaultValues: { patrimony: "", name: "", placeId: "", condition: "CONFORME", tag: "" },
   });
+  const placeId = useWatch({ control, name: "placeId" });
+  const condition = useWatch({ control, name: "condition" });
 
   useEffect(() => {
     async function loadPlaces() {
@@ -80,25 +85,24 @@ export default function MachineForm() {
           <Input placeholder="Ex.: Torno mecânico" {...register("name")} />
         </Field>
 
-        <Field label="Local *" error={errors.placeId?.message || placesError}>
-          <select
-            className="w-full rounded-lg border border-gray-300 p-3"
-            disabled={loadingPlaces || Boolean(placesError)}
-            {...register("placeId")}
-          >
-            <option value="">{loadingPlaces ? "Carregando locais..." : "Selecione um local"}</option>
-            {places.map((place) => (
-              <option key={place.id} value={place.id}>{place.name}</option>
-            ))}
-          </select>
-        </Field>
+        <DropDown
+          label="Local *"
+          defaultSelection={loadingPlaces ? "Carregando locais..." : "Selecione um local"}
+          enumData={Object.fromEntries(places.map((place) => [place.id, place.name]))}
+          value={placeId}
+          onSelect={(value) => setValue("placeId", value, { shouldDirty: true, shouldValidate: true })}
+          disabled={loadingPlaces || Boolean(placesError)}
+          error={errors.placeId?.message || placesError}
+        />
 
-        <Field label="Condição *" error={errors.condition?.message}>
-          <select className="w-full rounded-lg border border-gray-300 p-3" {...register("condition")}>
-            <option value="CONFORME">Conforme</option>
-            <option value="NAO_CONFORME">Não conforme</option>
-          </select>
-        </Field>
+        <DropDown
+          label="Condição *"
+          defaultSelection="Selecione uma condição"
+          enumData={{ CONFORME: "Conforme", NAO_CONFORME: "Não conforme" }}
+          value={condition}
+          onSelect={(value) => setValue("condition", value as MachineFormData["condition"], { shouldDirty: true, shouldValidate: true })}
+          error={errors.condition?.message}
+        />
 
         <Field label="Tag ou categoria" error={errors.tag?.message}>
           <Input placeholder="Ex.: CNC, 3D, FRESA" {...register("tag")} />

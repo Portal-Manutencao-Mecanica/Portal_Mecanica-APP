@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
 import { TableProps } from "@/props/TableProps";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
 
 export function Table<T extends { id: string | number }>({
   columns,
@@ -37,12 +39,12 @@ export function Table<T extends { id: string | number }>({
           {onSearchChange && (
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
+              <Input
                 type="text"
                 value={searchValue || ""}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:border-weg-blue focus:ring-1 focus:ring-weg-blue transition-all placeholder:text-gray-400"
+                className="pl-9"
               />
             </div>
           )}
@@ -135,9 +137,10 @@ export function Table<T extends { id: string | number }>({
                 )}
 
                 {extraColumns.length > 0 && (
-                  <button
+                  <Button
                     onClick={() => toggleRow(item.id)}
-                    className="mt-1 w-full py-2 px-4 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200/80 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    variant="secondary"
+                    className="mt-1 w-full border border-gray-200/80 bg-gray-50 text-xs text-gray-600 shadow-none hover:bg-gray-100"
                   >
                     {isExpanded ? (
                       <>
@@ -150,7 +153,7 @@ export function Table<T extends { id: string | number }>({
                         <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                       </>
                     )}
-                  </button>
+                  </Button>
                 )}
               </div>
             );

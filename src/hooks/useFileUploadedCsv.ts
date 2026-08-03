@@ -1,96 +1,75 @@
-import { useState, useRef } from 'react';
+﻿import { useRef, useState } from "react";
 
 export interface CsvFileState {
   fileObject: File;
-  content: string; // Conteúdo de texto puro do CSV
-  previewEmails: string[]; // Primeiros e-mails para preview visual
+  previewLines: string[];
 }
 
 export function useFileUploadedCsv() {
-  const [files, setFiles] = useState<CsvFileState[]>([]);
+  const [file, setFile] = useState<CsvFileState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const processFiles = async (selectedFiles: FileList | File[]) => {
-    const filesArray = Array.from(selectedFiles);
+  async function processFile(selectedFile: File | undefined) {
+    if (!selectedFile) return;
 
-    // Valida apenas extensoes CSV
-    const validFiles = filesArray.filter((file) => {
-      const isValid = file.name.endsWith('.csv') || file.type === 'text/csv';
-      if (!isValid) {
-        alert(`O arquivo "${file.name}" não é um CSV válido!`);
-      }
-      return isValid;
-    });
-
-    const processFile = (file: File): Promise<CsvFileState> => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-
-        // 💡 Lê o CSV como texto puro (não Base64)
-        reader.readAsText(file, 'UTF-8');
-
-        reader.onload = () => {
-          const textContent = (reader.result as string) || '';
-
-          // Extrai linhas simples para extrair e-mails para prévia (preview)
-          const lines = textContent
-            .split(/\r?\n/)
-            .map((line) => line.trim())
-            .filter(Boolean);
-
-          // Pega os primeiros 5 e-mails para exibir na tela
-          const previewEmails = lines.slice(0, 5);
-
-          resolve({
-            fileObject: file,
-            content: textContent,
-            previewEmails,
-          });
-        };
-      });
-    };
-
-    const newFiles = await Promise.all(validFiles.map(processFile));
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  };
-
-  const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      processFiles(event.target.files);
-      event.target.value = '';
+    if (!selectedFile.name.toLocaleLowerCase("pt-BR").endsWith(".csv")) {
+      setFile(null);
+      setValidationError("Selecione um arquivo CSV.");
+      return;
     }
-  };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+    try {
+      const content = await selectedFile.text();
+      const previewLines = content
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+
+      setFile({ fileObject: selectedFile, previewLines });
+      setValidationError(null);
+    } catch {
+      setFile(null);
+      setValidationError("Não foi possível ler o arquivo CSV selecionado.");
+    }
+  }
+
+  function handleFilesChange(event: React.ChangeEvent<HTMLInputElement>) {
+    void processFile(event.target.files?.[0]);
+    event.target.value = "";
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLElement>) {
+    event.preventDefault();
     setIsDragging(true);
-  };
+  }
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
+  function handleDragLeave(event: React.DragEvent<HTMLElement>) {
+    event.preventDefault();
     setIsDragging(false);
-  };
+  }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
+  function handleDrop(event: React.DragEvent<HTMLElement>) {
+    event.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files?.length > 0) {
-      processFiles(e.dataTransfer.files);
-    }
-  };
+    void processFile(event.dataTransfer.files?.[0]);
+  }
 
-  const removeFile = (indexToRemove: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
-  };
+  function removeFile() {
+    setFile(null);
+    setValidationError(null);
+  }
 
-  const openFileDialog = () => {
+  function openFileDialog() {
     fileInputRef.current?.click();
-  };
+  }
 
   return {
-    files,
+    file,
     isDragging,
+    validationError,
     fileInputRef,
     handleFilesChange,
     handleDragOver,

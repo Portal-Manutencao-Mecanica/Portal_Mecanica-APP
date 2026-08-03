@@ -1,10 +1,13 @@
-﻿import type { Page } from "@/lib/api/types";
-import type { CalendarResponseDto, CreateCalendarEventDto } from "@/types/CalendarEvent";
+import type {
+  CalendarItem,
+  CalendarResponseDto,
+  CreateCalendarEventDto,
+} from "@/types/CalendarEvent";
 import { browserApi } from "./httpService";
 
 export const calendarService = {
   async list() {
-    const { data } = await browserApi.get<Page<CalendarResponseDto>>("/eventos");
+    const { data } = await browserApi.get<CalendarItem[]>("/eventos/calendario");
     return data;
   },
 

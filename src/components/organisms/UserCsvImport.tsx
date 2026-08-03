@@ -1,17 +1,131 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
+import UploadedCsv from "@/components/molecules/UploadedCsv";
 import { useAuth } from "@/hooks/useAuth";
-import type { UserImportResponse } from "@/lib/api/types";
+import type { ClassGroup, UserImportResponse } from "@/lib/api/types";
+import { classGroupBrowserService } from "@/services/classGroupBrowserService";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { userService } from "@/services/userService";
 
 interface UserCsvImportProps {
   onImportCompleted: () => void;
+}
+
+const templateHeaders = [
+  "name",
+  "username",
+  "email",
+  "role",
+  "organization",
+  "classGroupNames",
+] as const;
+
+function normalizeName(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLocaleLowerCase("pt-BR");
+}
+
+function parseCsv(content: string) {
+  const records: string[][] = [];
+  let record: string[] = [];
+  let value = "";
+  let quoted = false;
+
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index];
+    const nextCharacter = content[index + 1];
+
+    if (character === '"' && quoted && nextCharacter === '"') {
+      value += '"';
+      index += 1;
+    } else if (character === '"') {
+      quoted = !quoted;
+    } else if (character === "," && !quoted) {
+      record.push(value.trim());
+      value = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && nextCharacter === "\n") index += 1;
+      record.push(value.trim());
+      if (record.some(Boolean)) records.push(record);
+      record = [];
+      value = "";
+    } else {
+      value += character;
+    }
+  }
+
+  record.push(value.trim());
+  if (record.some(Boolean)) records.push(record);
+  return records;
+}
+
+function escapeCsv(value: string) {
+  return /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+}
+
+async function createImportFile(file: File) {
+  const records = parseCsv(await file.text());
+  const [header, ...rows] = records;
+  const normalizedHeader = header?.map((column) => column.replace(/^\uFEFF/, "").trim());
+
+  if (!normalizedHeader || !templateHeaders.every((column) => normalizedHeader.includes(column))) {
+    throw new Error(
+      "Use o modelo CSV com as colunas: name, username, email, role, organization e classGroupNames.",
+    );
+  }
+
+  const classGroupNamesIndex = normalizedHeader.indexOf("classGroupNames");
+  const classGroupsPage = await classGroupBrowserService.list(1000);
+  const groupsByName = new Map<string, ClassGroup[]>();
+
+  for (const classGroup of classGroupsPage.content) {
+    const name = normalizeName(classGroup.acronym);
+    groupsByName.set(name, [...(groupsByName.get(name) ?? []), classGroup]);
+  }
+
+  const convertedRows = rows.map((row, index) => {
+    const groupNames = (row[classGroupNamesIndex] ?? "")
+      .split("|")
+      .map((name) => name.trim())
+      .filter(Boolean);
+    const classGroupIds = groupNames.map((groupName) => {
+      const matches = groupsByName.get(normalizeName(groupName)) ?? [];
+      if (matches.length === 0) {
+        throw new Error(`Linha ${index + 2}: a turma \"${groupName}\" não foi encontrada.`);
+      }
+      if (matches.length > 1) {
+        throw new Error(`Linha ${index + 2}: a turma \"${groupName}\" está duplicada.`);
+      }
+      return matches[0].id;
+    });
+
+    return templateHeaders.map((column) => {
+      if (column === "classGroupNames") return classGroupIds.join("|");
+      return row[normalizedHeader.indexOf(column)] ?? "";
+    });
+  });
+
+  const backendHeader = [
+    "name",
+    "username",
+    "email",
+    "role",
+    "organization",
+    "classGroupIds",
+  ];
+  const content = [backendHeader, ...convertedRows]
+    .map((record) => record.map(escapeCsv).join(","))
+    .join("\n");
+
+  return new File([content], file.name, { type: "text/csv" });
 }
 
 export default function UserCsvImport({
@@ -22,34 +136,20 @@ export default function UserCsvImport({
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<UserImportResponse | null>(null);
 
-  const actor = user;
-  const canImport = actor?.role === "ADMIN" || actor?.role === "COORDENADOR";
-  const allowedRoles = actor?.role === "ADMIN"
+  if (!user || (user.role !== "ADMIN" && user.role !== "COORDENADOR")) return null;
+
+  const actorRole = user.role;
+  const allowedRoles = actorRole === "ADMIN"
     ? "ALUNO, PROFESSOR, COORDENADOR ou ADMIN"
     : "ALUNO ou PROFESSOR";
 
-  if (!canImport || !actor) return null;
-
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const selectedFile = event.target.files?.[0] ?? null;
-    if (selectedFile && !/\.(csv|xlsx)$/i.test(selectedFile.name)) {
-      toast.error("Selecione um arquivo no formato CSV ou XLSX.");
-      event.target.value = "";
-      setFile(null);
-      return;
-    }
-
-    setFile(selectedFile);
-    setResult(null);
-  }
-
   function downloadTemplate() {
-    const organization = actor.role === "COORDENADOR" ? "" : "SENAI";
+    const organization = actorRole === "COORDENADOR" ? "" : "SENAI";
     const content = [
-      "name,username,email,role,organization,classGroupIds",
-      `Nome do usuário,usuario.nome,usuario@empresa.com,ALUNO,${organization},`,
+      templateHeaders.join(","),
+      `Nome do usuário,usuario.nome,usuario@empresa.com,ALUNO,${organization},MEC-2026`,
     ].join("\n");
-    const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
+    const url = URL.createObjectURL(new Blob([`\uFEFF${content}`], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
     link.download = "modelo-importacao-usuarios.csv";
@@ -59,60 +159,50 @@ export default function UserCsvImport({
 
   async function importFile() {
     if (!file) {
-      toast.error("Selecione o arquivo CSV ou XLSX antes de importar.");
+      toast.error("Selecione o arquivo CSV antes de importar.");
       return;
     }
 
     setImporting(true);
     try {
-      const importResult = await userService.importCsv(file);
+      const importFile = await createImportFile(file);
+      const importResult = await userService.importCsv(importFile);
       setResult(importResult);
       if (importResult.created > 0) onImportCompleted();
       toast.success(`${importResult.created} usuário(s) importado(s).`);
     } catch (error) {
-      toast.error(
-        getServiceErrorMessage(error, "Não foi possível importar o arquivo."),
-      );
+      toast.error(getServiceErrorMessage(error, "Não foi possível importar o arquivo."));
     } finally {
       setImporting(false);
     }
   }
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-        <div>
-          <h2 className="text-lg font-semibold">Importar usuários por arquivo</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Cabeçalho: <code>name, username, email, role, organization, classGroupIds</code>.
-            A coluna <code>organization</code> aceita somente <code>SENAI</code>, <code>WEG</code> ou <code>OTHER</code>;
-            para COORDENADOR ela pode ficar vazia e a organização própria é usada.
+    <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold text-gray-800">Importar usuários por CSV</h2>
+          <p className="text-sm text-gray-500">
+            Use nomes ou siglas de turma, separados por <code>|</code>. Nenhum identificador precisa ser informado.
           </p>
-          <p className="mt-1 text-sm text-gray-500">
-            Roles permitidas para você: {allowedRoles}.
-          </p>
+          <p className="text-sm text-gray-500">Roles permitidas: {allowedRoles}.</p>
         </div>
         <Button variant="secondary" icon={Download} onClick={downloadTemplate}>
           Baixar modelo CSV
         </Button>
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <input
-          aria-label="Arquivo CSV de usuários"
-          accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-700"
-          onChange={handleFileChange}
-          type="file"
-        />
+      <UploadedCsv onChange={setFile} disabled={importing} />
+
+      <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
         <Button disabled={!file || importing} icon={Upload} onClick={importFile}>
-          {importing ? "Importando..." : "Importar arquivo"}
+          {importing ? "Importando..." : "Importar usuários"}
         </Button>
       </div>
 
       {result && (
-        <div className="mt-5 rounded-lg bg-gray-50 p-4 text-sm">
-          <p className="font-medium">
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm" aria-live="polite">
+          <p className="font-medium text-gray-800">
             Resultado: {result.created} criado(s), {result.failed} com falha.
           </p>
           {result.failed > 0 && (
