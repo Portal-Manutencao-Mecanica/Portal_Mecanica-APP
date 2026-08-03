@@ -13,7 +13,8 @@ import {
   Settings,
   CircleQuestionMark,
   BrushCleaning,
-  Calendar
+  Calendar,
+  ClipboardCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
@@ -35,7 +36,8 @@ export function SideBar({
     { icon: Users, label: "Turmas", href: "/turmas" },
     { icon: Toolbox, label: "Equipamentos", href: "/equipamentos" },
     { icon: BrushCleaning, label: "Inconveniência 5S", href: "/incoveniencia5s" },
-    { icon: Calendar, label: "Calendário Preventiva", href: "/calendario" },
+    { icon: ClipboardCheck, label: "Manutenção Autônoma", href: "/manutencao-autonoma" },
+    { icon: Calendar, label: "Calendário", href: "/calendario" },
   ];
 
   return (
@@ -139,7 +141,7 @@ export function SideBar({
           {/* Itens Exclusivos de Mobile */}
           <div className="md:hidden flex flex-col gap-1 mt-1 pt-1 border-t border-white/20 shrink-0 w-full">
             <Link
-              href="/configuracoes"
+              href="/configuracao"
               onClick={closeMobileMenu}
               className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 w-full justify-start"
             >
@@ -152,7 +154,7 @@ export function SideBar({
             </Link>
 
             <Link
-              href="/ajuda"
+              href="/faq"
               onClick={closeMobileMenu}
               className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 w-full justify-start"
             >

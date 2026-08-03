@@ -110,6 +110,58 @@ export interface Place {
   name: string;
 }
 
+export type EquipmentSituation = "OPERANDO" | "NAO_OPERANDO";
+export type EquipmentCondition = "CONFORME" | "NAO_CONFORME";
+
+export type AutonomousMaintenanceStatus =
+  | "PENDENTE_APROVACAO_COORDENADOR"
+  | "APROVADA_PELO_COORDENADOR"
+  | "REPROVADA_PELO_COORDENADOR";
+
+export interface AutonomousMaintenanceStudent {
+  id: string;
+  name: string;
+  email: string;
+  numberCard: string;
+}
+
+export interface AutonomousMaintenanceRequest {
+  equipmentSituation: EquipmentSituation;
+  scheduledFor: string;
+  inspectedAt?: string | null;
+  inspectedMachineId: string;
+  equipmentCondition: EquipmentCondition;
+  identifiedNonconformities?: string | null;
+  studentIds: string[];
+}
+
+export interface AutonomousMaintenanceApproval {
+  approved: boolean;
+  reason?: string | null;
+}
+
+export interface AutonomousMaintenance {
+  id: string;
+  equipmentSituation: EquipmentSituation;
+  scheduledFor: string;
+  inspectedAt: string | null;
+  inspectedMachineId: string;
+  inspectedMachineName: string;
+  equipmentCondition: EquipmentCondition;
+  identifiedNonconformities: string | null;
+  responsibleTeacherId: string;
+  responsibleTeacherName: string;
+  students: AutonomousMaintenanceStudent[];
+  status: AutonomousMaintenanceStatus;
+  coordinatorApproverId: string | null;
+  coordinatorApproverName: string | null;
+  approvedAt: string | null;
+  rejectionReason: string | null;
+  calendarEventId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CreateMachine {
   name: string;
   patrimony: string;

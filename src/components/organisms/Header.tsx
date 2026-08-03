@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import NotificationItem from "@/components/atoms/NotificationItem";
+import type { Notification } from "@/lib/api/types";
+import { notificationService } from "@/services/notificationService";
 
 interface HeaderProps {
   onOpenMobileMenu?: () => void;
@@ -14,28 +16,26 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
-  const [notifications] = useState([
-    {
-      id: 1,
-      title: "Ocorrência Aprovada",
-      about: "A ocorrência do Professor Manutenção foi validada.",
-      isUnread: true,
-    },
-    {
-      id: 2,
-      title: "Sistema Atualizado",
-      about: "O portal recebeu uma nova versão hoje.",
-      isUnread: false,
-    },
-    {
-      id: 3,
-      title: "Manutenção Concluída",
-      about: "Máquina Torno CNC liberada para uso.",
-      isUnread: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const hasUnreadNotifications = notifications.some((notif) => notif.isUnread);
+  const hasUnreadNotifications = notifications.some((notif) => !notif.statusRead);
+
+  useEffect(() => {
+    let active = true;
+
+    notificationService
+      .list({ size: 5 })
+      .then((page) => {
+        if (active) setNotifications(page.content);
+      })
+      .catch(() => {
+        if (active) setNotifications([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -53,6 +53,24 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const handleToggleMenu = () => {
     setIsNotificationOpen(!isNotificationOpen);
   };
+
+  function handleNotificationClick(notification: Notification) {
+    setIsNotificationOpen(false);
+    if (notification.statusRead) return;
+
+    setNotifications((current) =>
+      current.map((item) =>
+        item.id === notification.id ? { ...item, statusRead: true } : item,
+      ),
+    );
+    void notificationService.markAsRead(notification.id).catch(() => {
+      setNotifications((current) =>
+        current.map((item) =>
+          item.id === notification.id ? { ...item, statusRead: false } : item,
+        ),
+      );
+    });
+  }
 
   return (
     <header className="bg-weg-blue w-full h-16 md:h-20 px-4 md:px-5 shadow-md relative z-30 flex items-center shrink-0">
@@ -128,18 +146,22 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                   </div>
 
                   <div className="max-h-75 overflow-y-auto">
-                    {notifications.map((notif) => (
-                      <NotificationItem
-                        key={notif.id}
-                        title={notif.title}
-                        about={notif.about}
-                        isUnread={notif.isUnread}
-                        onClick={() =>
-                          console.log(`Clicou na notificação ${notif.id}`)
-                        }
-                        id={""}
-                      />
-                    ))}
+                    {notifications.length === 0 ? (
+                      <p className="px-4 py-6 text-center text-sm text-gray-500">
+                        Nenhuma notificação disponível.
+                      </p>
+                    ) : (
+                      notifications.map((notif) => (
+                        <NotificationItem
+                          key={notif.id}
+                          id={notif.id}
+                          title={notif.title}
+                          about={notif.about}
+                          isUnread={!notif.statusRead}
+                          onClick={() => handleNotificationClick(notif)}
+                        />
+                      ))
+                    )}
                   </div>
 
                   <div className="h-px bg-weg-blue/30 my-1" />

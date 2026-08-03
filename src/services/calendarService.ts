@@ -3,8 +3,10 @@ import type { CalendarResponseDto, CreateCalendarEventDto } from "@/types/Calend
 import { browserApi } from "./httpService";
 
 export const calendarService = {
-  async list() {
-    const { data } = await browserApi.get<Page<CalendarResponseDto>>("/eventos");
+  async list(params?: { page?: number; size?: number; sort?: string }) {
+    const { data } = await browserApi.get<Page<CalendarResponseDto>>("/eventos", {
+      params,
+    });
     return data;
   },
 

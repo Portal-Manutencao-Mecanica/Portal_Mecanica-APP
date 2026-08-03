@@ -45,7 +45,14 @@ const newForm = (scheduledFor: string): CalendarForm => ({
   teacherId: "",
   status: "PENDENTE",
 });
-const toCalendarEvent = (event: CalendarResponseDto): EventInput => ({ id: event.id, title: event.scheduledAction, start: event.scheduledFor, extendedProps: event });
+const toCalendarEvent = (event: CalendarResponseDto): EventInput => ({
+  id: event.id,
+  title: event.scheduledAction,
+  start: event.scheduledFor,
+  backgroundColor: event.maintenanceType === "AUTONOMA" ? "#00693C" : undefined,
+  borderColor: event.maintenanceType === "AUTONOMA" ? "#00693C" : undefined,
+  extendedProps: event,
+});
 
 export default function CalendarioPage() {
   const [events, setEvents] = useState<CalendarResponseDto[]>(initialEvents);
@@ -61,7 +68,7 @@ export default function CalendarioPage() {
   useEffect(() => {
     async function loadEvents() {
       try {
-        const page = await calendarService.list();
+        const page = await calendarService.list({ size: 100, sort: "scheduledFor,asc" });
         setEvents(page.content);
       } catch (error) {
         toast.error(getServiceErrorMessage(error, "Nao foi possivel carregar o calendario."));
@@ -104,7 +111,7 @@ export default function CalendarioPage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Calendario de manutencao</h1>
-            <p className="text-sm text-gray-500">Clique em um dia para agendar uma manutencao.</p>
+            <p className="text-sm text-gray-500">Visualize manutenções preventivas e autônomas aprovadas.</p>
           </div>
           <button type="button" onClick={() => openCreate(toInputDate(new Date().toISOString()))} className="flex items-center gap-2 rounded-lg bg-weg-blue px-4 py-2 font-medium text-white">
             <Plus className="h-4 w-4" />Novo evento
@@ -112,6 +119,29 @@ export default function CalendarioPage() {
         </div>
         {isLoading ? <p className="text-sm text-gray-500">Carregando eventos...</p> : <Calendar events={events.map(toCalendarEvent)} onDateClick={(info) => openCreate(`${info.dateStr}T08:00`)} onEventClick={(info) => setModal({ type: "details", event: info.event.extendedProps as CalendarResponseDto })} />}
       </main>
+      {modal?.type === "details" && (
+        <div role="dialog" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-weg-blue">
+                  {modal.event.maintenanceType === "AUTONOMA" ? "Manutenção autônoma" : "Evento de manutenção"}
+                </span>
+                <h2 className="mt-1 text-xl font-bold text-gray-900">{modal.event.scheduledAction}</h2>
+              </div>
+              <button type="button" onClick={closeModal} aria-label="Fechar" className="rounded-lg p-2 hover:bg-gray-100"><X /></button>
+            </div>
+            <dl className="grid gap-4 rounded-lg bg-gray-50 p-4 sm:grid-cols-2">
+              <CalendarDetail label="Data" value={new Date(modal.event.scheduledFor).toLocaleString("pt-BR")} />
+              <CalendarDetail label="Status" value={modal.event.status.replaceAll("_", " ")} />
+              <CalendarDetail label="Máquina" value={modal.event.machineName ?? "Não informada"} />
+              <CalendarDetail label="Professor" value={modal.event.teacherName ?? "Não informado"} />
+              <CalendarDetail label="Local" value={modal.event.placeName ?? "Não informado"} />
+              <CalendarDetail label="Criticidade" value={modal.event.criticality} />
+            </dl>
+          </div>
+        </div>
+      )}
       {modal?.type === "create" && <div role="dialog" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-2xl rounded-xl bg-white p-6"><div className="mb-6 flex justify-between"><div><h2 className="text-xl font-bold">Agendar manutencao</h2><p className="text-sm text-gray-500">Preencha os dados do evento.</p></div><button onClick={closeModal} aria-label="Fechar"><X /></button></div><form onSubmit={createEvent} className="space-y-4"><FormField id="scheduledAction" label="Acao programada *"><input id="scheduledAction" value={form.scheduledAction} onChange={(event) => updateForm("scheduledAction", event.target.value)} className={inputStyle} /></FormField><div className="grid gap-4 sm:grid-cols-2"><FormField id="scheduledFor" label="Data e hora *"><input id="scheduledFor" type="datetime-local" value={form.scheduledFor} onChange={(event) => updateForm("scheduledFor", event.target.value)} className={inputStyle} /></FormField><FormField id="criticality" label="Criticidade *"><select id="criticality" value={form.criticality} onChange={(event) => updateForm("criticality", event.target.value)} className={inputStyle}><option value="BAIXA">Baixa</option><option value="MEDIA">Media</option><option value="ALTA">Alta</option></select></FormField></div><FormField id="maintenanceType" label="Tipo de manutencao *"><select id="maintenanceType" value={form.maintenanceType} onChange={(event) => updateForm("maintenanceType", event.target.value)} className={inputStyle}><option value="PREVENTIVA">Preventiva</option><option value="CORRETIVA">Corretiva</option><option value="PREDITIVA">Preditiva</option></select></FormField><div className="grid gap-4 sm:grid-cols-2"><TextField id="equipmentId" label="Identificador do equipamento *" value={form.equipmentId} onChange={(value) => updateForm("equipmentId", value)} /><TextField id="machineId" label="Identificador da maquina *" value={form.machineId} onChange={(value) => updateForm("machineId", value)} /><TextField id="placeId" label="Identificador do local *" value={form.placeId} onChange={(value) => updateForm("placeId", value)} /><TextField id="studentId" label="Identificador do aluno responsavel" value={form.studentId} onChange={(value) => updateForm("studentId", value)} /><TextField id="teacherId" label="Identificador do professor responsavel *" value={form.teacherId} onChange={(value) => updateForm("teacherId", value)} /></div><div className="flex justify-end gap-3"><button type="button" onClick={closeModal}>Cancelar</button><button type="submit" disabled={isSaving}>{isSaving ? "Criando..." : "Criar evento"}</button></div></form></div></div>}
     </LayoutDesktop>
   );
@@ -123,4 +153,8 @@ function FormField({ id, label, children }: { id: string; label: string; childre
 
 function TextField({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
   return <FormField id={id} label={label}><input id={id} value={value} onChange={(event) => onChange(event.target.value)} className={inputStyle} /></FormField>;
+}
+
+function CalendarDetail({ label, value }: { label: string; value: string }) {
+  return <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">{label}</dt><dd className="mt-1 text-sm text-gray-800">{value}</dd></div>;
 }

@@ -2,8 +2,8 @@ import type { ClassGroup, CreateClassGroup, Page } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const classGroupBrowserService = {
-  async list() {
-    const { data } = await browserApi.get<Page<ClassGroup>>("/turma");
+  async list(params?: { page?: number; size?: number; sort?: string }) {
+    const { data } = await browserApi.get<Page<ClassGroup>>("/turma", { params });
     return data;
   },
   async getById(id: string) {
