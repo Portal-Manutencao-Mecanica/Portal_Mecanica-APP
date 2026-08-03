@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
@@ -40,7 +41,7 @@ export function LoginForm() {
   useEffect(() => {
     if (isAuthenticated && !isLoadingSession) {
       router.replace(
-        authenticatedUser?.passwordChangeRequired ? "/primeiro-acesso" : "/"
+        authenticatedUser?.passwordChangeRequired ? "/primeiro-acesso" : "/",
       );
     }
   }, [authenticatedUser, isAuthenticated, isLoadingSession, router]);
@@ -63,12 +64,12 @@ export function LoginForm() {
         router.push("/primeiro-acesso");
       } else {
         const returnTo = new URLSearchParams(window.location.search).get(
-          "returnTo"
+          "returnTo",
         );
         router.push(
           returnTo?.startsWith("/") && !returnTo.startsWith("//")
             ? returnTo
-            : "/"
+            : "/",
         );
       }
       router.refresh();
@@ -125,8 +126,7 @@ export function LoginForm() {
             ))}
           </div>
           <p className="mt-2 text-[11px] text-gray-500">
-            Selecione um perfil para preencher as credenciais de
-            desenvolvimento.
+            Selecione um perfil para preencher as credenciais de desenvolvimento.
           </p>
         </div>
       )}
@@ -149,7 +149,6 @@ export function LoginForm() {
       >
         {loading || isLoadingSession ? "Entrando..." : "Entrar"}
       </Button>
-      </div>
     </form>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { CheckCheck, Eye } from "lucide-react";
-import Link from "next/link";
 import Button from "@/components/atoms/Button";
 import PageHeader from "@/components/molecules/PageHeader";
 import DataTable from "@/components/organisms/DataTable";
@@ -19,7 +18,7 @@ export default function NotificationListSection({ notifications, onMarkAllAsRead
     { header: "Título", accessorKey: "title" },
     { header: "Assunto", render: (notification) => notification.about ?? "-" },
     { header: "Situação", render: (notification) => notification.statusRead ? "Lida" : "Não lida" },
-    { header: "", align: "right", render: (notification) => <Link href={`/notificacoes/${notification.id}`} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-weg-blue hover:bg-blue-50" aria-label={`Ver notificação: ${notification.title}`}><Eye className="h-4 w-4" /> Ver</Link> },
+    { header: "", align: "right", render: (notification) => <Button href={`/notificacoes/${notification.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar notificação: ${notification.title}`} title="Visualizar notificação" /> },
   ], []);
 
   return <div className="space-y-6">

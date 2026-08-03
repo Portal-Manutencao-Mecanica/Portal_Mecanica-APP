@@ -43,9 +43,7 @@ export default function ClassGroupTable({
       align: "right",
       render: (group) => (
         <div className="flex justify-end gap-2">
-          <Link href={{ pathname: `/turmas/${group.id}`, query: { turma: group.acronym } }}>
-            <Button variant="secondary" icon={Eye}>Visualizar</Button>
-          </Link>
+          <Button href={`/turmas/${group.id}?turma=${encodeURIComponent(group.acronym)}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar turma ${group.acronym}`} title="Visualizar turma" />
           <Link href={{ pathname: `/turmas/${group.id}/editar`, query: { turma: group.acronym } }}>
             <Button icon={Pencil}>Editar</Button>
           </Link>

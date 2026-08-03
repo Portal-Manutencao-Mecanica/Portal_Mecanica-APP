@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "https://campaign-licensing-dream-edition.trycloudflare.com/api";
+const DEFAULT_API_URL = "https://knight-basement-washing-goat.trycloudflare.com/api";
 
 export function getApiUrl() {
   return (process.env.MAINTENANCE_API_URL ?? DEFAULT_API_URL).replace(/\/$/, "");

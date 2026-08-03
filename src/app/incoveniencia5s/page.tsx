@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
@@ -32,7 +33,7 @@ export default function InconveniencePage() {
     { header: "Turma", accessorKey: "classGroupAcronym" },
     { header: "Professor", accessorKey: "notifiedTeacherName" },
     { header: "Situação", render: (item) => <LabelWithCircle status={item.status === "RESOLVIDA" ? "positive" : "warning"} text={item.status.replaceAll("_", " ")} /> },
-    { header: "Ações", align: "right", render: (item) => <Link href={`/incoveniencia5s/${item.id}`}><Button variant="secondary">Ver detalhes</Button></Link> },
+    { header: "Ações", align: "right", render: (item) => <Button href={`/incoveniencia5s/${item.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar ocorrência 5S ${item.inconvenience}`} title="Visualizar ocorrência 5S" /> },
   ], []);
 
   return <LayoutDesktop><div className="space-y-6">

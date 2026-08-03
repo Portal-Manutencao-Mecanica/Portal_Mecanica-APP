@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
 
@@ -36,9 +36,7 @@ export default function EquipmentCard({ equipment }: Props) {
           </p>
         </div>
 
-        <Link href={`/equipamentos/${equipment.id}`}>
-          <Button>Ver detalhes</Button>
-        </Link>
+        <Button href={`/equipamentos/${equipment.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar equipamento ${equipment.name}`} title="Visualizar equipamento" />
       </div>
     </div>
   );

@@ -90,7 +90,7 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-5xl space-y-6 p-6">
+      <section className="space-y-6">
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-100 pb-5">
             <div>
@@ -131,24 +131,34 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
               {request.coordinatorApprovedAt && <Detail label="Decidida em" value={new Date(request.coordinatorApprovedAt).toLocaleString("pt-BR")} />}
             </div>
             {request.coordinatorRejectionReason && <div className="mt-5"><Detail label="Motivo da reprovação do coordenador" value={request.coordinatorRejectionReason} /></div>}
-            {request.media?.length > 0 && (
-              <div className="mt-6 border-t border-gray-100 pt-5">
-                <h3 className="text-sm font-semibold text-gray-800">Imagens da ocorrência</h3>
-                <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
-                  {request.media.map((media) => (
-                    <SafeImage
-                      key={media.id}
-                      src={media.image}
-                      alt={media.description || media.originalName}
-                      width={640}
-                      height={420}
-                      className="h-36 w-full rounded-lg border border-gray-200 object-cover"
-                      unoptimized
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+          </section>
+        )}
+
+        {request.media?.length > 0 && (
+          <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-800">Imagens da ocorrência</h2>
+            <p className="mt-1 text-sm text-gray-500">Evidências enviadas no registro da ocorrência.</p>
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {request.media.map((media) => (
+                <a
+                  key={media.id}
+                  href={media.image}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="overflow-hidden rounded-lg border border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-weg-blue focus-visible:ring-offset-2"
+                  aria-label={`Abrir ${media.description || media.originalName}`}
+                >
+                  <SafeImage
+                    src={media.image}
+                    alt={media.description || media.originalName}
+                    width={640}
+                    height={420}
+                    className="h-44 w-full object-cover"
+                    unoptimized
+                  />
+                </a>
+              ))}
+            </div>
           </section>
         )}
 
@@ -161,7 +171,7 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
           {canCoordinatorDecide && <Button variant="danger" icon={XCircle} onClick={() => setPendingDecision("COORDINATOR_REJECT")}>Reprovar ordem</Button>}
           {canCoordinatorDecide && <Button icon={CheckCircle2} onClick={() => setPendingDecision("COORDINATOR_APPROVE")}>Aprovar ordem</Button>}
         </div>
-      </div>
+      </section>
 
       <ConfirmDialog open={confirmingDelete} title="Excluir ocorrência" description="Esta ação não pode ser desfeita. Deseja excluir esta ocorrência?" confirmText={submitting ? "Excluindo..." : "Excluir"} onCancel={() => !submitting && setConfirmingDelete(false)} onConfirm={deleteOccurrence} />
       {decisionContent && <ConfirmDialog open title={decisionContent.title} description={decisionContent.description} confirmText={submitting ? "Salvando..." : decisionContent.confirmText} onCancel={() => !submitting && setPendingDecision(null)} onConfirm={decide} />}

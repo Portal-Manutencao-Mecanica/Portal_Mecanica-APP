@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
 import PageFeedback from "@/components/molecules/PageFeedback";
@@ -47,7 +48,7 @@ export default function EquipmentsPage() {
       {
         header: "Ações",
         align: "right",
-        render: (equipment) => <Link href={`/equipamentos/${equipment.id}`}><Button variant="secondary">Ver detalhes</Button></Link>,
+        render: (equipment) => <Button href={`/equipamentos/${equipment.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar equipamento ${equipment.name}`} title="Visualizar equipamento" />,
       },
     ],
     [],

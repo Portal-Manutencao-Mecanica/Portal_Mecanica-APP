@@ -1,141 +1,163 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from "react";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { useEffect, useId, useRef } from "react";
 import { FileImage, Trash2, Upload } from "lucide-react";
+
+import Button from "@/components/atoms/Button";
 import SafeImage from "@/components/atoms/SafeImage";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import type { UploadedFileProps } from "@/props/UploadedFileProps";
 import formatBytes from "@/utils/formatBytes";
 
-interface UploadedFileProps  {
-    onChange?: (base64List: string[]) => void;
-    error?: string;
-    id? : string
+interface UploadedFile64Props {
+  value?: string[];
+  onChange?: (base64List: string[]) => void;
+  error?: string;
+  id?: string;
+  maxFiles?: number;
+  maxFileSizeBytes?: number;
+  disabled?: boolean;
 }
 
-export default function UploadedFile64({ onChange, error }: UploadedFileProps) {
-    const {
-        files,
-        isDragging,
-        fileInputRef,
-        handleFilesChange,
-        handleDragOver,
-        handleDragLeave,
-        handleDrop,
-        removeFile,
-        openFileDialog
-    } = useFileUpload();
+function sameImages(first: string[], second: string[]) {
+  return first.length === second.length && first.every((image, index) => image === second[index]);
+}
 
-    // Guardamos a referência do callback para não causar re-renders no useEffect
-    const onChangeRef = useRef(onChange);
-    useEffect(() => {
-        onChangeRef.current = onChange;
-    }, [onChange]);
+function imageContents(files: UploadedFileProps[]) {
+  return files
+    .map((file) => file.fileContent)
+    .filter((content): content is string => typeof content === "string" && content.length > 0);
+}
 
-    // Dispara para o Valibot SOMENTE quando a lista de 'files' realmente mudar
-    useEffect(() => {
-        if (!onChangeRef.current) return;
+export default function UploadedFile64({
+  value = [],
+  onChange,
+  error,
+  id,
+  maxFiles,
+  maxFileSizeBytes,
+  disabled = false,
+}: UploadedFile64Props) {
+  const generatedId = useId();
+  const inputId = id ?? `uploaded-file-${generatedId}`;
+  const onChangeRef = useRef(onChange);
+  const previousValueRef = useRef(value);
+  const skipNextChangeRef = useRef(false);
+  const {
+    files,
+    fileError,
+    isDragging,
+    fileInputRef,
+    setFiles,
+    handleFilesChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    removeFile,
+    openFileDialog,
+  } = useFileUpload({ maxFiles, maxFileSizeBytes });
 
-        // Filtra apenas as strings que já concluíram a conversão Base64
-        const base64Strings = files
-            .map((f) => f.fileContent)
-            .filter((content): content is string => typeof content === "string" && content.length > 0);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
-        onChangeRef.current(base64Strings);
-    }, [files]); // Dependência EXCLUSIVA de 'files'
+  useEffect(() => {
+    if (sameImages(value, previousValueRef.current)) return;
 
-    return (
-        <div className="w-full max-w-xl mx-auto p-4 flex flex-col gap-4">
-            <input
-                type="file"
-                multiple
-                accept="image/png, image/jpeg, image/webp, image/svg+xml"
-                ref={fileInputRef}
-                onChange={handleFilesChange}
-                className="hidden"
-            />
+    previousValueRef.current = value;
+    if (!sameImages(value, imageContents(files))) {
+      skipNextChangeRef.current = true;
+      setFiles(value.map((fileContent) => ({ fileContent })));
+    }
+  }, [files, setFiles, value]);
 
-            {/* Caixa de Dropzone */}
-            <div
-                onClick={openFileDialog}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`
-                    flex flex-col items-center justify-center 
-                    p-6 sm:p-10 rounded-2xl border-2 border-dashed transition-all cursor-pointer select-none text-center
-                    ${isDragging
-                        ? 'border-blue-500 bg-blue-50/50'
-                        : error 
-                            ? 'border-red-400 bg-red-50/30' 
-                            : 'border-gray-300 bg-gray-100 hover:bg-gray-200/70'
-                    }
-                `}
+  useEffect(() => {
+    if (skipNextChangeRef.current) {
+      skipNextChangeRef.current = false;
+      return;
+    }
+    onChangeRef.current?.(imageContents(files));
+  }, [files]);
+
+  const feedback = error || fileError;
+
+  return (
+    <div className="space-y-4">
+      <input
+        id={inputId}
+        type="file"
+        multiple
+        accept="image/png, image/jpeg, image/webp, image/svg+xml"
+        ref={fileInputRef}
+        onChange={handleFilesChange}
+        className="sr-only"
+        disabled={disabled}
+      />
+
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={openFileDialog}
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onDrop={disabled ? undefined : handleDrop}
+        disabled={disabled}
+        aria-describedby={`${inputId}-help`}
+        className={`min-h-40 w-full flex-col border-2 border-dashed shadow-none ${
+          isDragging ? "border-weg-blue" : feedback ? "border-weg-negative" : "border-gray-300"
+        }`}
+      >
+        <Upload className="h-8 w-8" aria-hidden="true" />
+        <span>Selecionar imagens</span>
+        <span className="text-xs font-normal text-gray-500">ou solte os arquivos aqui</span>
+      </Button>
+
+      {feedback && <p className="text-sm text-weg-negative">{feedback}</p>}
+
+      {files.length > 0 && (
+        <ul className="space-y-2" aria-live="polite">
+          {files.map((item, index) => (
+            <li
+              key={`${index}-${item.fileObject?.name ?? "imagem"}`}
+              className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3"
             >
-                <Upload className="w-8 h-8 sm:w-10 sm:h-10 text-gray-700 mb-3" />
-                <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
-                    Selecione um arquivo
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-xs">
-                    ou solte aqui
-                </p>
-            </div>
-
-            {/* Mensagem de Erro da Validação do Valibot */}
-            {error && (
-                <span className="text-xs font-medium text-red-500 text-center">
-                    {error}
-                </span>
-            )}
-
-            {/* Lista de Imagens Carregadas */}
-            {files.length > 0 && (
-                <div className="flex flex-col gap-2.5 mt-2">
-                    {files.map((item, index) => (
-                        <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-gray-200/60 rounded-xl border border-gray-200/80 transition-all hover:bg-gray-200"
-                        >
-                            <div className="flex items-center gap-3.5 min-w-0">
-                                <div className="w-12 h-12 rounded-lg bg-gray-300/80 shrink-0 flex items-center justify-center overflow-hidden border border-gray-300">
-                                    {typeof item.fileContent === 'string' ? (
-                                        <SafeImage
-                                            src={item.fileContent}
-                                            alt={item.fileObject.name}
-                                            width={48}
-                                            height={48}
-                                            className="h-full w-full object-cover"
-                                            unoptimized
-                                        />
-                                    ) : (
-                                        <FileImage className="w-6 h-6 text-gray-500" />
-                                    )}
-                                </div>
-
-                                <div className="flex flex-col min-w-0">
-                                    <p className="font-semibold text-sm text-gray-800 truncate">
-                                        {item.fileObject.name}
-                                    </p>
-                                    <p className="text-xs text-gray-500 font-medium">
-                                        {formatBytes(item.fileObject.size)}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeFile(index);
-                                }}
-                                className="p-1.5 text-gray-400 cursor-pointer hover:bg-gray-300/50 rounded-lg transition-colors"
-                                title="Remover arquivo"
-                            >
-                                <Trash2 className="w-5 h-5" />
-                            </button>
-                        </div>
-                    ))}
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-white">
+                  {typeof item.fileContent === "string" ? (
+                    <SafeImage
+                      src={item.fileContent}
+                      alt={item.fileObject?.name ?? `Imagem da ocorrência ${index + 1}`}
+                      width={48}
+                      height={48}
+                      className="h-full w-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <FileImage className="h-6 w-6 text-gray-500" aria-hidden="true" />
+                  )}
                 </div>
-            )}
-        </div>
-    );
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-800">
+                    {item.fileObject?.name ?? `Imagem da ocorrência ${index + 1}`}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {item.fileObject ? formatBytes(item.fileObject.size) : "Imagem já salva"}
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                icon={Trash2}
+                onClick={() => removeFile(index)}
+                disabled={disabled}
+                aria-label={`Remover imagem ${index + 1}`}
+                className="min-h-0 shrink-0 px-2 py-2 shadow-none"
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }

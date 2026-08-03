@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Eye, Pencil } from "lucide-react";
 import Button from "../atoms/Button";
 import LabelWithCircle from "./LabelWithCircle";
 
@@ -44,12 +44,14 @@ export function MachineRow({
       
       <span>{tag ?? "-"}</span>
       <div className="flex justify-end gap-2">
-        <Link href={`/maquinas/${id}`}>
-          <Button variant="primary">Ver</Button>
-        </Link>
-        <Link href={`/maquinas/${id}/editar`}>
-          <Button variant="warning">Editar</Button>
-        </Link>
+        <Button href={`/maquinas/${id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar máquina ${name}`} title="Visualizar máquina" />
+        <Button
+          href={`/maquinas/${id}/editar`}
+          icon={Pencil}
+          iconOnly
+          aria-label={`Editar máquina ${name}`}
+          title="Editar máquina"
+        />
         <Button variant="danger">Excluir</Button>
       </div>
     </div>

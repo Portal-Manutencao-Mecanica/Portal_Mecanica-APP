@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
@@ -35,7 +36,7 @@ export default function BuyPage() {
     { header: "Itens", render: (buy) => buy.items.length, align: "center" },
     { header: "Data", render: (buy) => dateFormatter.format(new Date(buy.createdAt)) },
     { header: "Situação", render: (buy) => <LabelWithCircle status={buy.status.includes("REPROV") ? "negative" : buy.status.includes("APROV") ? "positive" : "warning"} text={buy.status.replaceAll("_", " ")} /> },
-    { header: "Ações", align: "right", render: (buy) => <Link href={`/compras/${buy.id}`}><Button variant="secondary">Ver detalhes</Button></Link> },
+    { header: "Ações", align: "right", render: (buy) => <Button href={`/compras/${buy.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar solicitação de ${buy.createdByName}`} title="Visualizar solicitação" /> },
   ], []);
 
   return <LayoutDesktop><div className="space-y-6">

@@ -84,14 +84,14 @@ export default function AutonomousMaintenancePage() {
         header: "Ações",
         align: "right",
         render: (maintenance) => (
-          <Link href={`/manutencao-autonoma/${maintenance.id}`}>
-            <Button variant="secondary" icon={Eye}>
-              {user?.role === "COORDENADOR" &&
-              maintenance.status === "PENDENTE_APROVACAO_COORDENADOR"
-                ? "Analisar"
-                : "Ver detalhes"}
-            </Button>
-          </Link>
+          <Button
+            href={`/manutencao-autonoma/${maintenance.id}`}
+            variant="secondary"
+            icon={Eye}
+            iconOnly
+            aria-label={user?.role === "COORDENADOR" && maintenance.status === "PENDENTE_APROVACAO_COORDENADOR" ? "Analisar manutenção autônoma" : "Visualizar manutenção autônoma"}
+            title={user?.role === "COORDENADOR" && maintenance.status === "PENDENTE_APROVACAO_COORDENADOR" ? "Analisar manutenção autônoma" : "Visualizar manutenção autônoma"}
+          />
         ),
       },
     ],

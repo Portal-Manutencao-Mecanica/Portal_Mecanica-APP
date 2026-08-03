@@ -1,8 +1,8 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
@@ -45,7 +45,23 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
       <div className="mx-auto max-w-5xl space-y-6 p-6">
         <div className="flex justify-between">
           <div><h1 className="text-3xl font-bold">{machine.name}</h1><p className="text-gray-500">Patrimônio: {machine.patrimony}</p></div>
-          <div className="flex gap-2"><Link href="/maquinas"><Button variant="secondary">Voltar</Button></Link><Link href={`/maquinas/${id}/editar`}><Button variant="warning">Editar</Button></Link><Button variant="danger" onClick={() => setOpen(true)}>Excluir</Button></div>
+          <div className="flex gap-2">
+            <Button
+              href={`/maquinas/${id}/editar`}
+              icon={Pencil}
+              iconOnly
+              aria-label={`Editar máquina ${machine.name}`}
+              title="Editar máquina"
+            />
+            <Button
+              variant="danger"
+              icon={Trash2}
+              iconOnly
+              aria-label={`Excluir máquina ${machine.name}`}
+              title="Excluir máquina"
+              onClick={() => setOpen(true)}
+            />
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-6 rounded-xl border bg-white p-6 md:grid-cols-2">
           <Detail label="Condição"><LabelWithCircle status={isConforming ? "positive" : "negative"} text={isConforming ? "Conforme" : "Não conforme"} /></Detail>

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Eye } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -43,9 +42,7 @@ export function StudentTable({
       header: "Ações",
       align: "right",
       render: (student) => (
-        <Link href={`/alunos/${student.id}`}>
-          <Button variant="secondary" icon={Eye}>Visualizar</Button>
-        </Link>
+        <Button href={`/alunos/${student.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar aluno ${student.name}`} title="Visualizar aluno" />
       ),
     },
   ];

@@ -33,7 +33,7 @@ export default function OccurrencesPage() {
     { header: "Professor", accessorKey: "notifiedTeacherName" },
     { header: "Prioridade", accessorKey: "priority" },
     { header: "Situação", render: (item) => <LabelWithCircle status={item.status === "APROVADA_PELO_PROFESSOR" || item.status === "FINALIZADA" ? "positive" : item.status.includes("REPROV") ? "negative" : "warning"} text={item.status.replaceAll("_", " ")} /> },
-    { header: "Ações", align: "right", render: (item) => <Link href={`/ocorrencias/${item.id}`}><Button variant="secondary" icon={Eye}>Analisar</Button></Link> },
+    { header: "Ações", align: "right", render: (item) => <Button href={`/ocorrencias/${item.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Analisar ocorrência da máquina ${item.machineName}`} title="Analisar ocorrência" /> },
   ], []);
 
   return <LayoutDesktop><div className="space-y-6">
