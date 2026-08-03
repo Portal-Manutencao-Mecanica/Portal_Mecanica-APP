@@ -20,6 +20,7 @@ export default function DropDown({
   const containerRef = useRef<HTMLDivElement>(null);
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const errorId = `${inputId}-error`;
   const options = Object.entries(enumData);
   const selectedLabel = options.find(([optionValue]) => optionValue === value)?.[1];
 
@@ -50,11 +51,12 @@ export default function DropDown({
           disabled={disabled}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
+          aria-describedby={error ? errorId : undefined}
           onClick={() => setIsOpen((current) => !current)}
-          className={`flex w-full items-center justify-between rounded-lg border bg-white px-4 py-2 text-left text-sm shadow-sm transition-all duration-200 ease-out hover:border-[#3498db] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 ${isOpen ? "border-[#3498db] ring-2 ring-[#3498db]/30" : "border-gray-200"} ${error ? "border-red-500" : ""} ${className}`}
+          className={`flex min-h-10 w-full items-center justify-between rounded-lg border bg-white px-4 py-2 text-left text-sm shadow-sm transition-colors hover:border-weg-blue/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-weg-blue/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 ${isOpen ? "border-weg-blue ring-2 ring-weg-blue/20" : "border-gray-200"} ${error ? "border-red-500" : ""} ${className}`}
         >
           <span className={selectedLabel ? "text-gray-800" : "italic text-gray-400"}>{selectedLabel ?? defaultSelection}</span>
-          <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-180 text-[#3498db]" : ""}`} />
+          <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-180 text-weg-blue" : ""}`} />
         </button>
 
         {isOpen && !disabled && (
@@ -71,7 +73,7 @@ export default function DropDown({
         )}
       </div>
 
-      {error && <span className="text-xs font-medium text-red-500">{error}</span>}
+      {error && <span id={errorId} className="text-sm text-red-700">{error}</span>}
     </div>
   );
 }

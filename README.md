@@ -29,19 +29,22 @@ credenciais.
 
 ## Getting Started
 
-First, run the development server:
+Para iniciar o frontend com um link público temporário, execute:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O terminal imprime `Link público: https://...trycloudflare.com` após o frontend
+ficar disponível. A URL muda a cada inicialização e funciona enquanto o comando
+permanecer em execução. A API também precisa estar em execução em
+`http://127.0.0.1:8080/api`.
+
+Para iniciar somente localmente, sem criar um túnel:
+
+```bash
+npm run dev:local
+```
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
