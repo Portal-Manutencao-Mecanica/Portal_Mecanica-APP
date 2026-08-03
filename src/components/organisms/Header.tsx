@@ -67,6 +67,24 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
     });
   }
 
+  function handleNotificationClick(notification: Notification) {
+    setIsNotificationOpen(false);
+    if (notification.statusRead) return;
+
+    setNotifications((current) =>
+      current.map((item) =>
+        item.id === notification.id ? { ...item, statusRead: true } : item,
+      ),
+    );
+    void notificationService.markAsRead(notification.id).catch(() => {
+      setNotifications((current) =>
+        current.map((item) =>
+          item.id === notification.id ? { ...item, statusRead: false } : item,
+        ),
+      );
+    });
+  }
+
   return (
     <header className="relative z-30 flex h-16 w-full shrink-0 items-center bg-weg-blue px-4 shadow-md md:h-20 md:px-5">
       <nav className="relative flex w-full items-center justify-between gap-2 md:gap-4">

@@ -7,6 +7,11 @@ export const studentService = {
     return data;
   },
 
+  async listActive() {
+    const { data } = await browserApi.get<Student[]>("/alunos/ativos");
+    return data;
+  },
+
   async getById(id: string) {
     const { data } = await browserApi.get<Student>(
       `/alunos/${encodeURIComponent(id)}`,

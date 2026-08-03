@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
@@ -8,22 +8,29 @@ import { ChevronRight, Home } from "lucide-react";
 export function Breadcrumbs() {
   const pathname = usePathname();
   const [dynamicLabels, setDynamicLabels] = useState<Record<number, string>>({});
-  const pathSegments = pathname.split("/").filter(Boolean);
+  const pathSegments = useMemo(
+    () => pathname.split("/").filter(Boolean),
+    [pathname],
+  );
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const labels: Record<number, string> = {};
+    const timeoutId = window.setTimeout(() => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const labels: Record<number, string> = {};
 
-    if (pathSegments[0] === "turmas") {
-      const classGroupName = searchParams.get("turma");
-      const studentName = searchParams.get("aluno");
+      if (pathSegments[0] === "turmas") {
+        const classGroupName = searchParams.get("turma");
+        const studentName = searchParams.get("aluno");
 
-      if (classGroupName && pathSegments[1]) labels[1] = `Turma ${classGroupName}`;
-      if (studentName && pathSegments[2] && pathSegments[2] !== "editar") labels[2] = studentName;
-    }
+        if (classGroupName && pathSegments[1]) labels[1] = `Turma ${classGroupName}`;
+        if (studentName && pathSegments[2] && pathSegments[2] !== "editar") labels[2] = studentName;
+      }
 
-    setDynamicLabels(labels);
-  }, [pathname]);
+      setDynamicLabels(labels);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [pathSegments]);
 
   if (pathSegments.length === 0) return null;
 
@@ -36,6 +43,8 @@ export function Breadcrumbs() {
       compras: "Compras",
       alunos: "Alunos",
       turmas: "Turmas",
+      "manutencao-autonoma": "Manutenção autônoma",
+      nova: "Nova manutenção",
       criar: "Criar turma",
       editar: "Editar turma",
     };
