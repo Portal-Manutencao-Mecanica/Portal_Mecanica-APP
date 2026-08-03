@@ -36,16 +36,16 @@ export function CascadingMultiSelect<T extends CascadingItemProps>({
 
   // Mapeia todos os itens de todos os grupos para facilitar a busca
   const allItems = useMemo(() => {
-    return groups.flatMap((group: any) => group.items);
+    return groups.flatMap((group) => group.items);
   }, [groups]);
 
   // Obtém os itens selecionados com base nos IDs passados em 'value'
   const selectedItems = useMemo(() => {
-    return allItems.filter((item: any) => value.includes(item.id));
+    return allItems.filter((item) => value.includes(item.id));
   }, [allItems, value]);
 
   // Obtém os itens do grupo que está ativo/hover no momento
-  const activeItems = useMemo(() => {
+  const activeItems = useMemo<T[]>(() => {
     if (!activeGroupId) return [];
     return groups.find((g) => g.id === activeGroupId)?.items || [];
   }, [groups, activeGroupId]);

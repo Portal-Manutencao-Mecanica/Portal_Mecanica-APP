@@ -2,8 +2,10 @@ import type { CreateMachine, Machine, Page } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const machineService = {
-  async list(params?: { page?: number; size?: number; sort?: string }) {
-    const { data } = await browserApi.get<Page<Machine>>("/maquinas", { params });
+  async list(size?: number) {
+    const { data } = await browserApi.get<Page<Machine>>("/maquinas", {
+      params: size ? { size } : undefined,
+    });
     return data;
   },
 

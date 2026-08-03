@@ -41,7 +41,7 @@ export interface Notification {
   id: string;
   email: string;
   title: string;
-  about: string;
+  about: string | null;
   description: string;
   statusRead: boolean;
 }
@@ -215,8 +215,8 @@ export interface Inconvenience5S {
 export interface MaintenanceRequestApi {
   id: string;
   status: string;
-  sector: string;
-  priority: string;
+  sector: MaintenanceRequestSector;
+  priority: MaintenanceRequestPriority;
   assignedStudentIds: string[];
   placeId: string;
   placeName: string;
@@ -226,6 +226,52 @@ export interface MaintenanceRequestApi {
   notifiedTeacherName: string;
   machineId: string;
   machineName: string;
+  approvedById: string | null;
+  approvedByName: string | null;
+  approvedAt: string | null;
+  rejectionReason: string | null;
+  workOrderNumber: string | null;
+  workOrderCreatedAt: string | null;
+  workOrderCreatedById: string | null;
+  workOrderCreatedByName: string | null;
+  coordinatorApprovedById: string | null;
+  coordinatorApprovedByName: string | null;
+  coordinatorApprovedAt: string | null;
+  coordinatorRejectionReason: string | null;
+  media: Media[];
+}
+
+export interface Media {
+  id: string;
+  description: string | null;
+  mediaType: string;
+  image: string;
+  originalName: string;
+  contentType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
+export type MaintenanceRequestSector =
+  | "AREA_NAO_DESIGNADA"
+  | "CENTRO_WEG"
+  | "WEG_MANUTENCAO";
+
+export type MaintenanceRequestPriority = "ALTA" | "MEDIA" | "BAIXA";
+
+export interface CreateMaintenanceRequest {
+  sector: MaintenanceRequestSector;
+  priority: MaintenanceRequestPriority;
+  placeId: string;
+  description: string;
+  notifiedTeacherId: string;
+  machineId: string;
+  images: string[];
+}
+
+export interface MaintenanceApproval {
+  approved: boolean;
+  reason?: string;
 }
 
 export interface Page<T> {
@@ -336,4 +382,31 @@ export interface CreatedUser {
   credentialsSent: boolean;
   emailStatus: string;
   createdAt: string;
+}
+
+export interface UserImportItem {
+  id: string;
+  row: number;
+  name: string;
+  username: string;
+  email: string;
+  role: UserRole | null;
+  organization: string;
+  status: "CREATED" | "FAILED";
+  createdUserId: string | null;
+  errorCode: string | null;
+  field: string | null;
+  message: string | null;
+}
+
+export interface UserImportResponse {
+  importId: string;
+  filename: string;
+  totalRows: number;
+  created: number;
+  failed: number;
+  status: "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS";
+  createdAt: string;
+  completedAt: string | null;
+  items: UserImportItem[];
 }

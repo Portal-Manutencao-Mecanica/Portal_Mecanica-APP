@@ -1,60 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import Button from "@/components/atoms/Button";
 import NotificationDetailSection from "@/components/organisms/NotificationDetailSection";
-import type { Notification } from "@/lib/api/types";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import type { NotificationData } from "@/props/NotificationDetailProps";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { notificationService } from "@/services/notificationService";
 
 export default function NotificationDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [notification, setNotification] = useState<Notification | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    notificationService
-      .getById(id)
-      .then(setNotification)
-      .catch((error) =>
-        toast.error(
-          getServiceErrorMessage(error, "Não foi possível carregar a notificação."),
-        ),
-      )
-      .finally(() => setIsLoading(false));
+    async function loadNotification() {
+      try {
+        const current = await notificationService.getById(id);
+        const updated = current.statusRead ? current : await notificationService.markAsRead(current.id);
+        setNotification(updated);
+      } catch (error) {
+        toast.error(getServiceErrorMessage(error, "Não foi possível carregar a notificação."));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadNotification();
   }, [id]);
 
-  async function handleToggleRead() {
+  async function toggleRead() {
     if (!notification) return;
-    try {
-      setNotification(await notificationService.toggleRead(notification.id));
-    } catch (error) {
-      toast.error(
-        getServiceErrorMessage(error, "Não foi possível atualizar a notificação."),
-      );
-    }
-  }
 
-  if (isLoading || !notification) {
-    return (
-      <LayoutDesktop>
-        <p className="p-8 text-center text-sm text-gray-500">
-          {isLoading ? "Carregando notificação..." : "Notificação não encontrada."}
-        </p>
-      </LayoutDesktop>
-    );
+    try {
+      const updated = await notificationService.toggleRead(notification.id);
+      setNotification(updated);
+      toast.success(updated.statusRead ? "Notificação marcada como lida." : "Notificação marcada como não lida.");
+    } catch (error) {
+      toast.error(getServiceErrorMessage(error, "Não foi possível atualizar a notificação."));
+    }
   }
 
   return (
     <LayoutDesktop>
-      <div className="p-4 md:p-8">
-        <NotificationDetailSection
-          notification={notification}
-          onMarkAsRead={() => void handleToggleRead()}
-        />
+      <div className="space-y-5 p-4 md:p-8">
+        <Link href="/notificacoes">
+          <Button variant="secondary" icon={ArrowLeft}>Voltar para notificações</Button>
+        </Link>
+        {loading && <p className="text-center text-gray-500">Carregando notificação...</p>}
+        {!loading && !notification && <p className="text-center text-gray-500">Notificação não encontrada.</p>}
+        {notification && <NotificationDetailSection notification={notification} onMarkAsRead={toggleRead} />}
       </div>
     </LayoutDesktop>
   );

@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { DataTableProps } from "@/props/DataTableProps";
 import Input from "../atoms/Input";
+import Button from "../atoms/Button";
 import ToggleGroup from "../molecules/ToggleGroup";
 
 export default function DataTable<T>({
@@ -29,19 +30,17 @@ export default function DataTable<T>({
         });
     };
 
-    const tableData = Array.isArray(data) ? data : [];
-
     const filteredData = useMemo(() => {
-        if (!searchTerm || searchKeys.length === 0) return tableData;
+        if (!searchTerm || searchKeys.length === 0) return data;
 
-        return tableData.filter((item) =>
+        return data.filter((item) =>
             searchKeys.some((key) => {
                 const value = item[key];
                 if (value === null || value === undefined) return false;
                 return String(value).toLowerCase().includes(searchTerm.toLowerCase());
             })
         );
-    }, [tableData, searchTerm, searchKeys]);
+    }, [data, searchTerm, searchKeys]);
 
     const getAlignmentClass = (align?: "left" | "center" | "right") => {
         switch (align) {
@@ -92,7 +91,7 @@ export default function DataTable<T>({
                         {emptyMessage}
                     </div>
                 ) : (
-                    filteredData.map((item: any, rowIndex) => {
+                    filteredData.map((item, rowIndex) => {
                         const isExpanded = expandedRows.has(rowIndex);
                         // No mobile, se nÃ£o estiver expandido, mostra apenas as 2 primeiras colunas
                         const visibleColumns = isExpanded ? columns : columns.slice(0, 2);
@@ -123,16 +122,17 @@ export default function DataTable<T>({
                                 </div>
                                 
                                 {/* BotÃ£o para expandir/recolher o card inteiro */}
-                                <button
+                                <Button
                                     onClick={() => toggleRow(rowIndex)}
-                                    className="w-full flex items-center justify-center gap-2 py-2 mt-2 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
+                                    variant="secondary"
+                                    className="mt-2 w-full border border-gray-200 bg-gray-50 text-sm text-gray-600 shadow-none hover:bg-gray-100"
                                 >
                                     {isExpanded ? (
                                         <>Ocultar detalhes <ChevronUp className="w-4 h-4" /></>
                                     ) : (
                                         <>Mostrar mais <ChevronDown className="w-4 h-4" /></>
                                     )}
-                                </button>
+                                </Button>
                             </div>
                         );
                     })
@@ -162,7 +162,7 @@ export default function DataTable<T>({
                                 </td>
                             </tr>
                         ) : (
-                            filteredData.map((item: any, rowIndex) => (
+                            filteredData.map((item, rowIndex) => (
                                 <tr key={rowIndex} className="hover:bg-gray-50/80 transition-colors">
                                     {columns.map((col, colIndex) => (
                                         <td

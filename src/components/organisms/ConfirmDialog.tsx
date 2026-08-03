@@ -16,9 +16,9 @@ export default function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+      <div role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title" className="w-full max-w-md rounded-xl bg-white shadow-xl">
         <div className="border-b border-gray-200 p-6">
-          <h2 className="text-xl font-bold">{title}</h2>
+          <h2 id="confirm-dialog-title" className="text-xl font-bold">{title}</h2>
         </div>
 
         <div className="p-6">
@@ -26,7 +26,7 @@ export default function ConfirmDialog({
         </div>
 
         <div className="flex justify-end gap-3 border-t border-gray-200 p-6">
-          <Button className="bg-gray-500 hover:bg-gray-600" onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>
 

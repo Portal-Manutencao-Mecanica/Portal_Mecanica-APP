@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { FileImage, Trash2, Upload } from "lucide-react";
+import SafeImage from "@/components/atoms/SafeImage";
 import formatBytes from "@/utils/formatBytes";
 
 interface UploadedFileProps  {
@@ -97,10 +98,13 @@ export default function UploadedFile64({ onChange, error }: UploadedFileProps) {
                             <div className="flex items-center gap-3.5 min-w-0">
                                 <div className="w-12 h-12 rounded-lg bg-gray-300/80 shrink-0 flex items-center justify-center overflow-hidden border border-gray-300">
                                     {typeof item.fileContent === 'string' ? (
-                                        <img
+                                        <SafeImage
                                             src={item.fileContent}
                                             alt={item.fileObject.name}
-                                            className="w-full h-full object-cover"
+                                            width={48}
+                                            height={48}
+                                            className="h-full w-full object-cover"
+                                            unoptimized
                                         />
                                     ) : (
                                         <FileImage className="w-6 h-6 text-gray-500" />

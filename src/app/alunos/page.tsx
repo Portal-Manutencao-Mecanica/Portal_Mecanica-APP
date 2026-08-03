@@ -1,9 +1,85 @@
-"use client";
+﻿"use client";
+
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import LayoutDesktop from "@/components/templates/LayoutDesktop";
+
+import Button from "@/components/atoms/Button";
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
 import { StudentTable } from "@/components/organisms/StudentTable";
+import UserCsvImport from "@/components/organisms/UserCsvImport";
+import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { Student } from "@/lib/api/types";
-import { studentService } from "@/services/studentService";
 import { getServiceErrorMessage } from "@/services/httpService";
-export default function StudentsPage() { const [students, setStudents] = useState<Student[]>([]); const [loading, setLoading] = useState(true); useEffect(() => { studentService.list().then(setStudents).catch((error) => toast.error(getServiceErrorMessage(error, "Não foi possível carregar os alunos."))).finally(() => setLoading(false)); }, []); return <LayoutDesktop><div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8"><div><h1 className="text-3xl font-bold">Alunos</h1><p className="text-gray-500">Gerencie todos os alunos cadastrados.</p></div>{loading ? <p className="text-center text-gray-500">Carregando alunos...</p> : <StudentTable students={students} />}</div></LayoutDesktop>; }
+import { studentService } from "@/services/studentService";
+
+export default function StudentsPage() {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [requestVersion, setRequestVersion] = useState(0);
+
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    studentService.list()
+      .then((data) => {
+        if (!isCurrentRequest) return;
+        setStudents(data);
+        setHasError(false);
+      })
+      .catch((error) => {
+        if (!isCurrentRequest) return;
+        setHasError(true);
+        toast.error(getServiceErrorMessage(error, "Não foi possível carregar os alunos."));
+      })
+      .finally(() => {
+        if (isCurrentRequest) setLoading(false);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [requestVersion]);
+
+  function retryLoadStudents() {
+    setLoading(true);
+    setRequestVersion((version) => version + 1);
+  }
+
+  const visibleStudents = students.filter((student) =>
+    statusFilter === "ALL"
+      || (statusFilter === "ACTIVE" ? student.enabled : !student.enabled),
+  );
+
+  return (
+    <LayoutDesktop>
+      <section className="space-y-6">
+        <PageHeader
+          title="Alunos"
+          description="Visualize os alunos cadastrados e suas turmas vinculadas."
+        />
+
+        <UserCsvImport onImportCompleted={retryLoadStudents} />
+
+        {loading ? (
+          <PageFeedback message="Carregando alunos..." />
+        ) : hasError ? (
+          <div className="space-y-4">
+            <PageFeedback variant="error" message="Não foi possível carregar os alunos." />
+            <div className="flex justify-center">
+              <Button onClick={retryLoadStudents}>Tentar novamente</Button>
+            </div>
+          </div>
+        ) : (
+          <StudentTable
+            students={visibleStudents}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+          />
+        )}
+      </section>
+    </LayoutDesktop>
+  );
+}

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import Button from "@/components/atoms/Button";
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
 import { MachineTable } from "@/components/organisms/MachineTable";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { Machine } from "@/lib/api/types";
@@ -32,24 +34,16 @@ export default function MachinesPage() {
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold md:text-3xl">Máquinas</h1>
-            <p className="text-gray-500">Visualize todas as máquinas cadastradas.</p>
-          </div>
-
-          <Link href="/maquinas/criar">
-            <Button>Nova máquina</Button>
-          </Link>
-        </div>
-
+      <div className="space-y-6">
+        <PageHeader
+          title="Máquinas"
+          description="Visualize todas as máquinas cadastradas."
+          actions={<Link href="/maquinas/criar"><Button>Nova máquina</Button></Link>}
+        />
         {loading ? (
-          <p className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
-            Carregando máquinas...
-          </p>
+          <PageFeedback message="Carregando máquinas..." />
         ) : error ? (
-          <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>
+          <PageFeedback variant="error" message={error} />
         ) : (
           <MachineTable machines={machines} />
         )}

@@ -1,7 +1,11 @@
-export interface DropDownProps<T extends Record<string , string>>{
-    defaultSelection : string,
-    qty : number,
-    enumData : T
-
-    onSelect: (value: T[keyof T]) => void
+export interface DropDownProps {
+  defaultSelection: string;
+  enumData: Record<string, string>;
+  onSelect: (value: string) => void;
+  value?: string;
+  label?: string;
+  error?: string;
+  className?: string;
+  disabled?: boolean;
+  id?: string;
 }
