@@ -1,4 +1,5 @@
 import Button from "@/components/atoms/Button";
+import PageHeader from "@/components/molecules/PageHeader";
 import { NotificationDetailProps } from "@/props/NotificationDetailProps";
 import LabelWithCircle from "../molecules/LabelWithCircle";
 
@@ -7,17 +8,12 @@ export default function NotificationDetailSection({
   onMarkAsRead,
 }: NotificationDetailProps) {
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Cabeçalho de Ações */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-            Detalhes da Notificação
-          </h1>
-        </div>
-
-        {/* Status com LabelWithCircle e Botão Dinâmico */}
-        <div className="flex items-center gap-3">
+    <section className="space-y-6">
+      <PageHeader
+        title="Detalhes da notificação"
+        description={notification.about ?? "Visualize a mensagem recebida."}
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
           {notification.statusRead ? (
             <LabelWithCircle status="positive" text="Lida" />
           ) : (
@@ -26,7 +22,6 @@ export default function NotificationDetailSection({
 
           {onMarkAsRead && (
             <Button
-              /* 🎯 Se estiver lida, aplica a variante 'primary' (Azul), se não, 'secondary' */
               variant={notification.statusRead ? "primary" : "secondary"}
               onClick={onMarkAsRead}
             >
@@ -35,23 +30,18 @@ export default function NotificationDetailSection({
                 : "Marcar como lida"}
             </Button>
           )}
-        </div>
-      </div>
+          </div>
+        }
+      />
 
-      {/* Card com os Dados */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-6">
-        <div className="border-b border-gray-100 pb-4 space-y-1">
+      <div className="space-y-6 rounded-xl bg-weg-card-white p-6 shadow-sm">
+        <div className="space-y-1">
           <h2 className="text-2xl font-bold text-weg-blue">
             {notification.title}
           </h2>
-          {notification.about && (
-            <p className="text-base font-medium text-gray-600">
-              {notification.about}
-            </p>
-          )}
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+        <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
           <span className="font-semibold text-gray-700">Destinatário:</span>
           <span>{notification.email}</span>
         </div>
@@ -60,11 +50,11 @@ export default function NotificationDetailSection({
           <span className="text-xs uppercase tracking-wider font-semibold text-gray-400">
             Mensagem
           </span>
-          <div className="text-gray-800 text-base leading-relaxed whitespace-pre-line bg-gray-50/50 p-4 rounded-lg border border-gray-200">
+          <div className="rounded-lg bg-gray-50/50 p-4 text-base leading-relaxed whitespace-pre-line text-gray-800">
             {notification.description}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

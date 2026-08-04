@@ -57,7 +57,7 @@ export default function EditEquipmentPage({ params }: PageProps) {
   }
 
   return (
-    <LayoutDesktop>
+    <LayoutDesktop breadcrumbLabels={equipment ? { 1: equipment.name } : undefined}>
       <div className="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Editar equipamento</h1>
@@ -71,6 +71,8 @@ export default function EditEquipmentPage({ params }: PageProps) {
             initialValues={{
               name: equipment.name,
               sap: equipment.sap ?? undefined,
+              patrimony: equipment.patrimony ?? undefined,
+              tag: equipment.tag ?? undefined,
               unitPrice: equipment.unitPrice,
               availableQuantity: equipment.availableQuantity,
             }}

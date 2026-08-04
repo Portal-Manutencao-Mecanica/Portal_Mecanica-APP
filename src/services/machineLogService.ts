@@ -1,9 +1,11 @@
-import type { CreateMachineLog, MachineLog, Page } from "@/lib/api/types";
+import type { CreateMachineLog, MachineLog, Page, PageQuery } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const machineLogService = {
-  async list() {
-    const { data } = await browserApi.get<Page<MachineLog>>("/maquina-log");
+  async list(query: PageQuery & { machineId?: string } = {}) {
+    const { data } = await browserApi.get<Page<MachineLog>>("/maquina-log", {
+      params: query,
+    });
     return data;
   },
 

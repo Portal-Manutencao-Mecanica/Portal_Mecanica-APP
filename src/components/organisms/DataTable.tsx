@@ -12,13 +12,15 @@ export default function DataTable<T>({
     columns,
     searchPlaceholder = "Buscar...",
     searchKeys = [],
+    searchValue,
+    onSearchChange,
     emptyMessage = "Nenhum registro encontrado.",
     filterElement,
     toggleOptions,
     toggleValue,
     onToggleChange,
 }: DataTableProps<T>) {
-    const [searchTerm, setSearchTerm] = useState("");
+    const [internalSearchTerm, setInternalSearchTerm] = useState("");
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
     const toggleRow = (index: number) => {
@@ -30,17 +32,21 @@ export default function DataTable<T>({
         });
     };
 
-    const filteredData = useMemo(() => {
-        if (!searchTerm || searchKeys.length === 0) return data;
+    const searchTerm = searchValue ?? internalSearchTerm;
+    const safeData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
-        return data.filter((item) =>
+    const filteredData = useMemo(() => {
+        if (onSearchChange) return safeData;
+        if (!searchTerm || searchKeys.length === 0) return safeData;
+
+        return safeData.filter((item) =>
             searchKeys.some((key) => {
                 const value = item[key];
                 if (value === null || value === undefined) return false;
                 return String(value).toLowerCase().includes(searchTerm.toLowerCase());
             })
         );
-    }, [data, searchTerm, searchKeys]);
+    }, [onSearchChange, safeData, searchTerm, searchKeys]);
 
     const getAlignmentClass = (align?: "left" | "center" | "right") => {
         switch (align) {
@@ -65,7 +71,11 @@ export default function DataTable<T>({
                                     type="text"
                                     placeholder={searchPlaceholder}
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(event) => {
+                                        const value = event.target.value;
+                                        if (onSearchChange) onSearchChange(value);
+                                        else setInternalSearchTerm(value);
+                                    }}
                                     className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                 />
                             </div>
@@ -84,7 +94,7 @@ export default function DataTable<T>({
                 </div>
             )}
 
-            {/* VISUALIZAÃ‡ÃƒO MOBILE: CARDS (< 768px) */}
+            {/* VISUALIZAÇÃO MOBILE: CARDS (< 768px) */}
             <div className="block md:hidden divide-y divide-gray-100">
                 {filteredData.length === 0 ? (
                     <div className="p-8 text-center text-sm text-gray-400">
@@ -93,7 +103,7 @@ export default function DataTable<T>({
                 ) : (
                     filteredData.map((item, rowIndex) => {
                         const isExpanded = expandedRows.has(rowIndex);
-                        // No mobile, se nÃ£o estiver expandido, mostra apenas as 2 primeiras colunas
+                        // No mobile, se não estiver expandido, mostra apenas as 2 primeiras colunas
                         const visibleColumns = isExpanded ? columns : columns.slice(0, 2);
 
                         return (
@@ -121,7 +131,7 @@ export default function DataTable<T>({
                                     })}
                                 </div>
                                 
-                                {/* BotÃ£o para expandir/recolher o card inteiro */}
+                                {/* Botão para expandir/recolher o card inteiro */}
                                 <Button
                                     onClick={() => toggleRow(rowIndex)}
                                     variant="secondary"
@@ -139,7 +149,7 @@ export default function DataTable<T>({
                 )}
             </div>
 
-            {/* VISUALIZAÃ‡ÃƒO DESKTOP: TABELA TRADICIONAL (>= 768px) */}
+            {/* VISUALIZAÇÃO DESKTOP: TABELA TRADICIONAL (>= 768px) */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-sm border-collapse">
                     <thead className="bg-gray-50 text-gray-500 uppercase text-[11px] font-bold tracking-wider border-y border-gray-100">

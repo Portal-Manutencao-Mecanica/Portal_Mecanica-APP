@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
 
@@ -27,6 +27,14 @@ export default function EquipmentCard({ equipment }: Props) {
           </p>
 
           <p className="text-sm text-gray-500">
+            <span className="font-medium">Patrimônio:</span> {equipment.patrimony || "-"}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            <span className="font-medium">TAG:</span> {equipment.tag || "-"}
+          </p>
+
+          <p className="text-sm text-gray-500">
             <span className="font-medium">Preço unitário:</span> {formattedPrice}
           </p>
 
@@ -36,9 +44,7 @@ export default function EquipmentCard({ equipment }: Props) {
           </p>
         </div>
 
-        <Link href={`/equipamentos/${equipment.id}`}>
-          <Button>Ver detalhes</Button>
-        </Link>
+        <Button href={`/equipamentos/${equipment.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar equipamento ${equipment.name}`} title="Visualizar equipamento" />
       </div>
     </div>
   );

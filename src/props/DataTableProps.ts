@@ -7,6 +7,8 @@ export interface DataTableProps<T> {
     columns: ColumnProps<T>[];
     searchPlaceholder?: string;
     searchKeys?: (keyof T)[];
+    searchValue?: string;
+    onSearchChange?: (value: string) => void;
     emptyMessage?: string;
     filterElement?: ReactNode;
 

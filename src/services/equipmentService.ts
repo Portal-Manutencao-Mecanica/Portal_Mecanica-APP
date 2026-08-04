@@ -1,9 +1,11 @@
-import type { CreateEquipment, Equipment, Page } from "@/lib/api/types";
+import type { CreateEquipment, Equipment, Page, PageQuery } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const equipmentService = {
-  async list() {
-    const { data } = await browserApi.get<Page<Equipment>>("/equipamento");
+  async list(query: (PageQuery & { search?: string }) | number = {}) {
+    const { data } = await browserApi.get<Page<Equipment>>("/equipamento", {
+      params: typeof query === "number" ? { size: query } : query,
+    });
     return data;
   },
 

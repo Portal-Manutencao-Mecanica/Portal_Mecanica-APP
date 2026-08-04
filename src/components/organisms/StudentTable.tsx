@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Eye } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -13,12 +12,16 @@ interface StudentTableProps {
   students: Student[];
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
 }
 
 export function StudentTable({
   students,
   statusFilter,
   onStatusFilterChange,
+  searchValue,
+  onSearchChange,
 }: StudentTableProps) {
   const columns: ColumnProps<Student>[] = [
     { header: "Nome", accessorKey: "name" },
@@ -43,9 +46,7 @@ export function StudentTable({
       header: "Ações",
       align: "right",
       render: (student) => (
-        <Link href={`/alunos/${student.id}`}>
-          <Button variant="secondary" icon={Eye}>Visualizar</Button>
-        </Link>
+        <Button href={`/alunos/${student.id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar aluno ${student.name}`} title="Visualizar aluno" />
       ),
     },
   ];
@@ -55,6 +56,8 @@ export function StudentTable({
       data={students}
       columns={columns}
       searchKeys={["name", "email", "numberCard"]}
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
       searchPlaceholder="Pesquisar aluno..."
       emptyMessage="Nenhum aluno encontrado."
       toggleOptions={[

@@ -9,7 +9,7 @@ import { Breadcrumbs } from "../molecules/Breadcrumbs";
 import { LayoutProps } from "@/props/LayoutProps";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, breadcrumbLabels }: LayoutProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { isLoading, user } = useAuth();
     const pathname = usePathname();
@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps) {
                 
                 <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 relative">
                     <div className="max-w-7xl mx-auto">
-                        <Breadcrumbs />
+                        <Breadcrumbs labels={breadcrumbLabels} />
                         {children}
                     </div>
                 </main>

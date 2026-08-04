@@ -136,10 +136,10 @@ export default function ClassGroupForm({
       try {
         const [loadedTeachers, loadedStudents] = await Promise.all([
           teacherService.list(),
-          studentService.list(),
+          studentService.list({ size: 1000, sort: "name,asc" }),
         ]);
         setTeachers(loadedTeachers);
-        setStudents(loadedStudents);
+        setStudents(loadedStudents.content);
       } catch (error) {
         toast.error(getServiceErrorMessage(error, "Não foi possível carregar alunos e professores."));
       } finally {

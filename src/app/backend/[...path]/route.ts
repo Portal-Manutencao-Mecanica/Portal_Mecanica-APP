@@ -20,9 +20,11 @@ async function forward(
   const headers: Record<string, string> = {};
   const contentType = request.headers.get("content-type");
   const accept = request.headers.get("accept");
+  const idempotencyKey = request.headers.get("idempotency-key");
 
   if (contentType) headers["Content-Type"] = contentType;
   if (accept) headers.Accept = accept;
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   headers["User-Agent"] =
     request.headers.get("user-agent") ?? "maintenance-web";
@@ -50,10 +52,16 @@ async function responseFromUpstream(upstreamResponse: Response) {
   const contentDisposition = upstreamResponse.headers.get(
     "content-disposition",
   );
+  const idempotencyReplayed = upstreamResponse.headers.get(
+    "idempotency-replayed",
+  );
 
   if (contentType) headers.set("Content-Type", contentType);
   if (contentDisposition) {
     headers.set("Content-Disposition", contentDisposition);
+  }
+  if (idempotencyReplayed) {
+    headers.set("Idempotency-Replayed", idempotencyReplayed);
   }
   headers.set("Cache-Control", "no-store");
 

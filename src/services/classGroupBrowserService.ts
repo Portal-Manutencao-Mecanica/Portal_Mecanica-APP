@@ -1,10 +1,10 @@
-import type { ClassGroup, CreateClassGroup, Page } from "@/lib/api/types";
+import type { ClassGroup, CreateClassGroup, Page, PageQuery } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const classGroupBrowserService = {
-  async list(size?: number) {
+  async list(query: (PageQuery & { search?: string; enabled?: boolean }) | number = {}) {
     const { data } = await browserApi.get<Page<ClassGroup>>("/turma", {
-      params: size ? { size } : undefined,
+      params: typeof query === "number" ? { size: query } : query,
     });
     return data;
   },

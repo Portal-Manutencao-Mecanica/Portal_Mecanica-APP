@@ -1,107 +1,108 @@
-// src/hooks/useFileUpload.ts
-import { useState, useRef } from 'react';
-import { FilePayloadProps } from "@/props/FilePayloadProps";
-import { UploadedFileProps } from "@/props/UploadedFileProps";
+import { useRef, useState } from "react";
+
+import type { UploadedFileProps } from "@/props/UploadedFileProps";
 import { isAllowedFileType } from "@/utils/validationFiles";
 
-export function useFileUpload() {
+interface UseFileUploadOptions {
+  maxFiles?: number;
+  maxFileSizeBytes?: number;
+}
+
+export function useFileUpload({
+  maxFiles = Number.POSITIVE_INFINITY,
+  maxFileSizeBytes = Number.POSITIVE_INFINITY,
+}: UseFileUploadOptions = {}) {
   const [files, setFiles] = useState<UploadedFileProps[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  async function processFiles(selectedFiles: FileList | File[]) {
+    const candidates = Array.from(selectedFiles);
+    const validFiles = candidates.filter(
+      (file) => isAllowedFileType(file.name) && file.size <= maxFileSizeBytes,
+    );
+    const availableSlots = Math.max(0, maxFiles - files.length);
+    const filesToProcess = validFiles.slice(0, availableSlots);
 
-  const processFiles = async (selectedFiles: FileList | File[]) => {
-    const filesArray = Array.from(selectedFiles);
-
-    const validFiles = filesArray.filter((file) => {
-      const isValid = isAllowedFileType(file.name);
-      if (!isValid) {
-        alert(`O arquivo "${file.name}" não é permitido. Apenas imagens são aceitas!`);
-      }
-      return isValid;
-    });
-
-    const processFile = (file: File): Promise<UploadedFileProps> => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onload = () => {
-          resolve({
-            fileObject: file,
-            fileContent: reader.result,
-          });
-        };
-      });
-    };
-
-    const newFiles = await Promise.all(validFiles.map(processFile));
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  };
-
-  
-  const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      processFiles(event.target.files);
-      event.target.value = '';
+    if (validFiles.length !== candidates.length) {
+      setFileError("Selecione apenas imagens permitidas com o tamanho informado.");
+    } else if (availableSlots === 0 || filesToProcess.length !== validFiles.length) {
+      setFileError(`Envie no máximo ${maxFiles} imagens.`);
+    } else {
+      setFileError("");
     }
-  };
 
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+    const uploadedFiles = await Promise.all(
+      filesToProcess.map(
+        (file) =>
+          new Promise<UploadedFileProps>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({ fileObject: file, fileContent: reader.result });
+            reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+            reader.readAsDataURL(file);
+          }),
+      ),
+    );
+
+    setFiles((currentFiles) => [...currentFiles, ...uploadedFiles]);
+  }
+
+  async function handleFilesChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files) return;
+
+    try {
+      await processFiles(event.target.files);
+    } catch {
+      setFileError("Não foi possível ler a imagem selecionada.");
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  function handleDragOver(event: React.DragEvent) {
+    event.preventDefault();
     setIsDragging(true);
-  };
+  }
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
+  function handleDragLeave(event: React.DragEvent) {
+    event.preventDefault();
     setIsDragging(false);
-  };
+  }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
+  async function handleDrop(event: React.DragEvent) {
+    event.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      processFiles(e.dataTransfer.files);
+    if (event.dataTransfer.files.length === 0) return;
+
+    try {
+      await processFiles(event.dataTransfer.files);
+    } catch {
+      setFileError("Não foi possível ler a imagem selecionada.");
     }
-  };
+  }
 
-  const removeFile = (indexToRemove: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
-  };
+  function removeFile(indexToRemove: number) {
+    setFiles((currentFiles) =>
+      currentFiles.filter((_, index) => index !== indexToRemove),
+    );
+  }
 
-  const handleSubmit = () => {
-    const sendPayload = {
-      filePayloadProps: files.map((f): FilePayloadProps => {
-        const contentString = typeof f.fileContent === 'string' ? f.fileContent : '';
-        const base64Clean = contentString.split(',')[1] || contentString;
-
-        return {
-          name: f.fileObject.name,
-          fileContent: base64Clean,
-          type: f.fileObject.type,
-          size: f.fileObject.size,
-        };
-      }),
-    };
-
-    console.log("Payload Final:", JSON.stringify(sendPayload, null, 2));
-  };
-
-  const openFileDialog = () => {
+  function openFileDialog() {
     fileInputRef.current?.click();
-  };
+  }
 
   return {
     files,
+    fileError,
     isDragging,
     fileInputRef,
+    setFiles,
     handleFilesChange,
     handleDragOver,
     handleDragLeave,
     handleDrop,
     removeFile,
-    handleSubmit,
     openFileDialog,
   };
 }

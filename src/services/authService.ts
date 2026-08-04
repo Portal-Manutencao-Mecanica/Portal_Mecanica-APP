@@ -18,15 +18,10 @@ export interface ChangePasswordCredentials {
   passwordConfirmation: string;
 }
 
-export interface ValidateTemporaryPasswordParams {
-  email: string;
-  temporaryPassword: string;
-}
-
 export interface CompleteFirstAccessParams {
-  email: string;
-  temporaryPassword: string;
+  code: string;
   newPassword: string;
+  passwordConfirmation: string;
 }
 
 export const authService = {
@@ -54,21 +49,32 @@ export const authService = {
   },
 
   async forgotPassword(email: string) {
-    const { data } = await authApi.post<{ message: string }>("/password/forgot", {
+    const { data } = await browserApi.post<{ message: string }>("/auth/password/forgot", {
       email,
     });
     return data;
   },
 
   async validateResetToken(token: string) {
-    const { data } = await authApi.get<{ valid: boolean }>("/password/validate", {
+    const { data } = await browserApi.get<{ valid: boolean }>("/auth/password/validate", {
       params: { token },
     });
     return data.valid;
   },
 
   async resetPassword(payload: ResetPasswordCredentials) {
-    const { data } = await authApi.post<{ message: string }>("/password/reset", payload);
+    const { data } = await browserApi.post<{ message: string }>("/auth/password/reset", payload);
     return data;
+  },
+
+  async requestFirstAccessCode() {
+    const { data } = await browserApi.post<{ message: string }>(
+      "/users/me/first-access/code",
+    );
+    return data;
+  },
+
+  async completeFirstAccess(payload: CompleteFirstAccessParams) {
+    await browserApi.post("/users/me/first-access/complete", payload);
   },
 };

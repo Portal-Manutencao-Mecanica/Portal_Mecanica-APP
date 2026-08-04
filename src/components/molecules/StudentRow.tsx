@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import Button from "../atoms/Button";
 import LabelWithCircle from "./LabelWithCircle";
@@ -52,9 +53,7 @@ export function StudentRow({
         />
 
         <div className="flex justify-end gap-2">
-          <Link href={`/alunos/${id}`}>
-            <Button>Ver</Button>
-          </Link>
+          <Button href={`/alunos/${id}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar aluno ${name}`} title="Visualizar aluno" />
 
           <Link href={`/alunos/${id}/editar`}>
             <Button className="bg-amber-500 hover:bg-amber-600">

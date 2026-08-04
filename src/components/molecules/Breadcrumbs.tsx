@@ -5,7 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
 
-export function Breadcrumbs() {
+const UUID_SEGMENT_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+interface BreadcrumbsProps {
+  labels?: Record<number, string>;
+}
+
+export function Breadcrumbs({ labels = {} }: BreadcrumbsProps) {
   const pathname = usePathname();
   const [dynamicLabels, setDynamicLabels] = useState<Record<number, string>>({});
   const pathSegments = useMemo(
@@ -35,21 +42,47 @@ export function Breadcrumbs() {
   if (pathSegments.length === 0) return null;
 
   function formatPathName(segment: string, index: number) {
+    if (labels[index]) return labels[index];
     if (dynamicLabels[index]) return dynamicLabels[index];
+
+    const contextualDictionary: Record<string, Record<string, string>> = {
+      alunos: { editar: "Editar aluno" },
+      compras: { cadastro: "Nova compra" },
+      equipamentos: { novo: "Novo equipamento", editar: "Editar equipamento" },
+      incoveniencia5s: { nova: "Nova ocorrência 5S" },
+      manutencao: { cadastro: "Nova manutenção" },
+      "manutencao-autonoma": { nova: "Nova manutenção autônoma" },
+      maquinas: { criar: "Nova máquina", editar: "Editar máquina" },
+      ocorrencias: { cadastro: "Nova ocorrência", editar: "Editar ocorrência" },
+      turmas: { criar: "Nova turma", editar: "Editar turma" },
+    };
+    const contextualLabel = contextualDictionary[pathSegments[0]]?.[segment];
+
+    if (contextualLabel) return contextualLabel;
 
     const dictionary: Record<string, string> = {
       maquinas: "Máquinas",
       ocorrencias: "Ocorrências",
+      incoveniencia5s: "Inconveniências 5S",
       compras: "Compras",
+      equipamentos: "Equipamentos",
+      notificacoes: "Notificações",
       alunos: "Alunos",
       turmas: "Turmas",
+      calendario: "Calendário",
+      configuracao: "Configuração",
+      manutencao: "Manutenção",
       "manutencao-autonoma": "Manutenção autônoma",
-      nova: "Nova manutenção",
-      criar: "Criar turma",
-      editar: "Editar turma",
+      "material-complementar": "Material complementar",
+      faq: "Perguntas frequentes",
+      perfil: "Perfil",
+      termos: "Termos de uso",
     };
 
-    return dictionary[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    if (dictionary[segment]) return dictionary[segment];
+    if (UUID_SEGMENT_PATTERN.test(segment)) return "Detalhes";
+
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
   }
 
   return (

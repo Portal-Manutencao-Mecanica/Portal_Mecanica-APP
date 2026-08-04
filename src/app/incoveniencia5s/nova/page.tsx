@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as v from "valibot";
@@ -8,56 +8,139 @@ import * as v from "valibot";
 import Button from "@/components/atoms/Button";
 import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
+import TextArea from "@/components/atoms/TextArea";
+import PageHeader from "@/components/molecules/PageHeader";
 import { CascadingMultiSelect } from "@/components/molecules/CascadingSelector";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
-import type { ClassGroup } from "@/lib/api/types";
+import type {
+  ClassGroup,
+  Place,
+  RegistrationPeriod,
+  Teacher,
+} from "@/lib/api/types";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
 import { getServiceErrorMessage } from "@/services/httpService";
+import { inconvenienceService } from "@/services/inconvenienceService";
+import { placeService } from "@/services/placeService";
+import { teacherService } from "@/services/teacherService";
 
 const inconvenienceSchema = v.object({
-  inconvenience: v.pipe(v.string(), v.trim(), v.minLength(3, "Descreva a inconveniência.")),
-  place: v.pipe(v.string(), v.nonEmpty("Selecione o local.")),
-  teacher: v.pipe(v.string(), v.nonEmpty("Selecione o professor notificado.")),
-  classGroup: v.pipe(v.string(), v.nonEmpty("Selecione a turma.")),
-  registrationPeriod: v.pipe(v.string(), v.nonEmpty("Selecione o período.")),
-  students: v.pipe(v.array(v.string()), v.minLength(1, "Selecione ao menos um aluno.")),
-  description: v.pipe(v.string(), v.trim(), v.minLength(10, "Descreva a ocorrência com mais detalhes.")),
+  inconvenience: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(3, "Descreva a inconveniência."),
+  ),
+  placeId: v.pipe(v.string(), v.uuid("Selecione um local válido.")),
+  notifiedTeacherId: v.pipe(
+    v.string(),
+    v.uuid("Selecione um professor válido."),
+  ),
+  classGroupId: v.pipe(v.string(), v.uuid("Selecione uma turma válida.")),
+  registrationPeriod: v.picklist(
+    ["MATUTINO", "VESPERTINO", "NOTURNO"],
+    "Selecione o período.",
+  ),
+  involvedStudentIds: v.pipe(
+    v.array(v.pipe(v.string(), v.uuid("Selecione alunos válidos."))),
+    v.minLength(1, "Selecione ao menos um aluno."),
+  ),
+  description: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(10, "Descreva a ocorrência com mais detalhes."),
+  ),
 });
+
+interface FormState {
+  inconvenience: string;
+  placeId: string;
+  notifiedTeacherId: string;
+  classGroupId: string;
+  registrationPeriod: RegistrationPeriod | "";
+  involvedStudentIds: string[];
+  description: string;
+}
+
+const initialForm: FormState = {
+  inconvenience: "",
+  placeId: "",
+  notifiedTeacherId: "",
+  classGroupId: "",
+  registrationPeriod: "",
+  involvedStudentIds: [],
+  description: "",
+};
+
+const registrationPeriods: Record<RegistrationPeriod, string> = {
+  MATUTINO: "Matutino",
+  VESPERTINO: "Vespertino",
+  NOTURNO: "Noturno",
+};
 
 export default function NewInconveniencePage() {
   const router = useRouter();
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [classGroups, setClassGroups] = useState<ClassGroup[]>([]);
-  const [loadingStudents, setLoadingStudents] = useState(true);
-  const [form, setForm] = useState({
-    inconvenience: "",
-    place: "",
-    teacher: "",
-    classGroup: "",
-    registrationPeriod: "",
-    students: [] as string[],
-    description: "",
-  });
+  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState<FormState>(initialForm);
 
   useEffect(() => {
-    async function loadClassGroups() {
+    async function loadOptions() {
       try {
-        const page = await classGroupBrowserService.list(1000);
-        setClassGroups(page.content);
+        const [loadedPlaces, loadedTeachers, classGroupPage] = await Promise.all([
+          placeService.list(),
+          teacherService.list(),
+          classGroupBrowserService.list(1000),
+        ]);
+        setPlaces(loadedPlaces);
+        setTeachers(
+          loadedTeachers.filter((teacher) => teacher.enabled && teacher.accountNonLocked),
+        );
+        setClassGroups(classGroupPage.content.filter((classGroup) => classGroup.enabled));
       } catch (error) {
-        toast.error(getServiceErrorMessage(error, "Não foi possível carregar as turmas e alunos."));
+        setLoadError(
+          getServiceErrorMessage(
+            error,
+            "Não foi possível carregar locais, professores e turmas.",
+          ),
+        );
       } finally {
-        setLoadingStudents(false);
+        setLoadingOptions(false);
       }
     }
 
-    void loadClassGroups();
+    void loadOptions();
   }, []);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
-  };
+  const selectedClassGroup = useMemo(
+    () => classGroups.find((classGroup) => classGroup.id === form.classGroupId),
+    [classGroups, form.classGroupId],
+  );
+  const studentGroups = useMemo(
+    () =>
+      selectedClassGroup
+        ? [
+            {
+              id: selectedClassGroup.id,
+              name: selectedClassGroup.acronym,
+              items: selectedClassGroup.students.map((student) => ({
+                id: student.id,
+                name: student.name,
+              })),
+            },
+          ]
+        : [],
+    [selectedClassGroup],
+  );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const validation = v.safeParse(inconvenienceSchema, form);
 
@@ -66,56 +149,129 @@ export default function NewInconveniencePage() {
       return;
     }
 
-    toast.info("A ocorrência foi validada. A API de 5S ainda precisa receber os identificadores reais de local, turma e usuários.");
+    setSubmitting(true);
+    try {
+      const created = await inconvenienceService.create(validation.output);
+      toast.success("Ocorrência 5S registrada com sucesso.");
+      router.push(`/incoveniencia5s/${created.id}`);
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        getServiceErrorMessage(error, "Não foi possível registrar a ocorrência 5S."),
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
-
-  const studentGroups = classGroups.map((classGroup) => ({
-    id: classGroup.id,
-    name: classGroup.acronym,
-    items: classGroup.students,
-  }));
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-4xl rounded-xl border bg-white p-8 shadow-sm">
-        <h1 className="mb-2 text-3xl font-bold">Nova ocorrência 5S</h1>
-        <p className="mb-8 text-gray-500">Registre uma situação que precisa de atenção.</p>
+      <section className="space-y-6">
+        <PageHeader
+          title="Nova ocorrência 5S"
+          description="Registre uma situação que precisa de atenção."
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Input name="inconvenience" label="Inconveniência *" value={form.inconvenience} onChange={handleChange} placeholder="Descreva o problema" />
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 rounded-xl bg-weg-card-white p-6 shadow-sm"
+        >
+          <Input
+            name="inconvenience"
+            label="Inconveniência *"
+            value={form.inconvenience}
+            onChange={(event) => updateField("inconvenience", event.target.value)}
+            placeholder="Descreva o problema"
+          />
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Select name="place" label="Local *" value={form.place} onChange={handleChange} options={["Laboratório de Mecânica", "Laboratório de Elétrica", "Oficina"]} />
-            <Select name="teacher" label="Professor notificado *" value={form.teacher} onChange={handleChange} options={["Carlos Henrique", "João Pedro"]} />
-            <Select name="classGroup" label="Turma *" value={form.classGroup} onChange={handleChange} options={["TIIN 2025/1", "TIIN 2025/2"]} />
-            <Select name="registrationPeriod" label="Período *" value={form.registrationPeriod} onChange={handleChange} options={["Matutino", "Vespertino", "Noturno"]} />
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <DropDown
+              label="Local *"
+              defaultSelection={loadingOptions ? "Carregando locais..." : "Selecione o local"}
+              enumData={Object.fromEntries(places.map((place) => [place.id, place.name]))}
+              value={form.placeId}
+              onSelect={(value) => updateField("placeId", value)}
+              disabled={loadingOptions || Boolean(loadError)}
+            />
+            <DropDown
+              label="Professor notificado *"
+              defaultSelection={
+                loadingOptions ? "Carregando professores..." : "Selecione o professor"
+              }
+              enumData={Object.fromEntries(
+                teachers.map((teacher) => [teacher.id, teacher.name]),
+              )}
+              value={form.notifiedTeacherId}
+              onSelect={(value) => updateField("notifiedTeacherId", value)}
+              disabled={loadingOptions || Boolean(loadError)}
+            />
+            <DropDown
+              label="Turma *"
+              defaultSelection={loadingOptions ? "Carregando turmas..." : "Selecione a turma"}
+              enumData={Object.fromEntries(
+                classGroups.map((classGroup) => [classGroup.id, classGroup.acronym]),
+              )}
+              value={form.classGroupId}
+              onSelect={(value) =>
+                setForm((current) => ({
+                  ...current,
+                  classGroupId: value,
+                  involvedStudentIds: [],
+                }))
+              }
+              disabled={loadingOptions || Boolean(loadError)}
+            />
+            <DropDown
+              label="Período *"
+              defaultSelection="Selecione o período"
+              enumData={registrationPeriods}
+              value={form.registrationPeriod}
+              onSelect={(value) =>
+                updateField("registrationPeriod", value as FormState["registrationPeriod"])
+              }
+            />
           </div>
 
           <CascadingMultiSelect
             label="Alunos envolvidos *"
             groups={studentGroups}
-            value={form.students}
-            onChange={(studentIds) => setForm((current) => ({ ...current, students: studentIds.map(String) }))}
-            placeholder={loadingStudents ? "Carregando turmas e alunos..." : "Selecione os alunos envolvidos"}
-            groupHeader="Turmas"
+            value={form.involvedStudentIds}
+            onChange={(studentIds) =>
+              updateField("involvedStudentIds", studentIds.map(String))
+            }
+            placeholder={
+              form.classGroupId
+                ? "Selecione os alunos envolvidos"
+                : "Selecione primeiro uma turma"
+            }
+            groupHeader="Turma selecionada"
             itemHeader="Alunos"
           />
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">Descrição *</label>
-            <textarea name="description" value={form.description} onChange={handleChange} rows={6} placeholder="Descreva a ocorrência..." className="w-full rounded-lg border p-3" />
-          </div>
+          <TextArea
+            name="description"
+            label="Descrição *"
+            value={form.description}
+            onChange={(event) => updateField("description", event.target.value)}
+            rows={6}
+            placeholder="Descreva a ocorrência..."
+          />
 
-          <div className="flex justify-end gap-4">
-            <Button type="button" variant="secondary" onClick={() => router.back()}>Cancelar</Button>
-            <Button type="submit">Validar ocorrência</Button>
+          {loadError && <p className="text-sm text-weg-negative">{loadError}</p>}
+
+          <div className="flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-4 sm:flex-row">
+            <Button type="button" variant="secondary" onClick={() => router.back()}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting || loadingOptions || Boolean(loadError)}
+            >
+              {submitting ? "Registrando..." : "Registrar ocorrência"}
+            </Button>
           </div>
         </form>
-      </div>
+      </section>
     </LayoutDesktop>
   );
-}
-
-function Select({ name, label, value, onChange, options }: { name: string; label: string; value: string; onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; options: string[] }) {
-  return <DropDown label={label} defaultSelection="Selecione uma opção" enumData={Object.fromEntries(options.map((option) => [option, option]))} value={value} onSelect={(selectedValue) => onChange({ target: { name, value: selectedValue } } as React.ChangeEvent<HTMLInputElement>)} />;
 }

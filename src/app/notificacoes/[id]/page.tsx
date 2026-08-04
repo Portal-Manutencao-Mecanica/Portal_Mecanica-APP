@@ -1,12 +1,9 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import Button from "@/components/atoms/Button";
 import NotificationDetailSection from "@/components/organisms/NotificationDetailSection";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { NotificationData } from "@/props/NotificationDetailProps";
@@ -47,11 +44,8 @@ export default function NotificationDetailPage() {
   }
 
   return (
-    <LayoutDesktop>
-      <div className="space-y-5 p-4 md:p-8">
-        <Link href="/notificacoes">
-          <Button variant="secondary" icon={ArrowLeft}>Voltar para notificações</Button>
-        </Link>
+    <LayoutDesktop breadcrumbLabels={notification ? { 1: notification.title } : undefined}>
+      <div className="space-y-5">
         {loading && <p className="text-center text-gray-500">Carregando notificação...</p>}
         {!loading && !notification && <p className="text-center text-gray-500">Notificação não encontrada.</p>}
         {notification && <NotificationDetailSection notification={notification} onMarkAsRead={toggleRead} />}

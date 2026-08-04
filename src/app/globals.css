@@ -13,6 +13,11 @@
   --color-weg-label-warning: #EF8300;
   --color-weg-card-white: #FAFAFE;
   --color-weg-positive: #00693C;
+  --color-ui-border: #E5E7EB;
+  --color-ui-muted: #F9FAFB;
+  --color-ui-text: #374151;
+  --color-ui-heading: #111827;
+  --color-ui-subtle: #4B5563;
 
   --shadow-t-lg: 0 -10px 15px -3px rgba(0, 0, 0, 0.2), 0 -4px 6px -4px rgba(0, 0, 0, 0.2);
 
@@ -43,4 +48,77 @@ h6 {
 
 .fc .fc-button-active {
   background-color: var(--color-weg-blue) !important;
+}
+
+.calendar-shell .fc {
+  --fc-border-color: var(--color-ui-border);
+  --fc-neutral-bg-color: var(--color-ui-muted);
+  --fc-page-bg-color: var(--color-weg-card-white);
+  --fc-today-bg-color: color-mix(in srgb, var(--color-weg-blue) 8%, white);
+  --fc-event-bg-color: var(--color-weg-blue);
+  --fc-event-border-color: var(--color-weg-blue);
+  min-width: 680px;
+  color: var(--color-ui-text);
+}
+
+.calendar-shell .fc .fc-toolbar {
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.calendar-shell .fc .fc-toolbar-title {
+  color: var(--color-ui-heading);
+  font-family: var(--font-roboto);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.calendar-shell .fc .fc-button {
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.calendar-shell .fc .fc-scrollgrid {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.calendar-shell .fc .fc-col-header-cell {
+  background: var(--color-ui-muted);
+  padding: 0.75rem 0.25rem;
+}
+
+.calendar-shell .fc .fc-col-header-cell-cushion,
+.calendar-shell .fc .fc-daygrid-day-number {
+  color: var(--color-ui-subtle);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.calendar-shell .fc .fc-daygrid-day-frame {
+  min-height: 7rem;
+  padding: 0.25rem;
+}
+
+.calendar-shell .fc .fc-daygrid-day:hover {
+  background: var(--color-ui-muted);
+}
+
+.calendar-shell .fc .fc-daygrid-event {
+  border-radius: 0.375rem;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.35rem;
+}
+
+.calendar-shell .fc .fc-daygrid-more-link {
+  color: var(--color-weg-blue);
+  font-size: 0.75rem;
+  font-weight: 600;
 }

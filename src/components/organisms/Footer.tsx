@@ -15,15 +15,15 @@ export default function Footer() {
                     <Image
                         src="/brand/logo-icon.svg"
                         alt="WEG logo"
-                        width={31}
+                        width={30}
                         height={20}
                         priority
                     />
                     <Image
                         src="/brand/senai-logo.svg"
                         alt="SENAI logo"
-                        width={58}
-                        height={30}
+                        width={75}
+                        height={20}
                         priority
                     />
                 </div>

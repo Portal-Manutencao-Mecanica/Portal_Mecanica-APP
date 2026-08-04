@@ -91,7 +91,7 @@ export default function EquipmentDetailsPage({ params }: PageProps) {
   }).format(equipment.unitPrice);
 
   return (
-    <LayoutDesktop>
+    <LayoutDesktop breadcrumbLabels={{ 1: equipment.name }}>
       <div className="space-y-8">
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -110,6 +110,8 @@ export default function EquipmentDetailsPage({ params }: PageProps) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Detail label="Nome" value={equipment.name} />
             <Detail label="Código SAP" value={equipment.sap || "-"} />
+            <Detail label="Patrimônio" value={equipment.patrimony || "-"} />
+            <Detail label="TAG" value={equipment.tag || "-"} />
             <Detail label="Preço unitário" value={formattedPrice} />
             <Detail label="Quantidade disponível" value={String(equipment.availableQuantity)} />
           </div>

@@ -47,7 +47,12 @@ const maintenanceSchema = v.object({
 
 type MaintenanceFormData = v.InferInput<typeof maintenanceSchema>;
 
-export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string }) {
+interface MaintenceFormProps {
+  occurrenceId?: string;
+  onOccurrenceLoaded?: (label: string) => void;
+}
+
+export default function MaintenceForm({ occurrenceId, onOccurrenceLoaded }: MaintenceFormProps) {
   const { user } = useAuth();
   const router = useRouter();
   const canSubmit = !occurrenceId || user?.role === "ADMIN";
@@ -94,6 +99,7 @@ export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string 
         setMachines(machinePage.content);
         setTeachers(loadedTeachers);
         if (occurrence) {
+          onOccurrenceLoaded?.(occurrence.machineName);
           reset({
             sector: occurrence.sector,
             priority: occurrence.priority,
@@ -101,6 +107,7 @@ export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string 
             machineId: occurrence.machineId,
             notifiedTeacherId: occurrence.notifiedTeacherId,
             description: occurrence.description,
+            images: occurrence.media.map((media) => media.image),
           });
         }
       } catch (error) {
@@ -113,10 +120,10 @@ export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string 
     }
 
     void loadOptions();
-  }, [occurrenceId, reset]);
+  }, [occurrenceId, onOccurrenceLoaded, reset]);
 
   async function onSubmit(formData: MaintenanceFormData) {
-    if (!occurrenceId && formData.images.length === 0) {
+    if (formData.images.length === 0) {
       toast.error("Anexe pelo menos uma imagem da ocorrência.");
       return;
     }
@@ -191,9 +198,17 @@ export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string 
         control={control}
         render={({ field, fieldState }) => (
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Imagens da ocorrência *</label>
-            <UploadedFile64 onChange={field.onChange} error={fieldState.error?.message} />
-            <p className="mt-2 text-xs text-gray-500">Envie até 5 imagens em PNG, JPG, WEBP ou SVG, com no máximo 5 MB cada.</p>
+            <label htmlFor="occurrence-images" className="mb-2 block text-sm font-medium text-gray-700">Imagens da ocorrência *</label>
+            <UploadedFile64
+              id="occurrence-images"
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              maxFiles={5}
+              maxFileSizeBytes={5 * 1024 * 1024}
+              disabled={!canSubmit}
+            />
+            <p id="occurrence-images-help" className="mt-2 text-xs text-gray-500">Envie até 5 imagens em PNG, JPG, WEBP ou SVG, com no máximo 5 MB cada.</p>
           </div>
         )}
       />

@@ -17,8 +17,15 @@ export default function EquipamentCombobox({
     const selectedEquipment = options.find((opt) => opt.id === value);
 
     // Se achou nas opções, formata. Se não, usa o selectedName que veio do formulário
+    const selectedIdentifiers = selectedEquipment
+        ? [
+            selectedEquipment.sap && `SAP: ${selectedEquipment.sap}`,
+            selectedEquipment.patrimony && `Pat.: ${selectedEquipment.patrimony}`,
+            selectedEquipment.tag && `TAG: ${selectedEquipment.tag}`,
+        ].filter(Boolean).join(" · ")
+        : "";
     const displayName = selectedEquipment
-        ? `${selectedEquipment.name}${selectedEquipment.patrimony ? ` (Pat: ${selectedEquipment.patrimony})` : ""}`
+        ? `${selectedEquipment.name}${selectedIdentifiers ? ` (${selectedIdentifiers})` : ""}`
         : selectedName || "";
 
     useEffect(() => {
@@ -37,6 +44,7 @@ export default function EquipamentCombobox({
     const filteredOptions = options.filter(
         (opt) =>
             opt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            opt.sap?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             opt.patrimony?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             opt.tag?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -53,7 +61,7 @@ export default function EquipamentCombobox({
                     }`}
             >
                 <span className={displayName ? "text-gray-900 font-medium" : "text-gray-400"}>
-                    {displayName || "Pesquisar por nome, patrimônio ou TAG..."}
+                    {displayName || "Pesquisar por nome, SAP, patrimônio ou TAG..."}
                 </span>
                 <ChevronsUpDown className="w-4 h-4 text-gray-400" />
             </div>
@@ -95,8 +103,11 @@ export default function EquipamentCombobox({
                                         </span>
                                         {/* 3. Ajustado para group-hover:text-blue-100 (ou white) */}
                                         <span className="text-xs text-gray-500 group-hover:text-blue-100 transition-colors">
-                                            {opt.patrimony && `Pat: ${opt.patrimony} `}
-                                            {opt.tag && `| TAG: ${opt.tag}`}
+                                            {[
+                                                opt.sap && `SAP: ${opt.sap}`,
+                                                opt.patrimony && `Pat.: ${opt.patrimony}`,
+                                                opt.tag && `TAG: ${opt.tag}`,
+                                            ].filter(Boolean).join(" · ") || "Sem identificadores cadastrados"}
                                         </span>
                                     </div>
 
@@ -108,7 +119,7 @@ export default function EquipamentCombobox({
                             ))
                         ) : (
                             <li className="p-3 text-center text-xs text-gray-500">
-                                Nenhum equipamento encontrado com "{searchTerm}".
+                                Nenhum equipamento encontrado com {searchTerm}.
                             </li>
                         )}
 
@@ -122,7 +133,7 @@ export default function EquipamentCombobox({
                                 className="p-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 cursor-pointer flex items-center gap-2 font-medium transition-colors"
                             >
                                 <Plus className="w-4 h-4" />
-                                <span>Cadastrar novo: "{searchTerm}"</span>
+                                <span>Cadastrar novo: {searchTerm}</span>
                             </li>
                         )}
                     </ul>
