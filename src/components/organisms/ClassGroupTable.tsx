@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Eye, Pencil } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -19,12 +18,16 @@ interface ClassGroupTableProps {
   classGroups: ClassGroupTableItem[];
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
 }
 
 export default function ClassGroupTable({
   classGroups,
   statusFilter,
   onStatusFilterChange,
+  searchValue,
+  onSearchChange,
 }: ClassGroupTableProps) {
   const columns: ColumnProps<ClassGroupTableItem>[] = [
     { header: "Sigla", accessorKey: "acronym" },
@@ -44,9 +47,13 @@ export default function ClassGroupTable({
       render: (group) => (
         <div className="flex justify-end gap-2">
           <Button href={`/turmas/${group.id}?turma=${encodeURIComponent(group.acronym)}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar turma ${group.acronym}`} title="Visualizar turma" />
-          <Link href={{ pathname: `/turmas/${group.id}/editar`, query: { turma: group.acronym } }}>
-            <Button icon={Pencil}>Editar</Button>
-          </Link>
+          <Button
+            href={`/turmas/${group.id}/editar?turma=${encodeURIComponent(group.acronym)}`}
+            icon={Pencil}
+            iconOnly
+            aria-label={`Editar turma ${group.acronym}`}
+            title="Editar turma"
+          />
         </div>
       ),
     },
@@ -56,6 +63,8 @@ export default function ClassGroupTable({
       data={classGroups}
       columns={columns}
       searchKeys={["acronym"]}
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
       searchPlaceholder="Pesquisar turma..."
       emptyMessage="Nenhuma turma encontrada."
       toggleOptions={[

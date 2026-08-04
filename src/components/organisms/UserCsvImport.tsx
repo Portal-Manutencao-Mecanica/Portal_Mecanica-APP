@@ -22,7 +22,7 @@ const templateHeaders = [
   "email",
   "role",
   "organization",
-  "classGroupNames",
+  "classGroupAcronyms",
 ] as const;
 
 function normalizeName(value: string) {
@@ -78,11 +78,11 @@ async function createImportFile(file: File) {
 
   if (!normalizedHeader || !templateHeaders.every((column) => normalizedHeader.includes(column))) {
     throw new Error(
-      "Use o modelo CSV com as colunas: name, username, email, role, organization e classGroupNames.",
+      "Use o modelo CSV com as colunas: name, username, email, role, organization e classGroupAcronyms.",
     );
   }
 
-  const classGroupNamesIndex = normalizedHeader.indexOf("classGroupNames");
+  const classGroupNamesIndex = normalizedHeader.indexOf("classGroupAcronyms");
   const classGroupsPage = await classGroupBrowserService.list(1000);
   const groupsByName = new Map<string, ClassGroup[]>();
 
@@ -108,7 +108,7 @@ async function createImportFile(file: File) {
     });
 
     return templateHeaders.map((column) => {
-      if (column === "classGroupNames") return classGroupIds.join("|");
+      if (column === "classGroupAcronyms") return classGroupIds.join("|");
       return row[normalizedHeader.indexOf(column)] ?? "";
     });
   });
@@ -183,7 +183,7 @@ export default function UserCsvImport({
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-gray-800">Importar usuários por CSV</h2>
           <p className="text-sm text-gray-500">
-            Use nomes ou siglas de turma, separados por <code>|</code>. Nenhum identificador precisa ser informado.
+            Use somente as siglas das turmas, separadas por <code>|</code>. Nenhum UUID precisa ser informado.
           </p>
           <p className="text-sm text-gray-500">Roles permitidas: {allowedRoles}.</p>
         </div>

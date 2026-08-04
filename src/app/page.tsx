@@ -34,7 +34,7 @@ import { notificationService } from "@/services/notificationService";
 
 interface OccurrenceHome {
   id: string;
-  title: string;
+  description: string;
   date: string;
   priorityText: string;
   priorityStatus: LabelStatus;
@@ -91,7 +91,7 @@ export default function Home() {
         const [machinesResult, classGroupsResult, occurrencesResult, notificationsResult] = await Promise.allSettled([
           machineService.list(1000),
           classGroupBrowserService.list(1000),
-          maintenanceRequestService.list(),
+          maintenanceRequestService.list({ size: 1000, sort: "createdAt,desc" }),
           notificationService.list(),
         ]);
 
@@ -99,7 +99,7 @@ export default function Home() {
 
         if (machinesResult.status === "fulfilled") setMachines(machinesResult.value.content);
         if (classGroupsResult.status === "fulfilled") setClassGroups(classGroupsResult.value.content);
-        if (occurrencesResult.status === "fulfilled") setOccurrences(occurrencesResult.value);
+        if (occurrencesResult.status === "fulfilled") setOccurrences(occurrencesResult.value.content);
         if (notificationsResult.status === "fulfilled") {
           const notifications = notificationsResult.value.content;
           setNotification(notifications.find((item) => !item.statusRead) ?? notifications[0] ?? null);
@@ -151,7 +151,7 @@ export default function Home() {
       .slice(0, 5)
       .map((occurrence) => ({
         id: occurrence.id,
-        title: occurrence.machineName || occurrence.description,
+        description: occurrence.description || occurrence.machineName,
         date: formatDate(occurrence.createdAt),
         priorityText: statusLabel(occurrence.priority),
         priorityStatus: getPriorityType(occurrence.priority),
@@ -171,17 +171,32 @@ export default function Home() {
   const columns: Column<OccurrenceHome>[] = [
     {
       header: "Código",
-      accessor: (item) => <span className="font-semibold text-xs text-weg-blue">{item.id}</span>,
+      accessor: (item) => (
+        <span className="whitespace-nowrap text-xs font-semibold text-weg-blue" title={item.id}>
+          #{item.id.slice(0, 8).toUpperCase()}
+        </span>
+      ),
+      className: "w-28 align-middle whitespace-nowrap",
     },
-    { header: "Descrição", accessor: "title", className: "font-semibold text-gray-800 text-sm" },
-    { header: "Data", accessor: "date", className: "text-xs text-gray-400" },
+    {
+      header: "Descrição",
+      accessor: (item) => (
+        <span className="block min-w-0 break-words text-left text-sm font-semibold leading-5 text-gray-800">
+          {item.description}
+        </span>
+      ),
+      className: "min-w-52 align-middle text-left",
+    },
+    { header: "Data", accessor: "date", className: "w-32 align-middle whitespace-nowrap text-xs text-gray-400" },
     {
       header: "Prioridade",
       accessor: (item) => <LabelWithCircle text={item.priorityText} status={item.priorityStatus} />,
+      className: "align-middle whitespace-nowrap",
     },
     {
       header: "Status",
       accessor: (item) => <LabelWithCircle text={item.statusText} status={item.statusType} />,
+      className: "align-middle whitespace-nowrap",
     },
   ];
 

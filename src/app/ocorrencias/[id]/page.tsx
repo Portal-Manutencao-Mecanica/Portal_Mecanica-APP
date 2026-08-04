@@ -89,10 +89,10 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
   const decisionContent = pendingDecision && getDecisionContent(pendingDecision);
 
   return (
-    <LayoutDesktop>
+    <LayoutDesktop breadcrumbLabels={{ 1: request.machineName }}>
       <section className="space-y-6">
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-100 pb-5">
+        <section className="rounded-xl bg-weg-card-white p-6 shadow-sm md:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500">Solicitação de manutenção</p>
               <h1 className="mt-1 text-2xl font-bold text-gray-900 md:text-3xl">{request.machineName}</h1>
@@ -109,7 +109,7 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
           </ol>
         </section>
 
-        <section className="grid grid-cols-1 gap-6 rounded-xl border bg-white p-6 md:grid-cols-2">
+        <section className="grid grid-cols-1 gap-6 rounded-xl bg-weg-card-white p-6 shadow-sm md:grid-cols-2">
           <Detail label="Máquina" value={request.machineName} />
           <Detail label="Local" value={request.placeName} />
           <Detail label="Professor notificado" value={request.notifiedTeacherName} />
@@ -122,7 +122,7 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
         </section>
 
         {request.workOrderNumber && (
-          <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <section className="rounded-xl bg-weg-card-white p-6 shadow-sm">
             <div className="flex items-center gap-2"><Wrench className="h-5 w-5 text-weg-blue" /><h2 className="text-lg font-semibold">Ordem de manutenção {request.workOrderNumber}</h2></div>
             <div className="mt-5 grid gap-5 text-sm sm:grid-cols-2">
               <Detail label="Gerada por" value={request.workOrderCreatedByName || "Professor"} />
@@ -135,7 +135,7 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
         )}
 
         {request.media?.length > 0 && (
-          <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <section className="rounded-xl bg-weg-card-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-800">Imagens da ocorrência</h2>
             <p className="mt-1 text-sm text-gray-500">Evidências enviadas no registro da ocorrência.</p>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">

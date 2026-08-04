@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function TermsOfUseForm() {
     return (
         <div className="mx-auto w-full max-w-5xl px-6 py-8">
@@ -26,8 +24,8 @@ export default function TermsOfUseForm() {
                     </h2>
 
                     <p className="mb-4 leading-7 text-gray-700">
-                        Esta plataforma pertence ao Grupo WEG (doravante "nós",
-                        "nosso" ou "WEG").
+                        Esta plataforma pertence ao Grupo WEG (doravante &quot;nós&quot;,
+                        &quot;nosso&quot; ou &quot;WEG&quot;).
                     </p>
 
                     <p className="mb-4 leading-7 text-gray-700">
@@ -47,7 +45,7 @@ export default function TermsOfUseForm() {
 
                     <p className="leading-7 text-gray-700">
                         Se você tiver qualquer dúvida ou consideração, envie um
-                        e-mail acessando o link "Contato/Fale Conosco" disponível
+                        e-mail acessando o link &quot;Contato/Fale Conosco&quot; disponível
                         em www.weg.net.
                     </p>
                 </section>
@@ -109,7 +107,7 @@ export default function TermsOfUseForm() {
 
                     <p className="mb-4 leading-7 text-gray-700">
                         Após a liberação do seu registro, a Plataforma garantirá
-                        ao Usuário um "login e uma senha" pessoais que corresponderá
+                        ao Usuário um &quot;login e uma senha&quot; pessoais que corresponderá
                         a sua identificação na Plataforma, e permitirá que você use
                         serviços e recursos. Você é responsável pela proteção e
                         confidencialidade de sua senha pessoal.
@@ -144,7 +142,7 @@ export default function TermsOfUseForm() {
                         informações e conteúdos informativos (novas funcionalidades).
                         Se o Usuário não tiver interesse em receber conteúdos
                         informativos, ele tem o direito de expressar a sua oposição,
-                        se tal decisão for comunicada pelo canal "Fale Conosco".
+                        se tal decisão for comunicada pelo canal &quot;Fale Conosco&quot;.
                     </p>
                 </section>
 

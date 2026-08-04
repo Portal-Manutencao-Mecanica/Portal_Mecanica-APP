@@ -1,8 +1,5 @@
-'use client'
+import { redirect } from "next/navigation";
 
-import { FirstAccessForm } from "@/components/organisms/FirstAccessForm";
-import { LoginTemplate } from "@/components/templates/LoginTemplate";
-
-export default function FirstAccessPage() {
-    return <LoginTemplate form={<FirstAccessForm />} />;
+export default function LegacyFirstAccessPage() {
+  redirect("/primeiro-acesso");
 }

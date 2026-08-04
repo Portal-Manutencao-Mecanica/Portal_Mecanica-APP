@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
 import { EventInput } from "@fullcalendar/core";
 import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ import * as v from "valibot";
 import Button from "@/components/atoms/Button";
 import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
 import Calendar from "@/components/organisms/Calendar";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type {
@@ -112,7 +114,7 @@ export default function CalendarioPage() {
     setModal({ type: "create" });
   };
 
-  const closeModal = () => setModal(null);
+  const closeModal = useCallback(() => setModal(null), []);
 
   useEffect(() => {
     async function loadCalendarData() {
@@ -120,11 +122,11 @@ export default function CalendarioPage() {
         const [calendarItems, equipmentPage, machinePage, availablePlaces, availableTeachers, availableStudents] =
           await Promise.all([
             calendarService.list(),
-            equipmentService.list(),
-            machineService.list(),
+            equipmentService.list({ size: 1000, sort: "name,asc" }),
+            machineService.list({ size: 1000, sort: "name,asc" }),
             placeService.list(),
             teacherService.list(),
-            studentService.list(),
+            studentService.list({ size: 1000, sort: "name,asc" }),
           ]);
 
         setEvents(calendarItems);
@@ -132,9 +134,9 @@ export default function CalendarioPage() {
         setMachines(machinePage.content);
         setPlaces(availablePlaces);
         setTeachers(availableTeachers);
-        setStudents(availableStudents);
+        setStudents(availableStudents.content);
       } catch (error) {
-        toast.error(getServiceErrorMessage(error, "Nao foi possivel carregar os dados do calendario."));
+        toast.error(getServiceErrorMessage(error, "Não foi possível carregar os dados do calendário."));
       } finally {
         setIsLoading(false);
       }
@@ -161,10 +163,10 @@ export default function CalendarioPage() {
       const createdEvent = await calendarService.create(payload);
 
       setEvents((current) => sortEvents([...current, toCalendarItem(createdEvent)]));
-      toast.success("Evento adicionado ao calendario.");
+      toast.success("Evento adicionado ao calendário.");
       closeModal();
     } catch (error) {
-      toast.error(getServiceErrorMessage(error, "Nao foi possivel criar o evento."));
+      toast.error(getServiceErrorMessage(error, "Não foi possível criar o evento."));
     } finally {
       setIsSaving(false);
     }
@@ -174,27 +176,29 @@ export default function CalendarioPage() {
 
   return (
     <LayoutDesktop>
-      <main className="mx-auto max-w-7xl p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Calendario de manutencao preventiva</h1>
-            <p className="text-sm text-gray-500">Clique em um dia para agendar uma manutencao.</p>
-          </div>
-          <Button type="button" icon={Plus} onClick={() => openCreate(toInputDate(new Date()))}>
-            Novo evento
-          </Button>
-        </div>
+      <section className="space-y-6">
+        <PageHeader
+          title="Calendário de manutenção"
+          description="Visualize os eventos do mês e clique em um dia para agendar uma manutenção."
+          actions={
+            <Button type="button" icon={Plus} onClick={() => openCreate(toInputDate(new Date()))}>
+              Novo evento
+            </Button>
+          }
+        />
 
         {isLoading ? (
-          <p className="text-sm text-gray-500">Carregando eventos...</p>
+          <PageFeedback message="Carregando eventos..." />
         ) : (
-          <Calendar
-            events={events.map(toCalendarEvent)}
-            onDateClick={(info) => openCreate(`${info.dateStr}T08:00`)}
-            onEventClick={(info) => setModal({ type: "details", event: info.event.extendedProps as CalendarItem })}
-          />
+          <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
+            <Calendar
+              events={events.map(toCalendarEvent)}
+              onDateClick={(info) => openCreate(`${info.dateStr}T08:00`)}
+              onEventClick={(info) => setModal({ type: "details", event: info.event.extendedProps as CalendarItem })}
+            />
+          </div>
         )}
-      </main>
+      </section>
 
       {modal?.type === "create" && (
         <ModalShell title="Agendar manutencao" description="Preencha os dados do evento." onClose={closeModal}>
@@ -235,7 +239,82 @@ export default function CalendarioPage() {
 }
 
 function ModalShell({ title, description, onClose, children }: { title: string; description: string; onClose: () => void; children: React.ReactNode }) {
-  return <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl"><div className="mb-6 flex items-start justify-between gap-4"><div><h2 className="text-xl font-bold text-gray-800">{title}</h2><p className="text-sm text-gray-500">{description}</p></div><button type="button" onClick={onClose} aria-label="Fechar"><X className="h-5 w-5" /></button></div>{children}</div></div>;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const focusableSelector =
+      'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusableElements = Array.from(
+      dialog.querySelectorAll<HTMLElement>(focusableSelector),
+    );
+    focusableElements[0]?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements.at(-1);
+      if (!firstElement || !lastElement) {
+        event.preventDefault();
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl"
+      >
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h2 id={titleId} className="text-xl font-bold text-gray-800">{title}</h2>
+            <p id={descriptionId} className="text-sm text-gray-500">{description}</p>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            icon={X}
+            iconOnly
+            onClick={onClose}
+            aria-label="Fechar"
+            title="Fechar"
+          />
+        </div>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function formatScheduledDate(event: CalendarItem) {

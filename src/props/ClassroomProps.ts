@@ -1,5 +1,5 @@
 
-interface ClassroomProps {
+export interface ClassroomProps {
     id: number;
     name: string;
 }

@@ -14,17 +14,22 @@ interface CalendarProps {
 
 export default function Calendar({ events, onEventClick, onDateClick }: CalendarProps) {
   return (
-    <div className="w-full">
+    <div className="calendar-shell w-full overflow-x-auto">
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         locales={[ptBrLocale]}
         locale="pt-br"
         initialView="dayGridMonth"
-        height={740}
+        height="auto"
         events={events}
         eventClick={onEventClick}
         dateClick={onDateClick}
-        dayMaxEvents={3}
+        dayMaxEvents={2}
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "",
+        }}
         buttonText={{ today: "Hoje" }}
       />
     </div>

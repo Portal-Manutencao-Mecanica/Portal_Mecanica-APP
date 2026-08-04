@@ -1,6 +1,7 @@
 import type {
   CreatedUser,
   CreateUserRequest,
+  UserProfile,
   UserImportResponse,
 } from "@/lib/api/types";
 import { browserApi } from "./httpService";
@@ -17,6 +18,10 @@ export const userService = {
       "/users/import",
       formData,
     );
+    return data;
+  },
+  async updateOwnProfile(name: string) {
+    const { data } = await browserApi.patch<UserProfile>("/users/me", { name });
     return data;
   },
 };

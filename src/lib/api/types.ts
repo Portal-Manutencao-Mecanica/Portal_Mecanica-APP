@@ -82,6 +82,8 @@ export interface Equipment {
   id: string;
   name: string;
   sap: string | null;
+  patrimony: string | null;
+  tag: string | null;
   unitPrice: number;
   availableQuantity: number;
 }
@@ -89,6 +91,8 @@ export interface Equipment {
 export interface CreateEquipment {
   name: string;
   sap?: string;
+  patrimony?: string;
+  tag?: string;
   unitPrice: number;
   availableQuantity: number;
   media?: string;
@@ -102,6 +106,7 @@ export interface Machine {
   tag: string;
   placeId: string;
   placeName: string;
+  image: string | null;
   createdAt: string;
 }
 
@@ -168,6 +173,7 @@ export interface CreateMachine {
   condition: Machine["condition"];
   tag?: string;
   placeId: string;
+  image?: string;
 }
 
 export interface Buy {
@@ -175,8 +181,8 @@ export interface Buy {
   status: string;
   createdById: string;
   createdByName: string;
-  notifiedTeacherId: string;
-  notifiedTeacherName: string;
+  notifiedTeacherId: string | null;
+  notifiedTeacherName: string | null;
   purchaseJustification: string;
   classGroupId: string;
   classGroupAcronym: string;
@@ -184,16 +190,43 @@ export interface Buy {
   items: BuyItem[];
 }
 
+export interface CreateBuyItem {
+  equipmentId: string;
+  quantity: number;
+  technicalSpecification?: string;
+  mechanicalSet?: string;
+}
+
+export interface CreateBuy {
+  purchaseJustification: string;
+  classGroupId: string;
+  notifiedTeacherId?: string;
+  items: CreateBuyItem[];
+  mediaIds?: string[];
+}
+
 export interface BuyItem {
   id: string;
   equipmentId: string;
   equipmentName: string;
   quantity: number;
-  technicalSpecification: string;
-  sap: string;
-  patrimony: string;
-  tag: string;
-  mechanicalSet: string;
+  technicalSpecification: string | null;
+  sap: string | null;
+  patrimony: string | null;
+  tag: string | null;
+  mechanicalSet: string | null;
+}
+
+export type RegistrationPeriod = "MATUTINO" | "VESPERTINO" | "NOTURNO";
+
+export interface CreateInconvenience5S {
+  inconvenience: string;
+  placeId: string;
+  notifiedTeacherId: string;
+  classGroupId: string;
+  involvedStudentIds: string[];
+  description: string;
+  registrationPeriod: RegistrationPeriod;
 }
 
 export interface Inconvenience5S {
@@ -209,7 +242,7 @@ export interface Inconvenience5S {
   classGroupAcronym: string;
   involvedStudentIds: string[];
   description: string;
-  registrationPeriod: string;
+  registrationPeriod: RegistrationPeriod;
 }
 
 export interface MaintenanceRequestApi {
@@ -284,6 +317,12 @@ export interface Page<T> {
   first: boolean;
   last: boolean;
   empty: boolean;
+}
+
+export interface PageQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
 }
 
 export type TaskSituation = "PENDENTE" | "EM_ANDAMENTO" | "CONCLUIDA";

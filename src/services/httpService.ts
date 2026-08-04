@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { getIdempotencyKey } from "@/lib/api/idempotency";
 import type { ApiErrorPayload } from "@/lib/api/types";
 
 export const browserApi = axios.create({
@@ -12,6 +13,18 @@ export const authApi = axios.create({
   baseURL: "/api/auth",
   timeout: 15_000,
   withCredentials: true,
+});
+
+browserApi.interceptors.request.use((config) => {
+  if (config.method?.toUpperCase() !== "POST") return config;
+
+  const idempotencyKey = getIdempotencyKey(
+    config.url ?? "",
+    config.params,
+    config.data,
+  );
+  config.headers.set("Idempotency-Key", idempotencyKey);
+  return config;
 });
 
 export function getServiceErrorMessage(

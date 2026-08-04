@@ -1,7 +1,7 @@
-
-export interface PaginationProps{
-    page : number,
-    limit : number,
-    total : number,
-    onPageChange : (page: number) => void
+export interface PaginationProps {
+  page: number;
+  totalPages: number;
+  totalElements?: number;
+  onPageChange: (page: number) => void;
+  disabled?: boolean;
 }

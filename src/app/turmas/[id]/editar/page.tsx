@@ -41,7 +41,7 @@ export default function EditClassPage({ params }: PageProps) {
   }
 
   return (
-    <LayoutDesktop>
+    <LayoutDesktop breadcrumbLabels={classGroup ? { 1: `Turma ${classGroup.acronym}` } : undefined}>
       <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Editar turma</h1>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
@@ -11,6 +10,7 @@ import * as v from "valibot";
 import Button from "@/components/atoms/Button";
 import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
+import UploadedFile64 from "@/components/molecules/UploadedFile64";
 import type { Place } from "@/lib/api/types";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { machineService } from "@/services/machineService";
@@ -31,6 +31,7 @@ export default function MachineForm() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [placesError, setPlacesError] = useState("");
   const [loadingPlaces, setLoadingPlaces] = useState(true);
+  const [images, setImages] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
@@ -63,6 +64,7 @@ export default function MachineForm() {
       const machine = await machineService.create({
         ...data,
         tag: data.tag?.trim() ?? "",
+        image: images[0],
       });
       toast.success("Máquina cadastrada com sucesso.");
       router.push(`/maquinas/${machine.id}`);
@@ -109,8 +111,25 @@ export default function MachineForm() {
         </Field>
       </div>
 
+      <section className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">Imagem da máquina</h3>
+          <p className="text-sm text-gray-500">
+            Envie uma imagem PNG, JPG, WEBP ou SVG de até 5 MB.
+          </p>
+        </div>
+        <UploadedFile64
+          id="machine-image"
+          value={images}
+          onChange={setImages}
+          maxFiles={1}
+          maxFileSizeBytes={5 * 1024 * 1024}
+          disabled={isSubmitting}
+        />
+      </section>
+
       <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
-        <Link href="/maquinas"><Button type="button" variant="secondary">Cancelar</Button></Link>
+        <Button href="/maquinas" variant="secondary">Cancelar</Button>
         <Button type="submit" variant="primary" disabled={isSubmitting || loadingPlaces || Boolean(placesError)}>
           {isSubmitting ? "Cadastrando..." : "Cadastrar máquina"}
         </Button>

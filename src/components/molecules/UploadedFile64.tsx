@@ -80,6 +80,13 @@ export default function UploadedFile64({
   }, [files]);
 
   const feedback = error || fileError;
+  const dropzoneStyle = isDragging
+    ? "border-weg-blue bg-weg-blue/10! text-gray-700 hover:bg-weg-blue/10!"
+    : feedback
+      ? "border-weg-negative bg-red-50! text-weg-negative! hover:border-weg-negative hover:bg-red-50!"
+      : disabled
+        ? "border-gray-200 bg-gray-100! text-gray-500 hover:border-gray-200 hover:bg-gray-100!"
+        : "border-gray-300 bg-gray-50! text-gray-700 hover:border-weg-blue/60 hover:bg-weg-blue/5!";
 
   return (
     <div className="space-y-4">
@@ -103,9 +110,7 @@ export default function UploadedFile64({
         onDrop={disabled ? undefined : handleDrop}
         disabled={disabled}
         aria-describedby={`${inputId}-help`}
-        className={`min-h-40 w-full flex-col border-2 border-dashed shadow-none ${
-          isDragging ? "border-weg-blue" : feedback ? "border-weg-negative" : "border-gray-300"
-        }`}
+        className={`min-h-40 w-full flex-col border-2 border-dashed shadow-none ${dropzoneStyle}`}
       >
         <Upload className="h-8 w-8" aria-hidden="true" />
         <span>Selecionar imagens</span>
@@ -149,10 +154,12 @@ export default function UploadedFile64({
                 type="button"
                 variant="secondary"
                 icon={Trash2}
+                iconOnly
                 onClick={() => removeFile(index)}
                 disabled={disabled}
                 aria-label={`Remover imagem ${index + 1}`}
-                className="min-h-0 shrink-0 px-2 py-2 shadow-none"
+                title={`Remover imagem ${index + 1}`}
+                className="shadow-none"
               />
             </li>
           ))}

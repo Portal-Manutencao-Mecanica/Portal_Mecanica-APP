@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
+import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
 import TextArea from "@/components/atoms/TextArea";
 import { useAuth } from "@/hooks/useAuth";
 import type {
+  AutonomousMaintenance,
   AutonomousMaintenanceRequest,
   Machine,
   Student,
@@ -26,10 +28,6 @@ const formSchema = v.object({
   scheduledFor: v.pipe(
     v.string(),
     v.nonEmpty("Informe a data e a hora planejadas."),
-    v.check(
-      (value) => new Date(value).getTime() >= Date.now() - 60_000,
-      "A data planejada não pode estar no passado.",
-    ),
   ),
   inspectedAt: v.string(),
   inspectedMachineId: v.pipe(
@@ -57,9 +55,6 @@ type FormState = {
   studentIds: string[];
 };
 
-const fieldClassName =
-  "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-weg-blue focus:ring-2 focus:ring-weg-blue/20 disabled:bg-gray-100";
-
 function toLocalDateTimeInput(date: Date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 16);
@@ -71,32 +66,55 @@ function defaultScheduledFor() {
   return toLocalDateTimeInput(date);
 }
 
-const initialForm: FormState = {
-  equipmentSituation: "OPERANDO",
-  scheduledFor: defaultScheduledFor(),
-  inspectedAt: "",
-  inspectedMachineId: "",
-  equipmentCondition: "CONFORME",
-  identifiedNonconformities: "",
-  studentIds: [],
-};
+function createInitialForm(maintenance?: AutonomousMaintenance): FormState {
+  if (maintenance) {
+    return {
+      equipmentSituation: maintenance.equipmentSituation,
+      scheduledFor: maintenance.scheduledFor.slice(0, 16),
+      inspectedAt: maintenance.inspectedAt?.slice(0, 16) ?? "",
+      inspectedMachineId: maintenance.inspectedMachineId,
+      equipmentCondition: maintenance.equipmentCondition,
+      identifiedNonconformities: maintenance.identifiedNonconformities ?? "",
+      studentIds: maintenance.students.map((student) => student.id),
+    };
+  }
 
-export default function AutonomousMaintenanceForm() {
+  return {
+    equipmentSituation: "OPERANDO",
+    scheduledFor: defaultScheduledFor(),
+    inspectedAt: "",
+    inspectedMachineId: "",
+    equipmentCondition: "CONFORME",
+    identifiedNonconformities: "",
+    studentIds: [],
+  };
+}
+
+interface AutonomousMaintenanceFormProps {
+  maintenance?: AutonomousMaintenance;
+}
+export default function AutonomousMaintenanceForm({
+  maintenance,
+}: AutonomousMaintenanceFormProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [form, setForm] = useState<FormState>(initialForm);
+  const [form, setForm] = useState<FormState>(() => createInitialForm(maintenance));
   const [machines, setMachines] = useState<Machine[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [studentSearch, setStudentSearch] = useState("");
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dateLimits] = useState(() => ({
+    minimumScheduledFor: defaultScheduledFor(),
+    maximumInspectedAt: toLocalDateTimeInput(new Date()),
+  }));
 
   useEffect(() => {
     async function loadOptions() {
       try {
         const [machinePage, activeStudents, classGroupPage] = await Promise.all([
           machineService.list({ size: 100, sort: "name,asc" }),
-          studentService.listActive(),
+          studentService.listActive({ size: 1000, sort: "name,asc" }),
           classGroupBrowserService.list({ size: 100, sort: "acronym,asc" }),
         ]);
         const teacherGroups = classGroupPage.content.filter(
@@ -108,7 +126,7 @@ export default function AutonomousMaintenanceForm() {
         );
         setMachines(machinePage.content);
         setStudents(
-          activeStudents.filter(
+          activeStudents.content.filter(
             (student) =>
               student.enabled &&
               student.accountNonLocked &&
@@ -127,8 +145,10 @@ export default function AutonomousMaintenanceForm() {
       }
     }
 
-    if (user?.role === "PROFESSOR") void loadOptions();
-  }, [user?.id, user?.role]);
+    if (user?.role === "PROFESSOR" || (maintenance && user?.role === "ADMIN")) {
+      void loadOptions();
+    }
+  }, [maintenance, user?.id, user?.role]);
 
   const filteredStudents = useMemo(() => {
     const search = studentSearch.trim().toLocaleLowerCase("pt-BR");
@@ -162,6 +182,11 @@ export default function AutonomousMaintenanceForm() {
       return;
     }
 
+    if (!maintenance && new Date(validation.output.scheduledFor).getTime() < Date.now() - 60_000) {
+      toast.error("A data planejada não pode estar no passado.");
+      return;
+    }
+
     const payload: AutonomousMaintenanceRequest = {
       ...validation.output,
       scheduledFor: validation.output.scheduledFor,
@@ -174,15 +199,23 @@ export default function AutonomousMaintenanceForm() {
 
     setIsSubmitting(true);
     try {
-      const created = await autonomousMaintenanceService.create(payload);
-      toast.success("Manutenção autônoma enviada para aprovação.");
-      router.push(`/manutencao-autonoma/${created.id}`);
+      const saved = maintenance
+        ? await autonomousMaintenanceService.update(maintenance.id, payload)
+        : await autonomousMaintenanceService.create(payload);
+      toast.success(
+        maintenance
+          ? "Manutenção autônoma atualizada com sucesso."
+          : "Manutenção autônoma enviada para aprovação.",
+      );
+      router.push(`/manutencao-autonoma/${saved.id}`);
       router.refresh();
     } catch (error) {
       toast.error(
         getServiceErrorMessage(
           error,
-          "Não foi possível criar a manutenção autônoma.",
+          maintenance
+            ? "Não foi possível atualizar a manutenção autônoma."
+            : "Não foi possível criar a manutenção autônoma.",
         ),
       );
     } finally {
@@ -190,10 +223,14 @@ export default function AutonomousMaintenanceForm() {
     }
   }
 
-  if (user?.role !== "PROFESSOR") {
+  const canSubmit = maintenance
+    ? user?.role === "PROFESSOR" || user?.role === "ADMIN"
+    : user?.role === "PROFESSOR";
+
+  if (!canSubmit) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
-        Somente professores podem criar manutenções autônomas.
+        Você não possui permissão para {maintenance ? "editar" : "criar"} manutenções autônomas.
       </div>
     );
   }
@@ -202,82 +239,68 @@ export default function AutonomousMaintenanceForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Nova manutenção autônoma</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {maintenance ? "Editar manutenção autônoma" : "Nova manutenção autônoma"}
+          </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Planeje a atividade, atribua os alunos e envie para o coordenador.
+            {maintenance
+              ? "Atualize os dados da atividade e salve as alterações."
+              : "Planeje a atividade, atribua os alunos e envie para o coordenador."}
           </p>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          <Field label="Máquina *">
-            <select
-              value={form.inspectedMachineId}
-              onChange={(event) => updateField("inspectedMachineId", event.target.value)}
-              disabled={isLoadingOptions}
-              className={fieldClassName}
-            >
-              <option value="">
-                {isLoadingOptions ? "Carregando máquinas..." : "Selecione uma máquina"}
-              </option>
-              {machines.map((machine) => (
-                <option key={machine.id} value={machine.id}>
-                  {machine.name} — {machine.placeName}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <DropDown
+            id="autonomous-machine"
+            label="Máquina *"
+            defaultSelection={isLoadingOptions ? "Carregando máquinas..." : "Selecione uma máquina"}
+            enumData={Object.fromEntries(
+              machines.map((machine) => [machine.id, `${machine.name} — ${machine.placeName}`]),
+            )}
+            value={form.inspectedMachineId}
+            onSelect={(value) => updateField("inspectedMachineId", value)}
+            disabled={isLoadingOptions}
+          />
 
-          <Field label="Data e hora planejadas *">
-            <input
-              type="datetime-local"
-              value={form.scheduledFor}
-              min={defaultScheduledFor()}
-              onChange={(event) => updateField("scheduledFor", event.target.value)}
-              className={fieldClassName}
-            />
-          </Field>
+          <Input
+            id="autonomous-scheduled-for"
+            label="Data e hora planejadas *"
+            type="datetime-local"
+            value={form.scheduledFor}
+            min={maintenance ? undefined : dateLimits.minimumScheduledFor}
+            onChange={(event) => updateField("scheduledFor", event.target.value)}
+          />
 
-          <Field label="Situação da máquina *">
-            <select
-              value={form.equipmentSituation}
-              onChange={(event) =>
-                updateField(
-                  "equipmentSituation",
-                  event.target.value as FormState["equipmentSituation"],
-                )
-              }
-              className={fieldClassName}
-            >
-              <option value="OPERANDO">Operando</option>
-              <option value="NAO_OPERANDO">Não operando</option>
-            </select>
-          </Field>
+          <DropDown
+            id="autonomous-situation"
+            label="Situação da máquina *"
+            defaultSelection="Selecione a situação"
+            enumData={{ OPERANDO: "Operando", NAO_OPERANDO: "Não operando" }}
+            value={form.equipmentSituation}
+            onSelect={(value) =>
+              updateField("equipmentSituation", value as FormState["equipmentSituation"])
+            }
+          />
 
-          <Field label="Condição encontrada *">
-            <select
-              value={form.equipmentCondition}
-              onChange={(event) =>
-                updateField(
-                  "equipmentCondition",
-                  event.target.value as FormState["equipmentCondition"],
-                )
-              }
-              className={fieldClassName}
-            >
-              <option value="CONFORME">Conforme</option>
-              <option value="NAO_CONFORME">Não conforme</option>
-            </select>
-          </Field>
+          <DropDown
+            id="autonomous-condition"
+            label="Condição encontrada *"
+            defaultSelection="Selecione a condição"
+            enumData={{ CONFORME: "Conforme", NAO_CONFORME: "Não conforme" }}
+            value={form.equipmentCondition}
+            onSelect={(value) =>
+              updateField("equipmentCondition", value as FormState["equipmentCondition"])
+            }
+          />
 
-          <Field label="Data real da inspeção">
-            <input
-              type="datetime-local"
-              value={form.inspectedAt}
-              max={toLocalDateTimeInput(new Date())}
-              onChange={(event) => updateField("inspectedAt", event.target.value)}
-              className={fieldClassName}
-            />
-          </Field>
+          <Input
+            id="autonomous-inspected-at"
+            label="Data real da inspeção"
+            type="datetime-local"
+            value={form.inspectedAt}
+            max={dateLimits.maximumInspectedAt}
+            onChange={(event) => updateField("inspectedAt", event.target.value)}
+          />
 
           <div className="md:col-span-2">
             <TextArea
@@ -353,18 +376,13 @@ export default function AutonomousMaintenanceForm() {
           disabled={isSubmitting || isLoadingOptions}
           className="disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Enviando..." : "Enviar para aprovação"}
+          {isSubmitting
+            ? "Salvando..."
+            : maintenance
+              ? "Salvar alterações"
+              : "Enviar para aprovação"}
         </Button>
       </div>
     </form>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block text-sm font-medium text-gray-700">
-      <span className="mb-1.5 block">{label}</span>
-      {children}
-    </label>
   );
 }

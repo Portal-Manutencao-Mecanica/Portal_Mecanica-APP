@@ -1,94 +1,119 @@
 "use client";
 
-import Input from "../atoms/Input";
-import Button from "../atoms/Button";
-import { ConfigFormProps } from "@/props/ConfigFormProps";
-import Link from "next/link";
+import { FormEvent, useState } from "react";
+import { toast } from "sonner";
+import * as v from "valibot";
 
-export default function ConfigForm({ user }: ConfigFormProps) {
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
+import { useAuth } from "@/hooks/useAuth";
+import { getServiceErrorMessage } from "@/services/httpService";
+import { userService } from "@/services/userService";
+
+const profileSchema = v.object({
+  name: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(2, "Informe um nome válido."),
+    v.maxLength(150, "O nome deve possuir no máximo 150 caracteres."),
+  ),
+});
+
+export default function ConfigForm() {
+  const { isLoading, refreshSession, user } = useAuth();
+  const [nameDraft, setNameDraft] = useState<{ userId: string; value: string } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const name = user && nameDraft?.userId === user.id ? nameDraft.value : user?.name ?? "";
+
+  async function saveName(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (saving || !user) return;
+
+    const result = v.safeParse(profileSchema, { name });
+    if (!result.success) {
+      toast.error(result.issues[0]?.message ?? "Revise o nome informado.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await userService.updateOwnProfile(result.output.name);
+      await refreshSession();
+      setNameDraft({ userId: user.id, value: result.output.name });
+      toast.success("Nome atualizado com sucesso.");
+    } catch (error) {
+      toast.error(
+        getServiceErrorMessage(error, "Não foi possível atualizar o nome."),
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (isLoading || !user) {
+    return <PageFeedback message="Carregando configurações..." />;
+  }
+
+  const unchanged = name.trim() === user.name;
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-weg-gray">Configurações</h1>
+    <section className="space-y-6">
+      <PageHeader
+        title="Configurações"
+        description="Gerencie suas informações pessoais e configurações de acesso."
+      />
 
-        <p className="mt-2 text-gray-500">
-          Gerencie suas informações pessoais e configurações de acesso.
-        </p>
-      </div>
-
-      {/* Dados pessoais */}
-      <section className="mb-6 rounded-xl bg-weg-card-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-weg-gray">Dados pessoais</h2>
-
+      <form
+        onSubmit={saveName}
+        className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+      >
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">Dados pessoais</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Atualize as informações relacionadas à sua conta.
+            Atualize o nome exibido no sistema. O e-mail da conta não pode ser
+            alterado por esta tela.
           </p>
         </div>
 
-        {/* Nome social */}
-        <div className="border-b border-gray-200 py-5">
-          <div className="mb-4">
-            <h3 className="font-bold text-weg-gray">Nome social</h3>
-
-            <p className="text-sm text-gray-500">
-              Altere o nome que será exibido no sistema.
-            </p>
-          </div>
-
-          <div className="flex items-end gap-4">
-            <div className="flex-1">
-              <Input value={user.name} placeholder="Digite seu nome social" />
-            </div>
-
-            <Button>Salvar</Button>
-          </div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <Input
+            id="profile-name"
+            label="Nome"
+            value={name}
+            onChange={(event) => setNameDraft({ userId: user.id, value: event.target.value })}
+            maxLength={150}
+            autoComplete="name"
+            required
+          />
+          <Input
+            id="profile-email"
+            label="E-mail"
+            value={user.email}
+            disabled
+            readOnly
+          />
         </div>
 
-        {/* E-mail */}
-        <div className="py-5">
-          <div className="mb-4">
-            <h3 className="font-bold text-weg-gray">E-mail</h3>
-
-            <p className="text-sm text-gray-500">
-              Altere o endereço de e-mail vinculado à sua conta.
-            </p>
-          </div>
-
-          <div className="flex items-end gap-4">
-            <div className="flex-1">
-              <Input value={user.email} placeholder="Digite seu novo e-mail" />
-            </div>
-
-            <Button>Salvar</Button>
-          </div>
+        <div className="flex justify-end border-t border-gray-100 pt-4">
+          <Button type="submit" disabled={saving || unchanged || !name.trim()}>
+            {saving ? "Salvando..." : "Salvar nome"}
+          </Button>
         </div>
-      </section>
+      </form>
 
-      {/* Segurança */}
-      <section className="rounded-xl bg-weg-card-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-weg-gray">Segurança</h2>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Gerencie as configurações de segurança da sua conta.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between gap-6">
+      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="font-bold text-weg-gray">Alterar senha</h3>
-
+            <h2 className="text-lg font-semibold text-gray-800">Segurança</h2>
             <p className="mt-1 text-sm text-gray-500">
-              Atualize sua senha para manter sua conta segura.
+              Solicite um link de uso único para redefinir sua senha.
             </p>
           </div>
-
-          <Link href="/login/forgot-password">
-            <Button>Trocar senha</Button>
-          </Link>
+          <Button href="/login/forgot-password">Trocar senha</Button>
         </div>
       </section>
-    </div>
+    </section>
   );
 }

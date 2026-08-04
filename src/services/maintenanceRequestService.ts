@@ -2,13 +2,21 @@ import type {
   CreateMaintenanceRequest,
   MaintenanceApproval,
   MaintenanceRequestApi,
+  MaintenanceRequestPriority,
+  Page,
+  PageQuery,
 } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const maintenanceRequestService = {
-  async list() {
-    const { data } = await browserApi.get<MaintenanceRequestApi[]>(
+  async list(query: PageQuery & {
+    search?: string;
+    status?: string;
+    priority?: MaintenanceRequestPriority;
+  } = {}) {
+    const { data } = await browserApi.get<Page<MaintenanceRequestApi>>(
       "/solicitao-manutencao",
+      { params: query },
     );
     return data;
   },

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -6,52 +6,64 @@ import { toast } from "sonner";
 import Button from "@/components/atoms/Button";
 import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
+import Pagination from "@/components/molecules/Pagination";
 import { StudentTable } from "@/components/organisms/StudentTable";
 import UserCsvImport from "@/components/organisms/UserCsvImport";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
-import type { Student } from "@/lib/api/types";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import type { Page, Student } from "@/lib/api/types";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { studentService } from "@/services/studentService";
 
+const PAGE_SIZE = 10;
+
 export default function StudentsPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [studentPage, setStudentPage] = useState<Page<Student> | null>(null);
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
+  const [loadedRequestKey, setLoadedRequestKey] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [requestVersion, setRequestVersion] = useState(0);
+  const debouncedSearch = useDebouncedValue(search);
+  const requestKey = `${page}:${debouncedSearch}:${statusFilter}:${requestVersion}`;
+  const loading = loadedRequestKey !== requestKey;
 
   useEffect(() => {
-    let isCurrentRequest = true;
-
-    studentService.list()
+    let active = true;
+    studentService
+      .list({
+        page,
+        size: PAGE_SIZE,
+        sort: "name,asc",
+        search: debouncedSearch.trim() || undefined,
+        enabled:
+          statusFilter === "ALL" ? undefined : statusFilter === "ACTIVE",
+      })
       .then((data) => {
-        if (!isCurrentRequest) return;
-        setStudents(data);
+        if (!active) return;
+        setStudentPage(data);
         setHasError(false);
       })
       .catch((error) => {
-        if (!isCurrentRequest) return;
+        if (!active) return;
         setHasError(true);
-        toast.error(getServiceErrorMessage(error, "Não foi possível carregar os alunos."));
+        toast.error(
+          getServiceErrorMessage(error, "Não foi possível carregar os alunos."),
+        );
       })
       .finally(() => {
-        if (isCurrentRequest) setLoading(false);
+        if (active) setLoadedRequestKey(requestKey);
       });
 
     return () => {
-      isCurrentRequest = false;
+      active = false;
     };
-  }, [requestVersion]);
+  }, [debouncedSearch, page, requestKey, requestVersion, statusFilter]);
 
   function retryLoadStudents() {
-    setLoading(true);
     setRequestVersion((version) => version + 1);
   }
-
-  const visibleStudents = students.filter((student) =>
-    statusFilter === "ALL"
-      || (statusFilter === "ACTIVE" ? student.enabled : !student.enabled),
-  );
 
   return (
     <LayoutDesktop>
@@ -61,7 +73,12 @@ export default function StudentsPage() {
           description="Visualize os alunos cadastrados e suas turmas vinculadas."
         />
 
-        <UserCsvImport onImportCompleted={retryLoadStudents} />
+        <UserCsvImport
+          onImportCompleted={() => {
+            setPage(0);
+            retryLoadStudents();
+          }}
+        />
 
         {loading ? (
           <PageFeedback message="Carregando alunos..." />
@@ -73,11 +90,27 @@ export default function StudentsPage() {
             </div>
           </div>
         ) : (
-          <StudentTable
-            students={visibleStudents}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-          />
+          <>
+            <StudentTable
+              students={studentPage?.content ?? []}
+              searchValue={search}
+              onSearchChange={(value) => {
+                setSearch(value);
+                setPage(0);
+              }}
+              statusFilter={statusFilter}
+              onStatusFilterChange={(value) => {
+                setStatusFilter(value);
+                setPage(0);
+              }}
+            />
+            <Pagination
+              page={studentPage?.number ?? page}
+              totalPages={studentPage?.totalPages ?? 0}
+              totalElements={studentPage?.totalElements ?? 0}
+              onPageChange={setPage}
+            />
+          </>
         )}
       </section>
     </LayoutDesktop>

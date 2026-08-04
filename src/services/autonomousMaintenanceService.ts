@@ -21,7 +21,7 @@ export const autonomousMaintenanceService = {
       {
         params: {
           page: 0,
-          size: 100,
+          size: 10,
           sort: "scheduledFor,asc",
           ...params,
         },

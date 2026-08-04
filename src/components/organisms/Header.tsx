@@ -13,6 +13,8 @@ interface HeaderProps {
   onOpenMobileMenu?: () => void;
 }
 
+const NOTIFICATION_REFRESH_INTERVAL_MS = 30_000;
+
 export default function Header({ onOpenMobileMenu }: HeaderProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -34,6 +36,14 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
     }
   }, []);
 
+  const refreshUnreadCount = useCallback(async () => {
+    try {
+      setUnreadCount(await notificationService.unreadCount());
+    } catch {
+      // Keep the last known count during temporary connection failures.
+    }
+  }, []);
+
   useEffect(() => {
     async function loadInitialNotifications() {
       await loadNotifications();
@@ -44,9 +54,33 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
       void loadNotifications();
     }
 
+    function handleWindowFocus() {
+      void refreshUnreadCount();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void refreshUnreadCount();
+      }
+    }
+
+    const refreshInterval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refreshUnreadCount();
+      }
+    }, NOTIFICATION_REFRESH_INTERVAL_MS);
+
     window.addEventListener("notifications:changed", handleNotificationChange);
-    return () => window.removeEventListener("notifications:changed", handleNotificationChange);
-  }, [loadNotifications]);
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(refreshInterval);
+      window.removeEventListener("notifications:changed", handleNotificationChange);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loadNotifications, refreshUnreadCount]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -67,24 +101,6 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
     });
   }
 
-  function handleNotificationClick(notification: Notification) {
-    setIsNotificationOpen(false);
-    if (notification.statusRead) return;
-
-    setNotifications((current) =>
-      current.map((item) =>
-        item.id === notification.id ? { ...item, statusRead: true } : item,
-      ),
-    );
-    void notificationService.markAsRead(notification.id).catch(() => {
-      setNotifications((current) =>
-        current.map((item) =>
-          item.id === notification.id ? { ...item, statusRead: false } : item,
-        ),
-      );
-    });
-  }
-
   return (
     <header className="relative z-30 flex h-16 w-full shrink-0 items-center bg-weg-blue px-4 shadow-md md:h-20 md:px-5">
       <nav className="relative flex w-full items-center justify-between gap-2 md:gap-4">
@@ -97,7 +113,7 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
             <Menu size={24} />
           </button>
           <Link href="/" aria-label="Ir para a página inicial" className="hidden shrink-0 items-center sm:flex">
-            <Image src="/brand/logo-icon.svg" alt="WEG logo" width={39} height={25} priority />
+            <Image src="/brand/logo-icon.svg" alt="WEG logo" width={39} height={26} priority />
           </Link>
         </div>
 
@@ -119,15 +135,17 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
               <button
                 onClick={handleToggleMenu}
                 className={`relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg transition-colors md:h-12 md:w-12 ${isNotificationOpen ? "bg-white/20" : "hover:bg-white/10"}`}
-                aria-label="Notificações"
+                aria-label={unreadCount > 0
+                  ? `Notificações, ${unreadCount} não lida${unreadCount === 1 ? "" : "s"}`
+                  : "Notificações"}
                 aria-expanded={isNotificationOpen}
               >
                 <Bell color="white" size={24} />
                 {unreadCount > 0 && (
-                  <span className="absolute right-2.5 top-2.5 flex h-3 w-3">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-weg-blue bg-red-500" />
-                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-1.5 top-1.5 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white md:right-2 md:top-2"
+                  />
                 )}
               </button>
 

@@ -27,6 +27,14 @@ export default function EquipmentCard({ equipment }: Props) {
           </p>
 
           <p className="text-sm text-gray-500">
+            <span className="font-medium">Patrimônio:</span> {equipment.patrimony || "-"}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            <span className="font-medium">TAG:</span> {equipment.tag || "-"}
+          </p>
+
+          <p className="text-sm text-gray-500">
             <span className="font-medium">Preço unitário:</span> {formattedPrice}
           </p>
 

@@ -47,7 +47,12 @@ const maintenanceSchema = v.object({
 
 type MaintenanceFormData = v.InferInput<typeof maintenanceSchema>;
 
-export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string }) {
+interface MaintenceFormProps {
+  occurrenceId?: string;
+  onOccurrenceLoaded?: (label: string) => void;
+}
+
+export default function MaintenceForm({ occurrenceId, onOccurrenceLoaded }: MaintenceFormProps) {
   const { user } = useAuth();
   const router = useRouter();
   const canSubmit = !occurrenceId || user?.role === "ADMIN";
@@ -94,6 +99,7 @@ export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string 
         setMachines(machinePage.content);
         setTeachers(loadedTeachers);
         if (occurrence) {
+          onOccurrenceLoaded?.(occurrence.machineName);
           reset({
             sector: occurrence.sector,
             priority: occurrence.priority,
@@ -114,7 +120,7 @@ export default function MaintenceForm({ occurrenceId }: { occurrenceId?: string 
     }
 
     void loadOptions();
-  }, [occurrenceId, reset]);
+  }, [occurrenceId, onOccurrenceLoaded, reset]);
 
   async function onSubmit(formData: MaintenanceFormData) {
     if (formData.images.length === 0) {

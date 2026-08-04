@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
 import * as v from "valibot";
@@ -14,7 +13,6 @@ import UploadedFile64 from "../molecules/UploadedFile64";
 // 1. Schema atualizado para incluir a propriedade media (Base64)
 const equipmentSchema = v.object({
   name: v.pipe(v.string(), v.trim(), v.minLength(3, "Informe o nome do equipamento.")),
-  sap: v.optional(v.string()),
   unitPrice: v.pipe(
     v.string(),
     v.nonEmpty("Informe o preço unitário."),
@@ -48,7 +46,6 @@ export default function EquipmentForm({
   onSubmit,
 }: EquipmentFormProps) {
   const [name, setName] = useState(initialValues?.name ?? "");
-  const [sap, setSap] = useState(initialValues?.sap ?? "");
   const [unitPrice, setUnitPrice] = useState(initialValues?.unitPrice?.toString() ?? "");
   const [availableQuantity, setAvailableQuantity] = useState(
     initialValues?.availableQuantity?.toString() ?? "",
@@ -62,7 +59,6 @@ export default function EquipmentForm({
     // 2. Passamos o 'media' para a validação do Valibot
     const result = v.safeParse(equipmentSchema, {
       name,
-      sap,
       unitPrice,
       availableQuantity,
       media,
@@ -79,7 +75,6 @@ export default function EquipmentForm({
     try {
       await onSubmit({
         name: formData.name,
-        sap: formData.sap?.trim() || undefined,
         unitPrice: formData.unitPrice,
         availableQuantity: formData.availableQuantity,
         media: formData.media || undefined, // 👈 Corrigido: agora envia a string Base64 tratada
@@ -104,17 +99,18 @@ export default function EquipmentForm({
           label="Nome do equipamento *"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Ex.: Motor WEG 2CV"
+          placeholder="Ex.: Chave de boca 22 mm"
           required
         />
 
-        <Input
-          id="sap"
-          label="Código SAP"
-          value={sap}
-          onChange={(event) => setSap(event.target.value)}
-          placeholder="Ex.: 123456"
-        />
+        <div className="grid gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4 sm:grid-cols-3 md:col-span-2">
+          <AutomaticIdentifier label="Código SAP" value={initialValues?.sap} />
+          <AutomaticIdentifier label="Patrimônio" value={initialValues?.patrimony} />
+          <AutomaticIdentifier label="TAG" value={initialValues?.tag} />
+          <p className="text-xs text-blue-800 sm:col-span-3">
+            Esses identificadores são gerados automaticamente pelo sistema e não podem ser editados.
+          </p>
+        </div>
 
         <Input
           id="unitPrice"
@@ -153,13 +149,24 @@ export default function EquipmentForm({
       </div>
 
       <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-        <Link href="/equipamentos">
-          <Button type="button" variant="secondary">Cancelar</Button>
-        </Link>
+        <Button href="/equipamentos" type="button" variant="secondary">Cancelar</Button>
         <Button type="submit" icon={Save} disabled={saving}>
           {saving ? "Salvando..." : submitLabel}
         </Button>
       </div>
     </form>
+  );
+}
+
+function AutomaticIdentifier({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <span className="block text-xs font-semibold uppercase tracking-wide text-blue-700">
+        {label}
+      </span>
+      <span className="mt-1 block text-sm font-medium text-gray-800">
+        {value || "Gerado ao salvar"}
+      </span>
+    </div>
   );
 }

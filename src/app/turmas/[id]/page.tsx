@@ -62,7 +62,7 @@ export default function ClassGroupPage({ params }: Props) {
   }
 
   return (
-    <LayoutDesktop>
+    <LayoutDesktop breadcrumbLabels={{ 1: `Turma ${classGroup.acronym}` }}>
       <div className="mx-auto max-w-7xl space-y-6 p-8">
         <div className="flex flex-wrap gap-3">
           <Link href={{ pathname: `/turmas/${id}/editar`, query: { turma: classGroup.acronym } }}>

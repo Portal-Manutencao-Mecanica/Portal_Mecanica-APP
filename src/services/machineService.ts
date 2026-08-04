@@ -1,10 +1,15 @@
-import type { CreateMachine, Machine, Page } from "@/lib/api/types";
+import type { CreateMachine, Machine, Page, PageQuery } from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const machineService = {
-  async list(size?: number) {
+  async list(
+    query: (PageQuery & {
+      search?: string;
+      condition?: Machine["condition"];
+    }) | number = {},
+  ) {
     const { data } = await browserApi.get<Page<Machine>>("/maquinas", {
-      params: size ? { size } : undefined,
+      params: typeof query === "number" ? { size: query } : query,
     });
     return data;
   },
@@ -19,7 +24,12 @@ export const machineService = {
     return data;
   },
 
-  async update(id: string, machine: Pick<Machine, "name" | "patrimony" | "condition" | "tag">) {
+  async update(
+    id: string,
+    machine: Pick<Machine, "name" | "patrimony" | "condition" | "tag"> & {
+      image?: string;
+    },
+  ) {
     const { data } = await browserApi.patch<Machine>(`/maquinas/${encodeURIComponent(id)}`, machine);
     return data;
   },

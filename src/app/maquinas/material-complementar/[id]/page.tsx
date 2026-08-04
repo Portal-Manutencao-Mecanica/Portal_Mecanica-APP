@@ -23,7 +23,7 @@ export default function MaterialDetailsPage({
     };
 
     return (
-        <LayoutDesktop>
+        <LayoutDesktop breadcrumbLabels={{ 2: material.title }}>
             <div className="mx-auto max-w-5xl p-8">
 
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">

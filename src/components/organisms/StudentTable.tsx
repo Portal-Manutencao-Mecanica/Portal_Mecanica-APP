@@ -12,12 +12,16 @@ interface StudentTableProps {
   students: Student[];
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
 }
 
 export function StudentTable({
   students,
   statusFilter,
   onStatusFilterChange,
+  searchValue,
+  onSearchChange,
 }: StudentTableProps) {
   const columns: ColumnProps<Student>[] = [
     { header: "Nome", accessorKey: "name" },
@@ -52,6 +56,8 @@ export function StudentTable({
       data={students}
       columns={columns}
       searchKeys={["name", "email", "numberCard"]}
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
       searchPlaceholder="Pesquisar aluno..."
       emptyMessage="Nenhum aluno encontrado."
       toggleOptions={[
