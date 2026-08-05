@@ -55,6 +55,7 @@ async function responseFromUpstream(upstreamResponse: Response) {
   const idempotencyReplayed = upstreamResponse.headers.get(
     "idempotency-replayed",
   );
+  const retryAfter = upstreamResponse.headers.get("retry-after");
 
   if (contentType) headers.set("Content-Type", contentType);
   if (contentDisposition) {
@@ -63,6 +64,7 @@ async function responseFromUpstream(upstreamResponse: Response) {
   if (idempotencyReplayed) {
     headers.set("Idempotency-Replayed", idempotencyReplayed);
   }
+  if (retryAfter) headers.set("Retry-After", retryAfter);
   headers.set("Cache-Control", "no-store");
 
   const body =

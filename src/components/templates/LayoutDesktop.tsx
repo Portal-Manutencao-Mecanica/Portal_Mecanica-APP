@@ -8,6 +8,7 @@ import Footer from "../organisms/Footer";
 import { Breadcrumbs } from "../molecules/Breadcrumbs";
 import { LayoutProps } from "@/props/LayoutProps";
 import { useAuth } from "@/hooks/useAuth";
+import { isUnauthorizedRoute } from "@/lib/permissions";
 
 export default function Layout({ children, breadcrumbLabels }: LayoutProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,10 +24,14 @@ export default function Layout({ children, breadcrumbLabels }: LayoutProps) {
         }
         if (user.passwordChangeRequired) {
             router.replace("/primeiro-acesso");
+            return;
+        }
+        if (isUnauthorizedRoute(pathname, user.role)) {
+            router.replace(`/acesso-negado?returnTo=${encodeURIComponent(pathname)}`);
         }
     }, [isLoading, pathname, router, user]);
 
-    if (isLoading || !user || user.passwordChangeRequired) {
+    if (isLoading || !user || user.passwordChangeRequired || isUnauthorizedRoute(pathname, user?.role)) {
         return (
             <main className="flex min-h-screen items-center justify-center bg-gray-50">
                 <p className="text-sm text-gray-500">Validando sua sessão...</p>

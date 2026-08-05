@@ -2,7 +2,7 @@ import type { AuthSession, UserProfile } from "@/lib/api/types";
 import { authApi, browserApi } from "./httpService";
 
 export interface LoginCredentials {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -28,7 +28,7 @@ export const authService = {
   async login(credentials: LoginCredentials) {
     const { data } = await authApi.post<AuthSession>("/login", {
       ...credentials,
-      email: credentials.email.trim(),
+      identifier: credentials.identifier.trim(),
     });
     return data;
   },

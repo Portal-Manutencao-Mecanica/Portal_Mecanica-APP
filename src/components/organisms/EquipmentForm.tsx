@@ -8,6 +8,7 @@ import * as v from "valibot";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import type { CreateEquipment } from "@/lib/api/types";
+import { getApiFieldErrors, getServiceErrorMessage } from "@/services/httpService";
 import UploadedFile64 from "../molecules/UploadedFile64";
 
 // 1. Schema atualizado para incluir a propriedade media (Base64)
@@ -52,9 +53,11 @@ export default function EquipmentForm({
   );
   const [media, setMedia] = useState(initialValues?.media ?? "");
   const [saving, setSaving] = useState(false);
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setServerErrors({});
 
     // 2. Passamos o 'media' para a validação do Valibot
     const result = v.safeParse(equipmentSchema, {
@@ -81,11 +84,8 @@ export default function EquipmentForm({
       });
       toast.success(successMessage);
     } catch (submitError) {
-      toast.error(
-        submitError instanceof Error
-          ? submitError.message
-          : "Não foi possível salvar o equipamento. Tente novamente.",
-      );
+      setServerErrors(getApiFieldErrors(submitError));
+      toast.error(getServiceErrorMessage(submitError, "Não foi possível salvar o equipamento."));
     } finally {
       setSaving(false);
     }
@@ -99,6 +99,7 @@ export default function EquipmentForm({
           label="Nome do equipamento *"
           value={name}
           onChange={(event) => setName(event.target.value)}
+          error={serverErrors.name}
           placeholder="Ex.: Chave de boca 22 mm"
           required
         />
@@ -119,6 +120,7 @@ export default function EquipmentForm({
           inputMode="decimal"
           value={unitPrice}
           onChange={(event) => setUnitPrice(event.target.value)}
+          error={serverErrors.unitPrice}
           placeholder="Ex.: 199,90"
           required
         />
@@ -130,6 +132,7 @@ export default function EquipmentForm({
           inputMode="numeric"
           value={availableQuantity}
           onChange={(event) => setAvailableQuantity(event.target.value)}
+          error={serverErrors.availableQuantity}
           placeholder="Ex.: 10"
           required
         />

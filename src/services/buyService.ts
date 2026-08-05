@@ -26,4 +26,8 @@ export const buyService = {
     );
     return data;
   },
+
+  async remove(id: string) {
+    await browserApi.delete(`/compras/${encodeURIComponent(id)}`);
+  },
 };

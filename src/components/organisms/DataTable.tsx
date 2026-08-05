@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, type KeyboardEvent } from "react";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { DataTableProps } from "@/props/DataTableProps";
 import Input from "../atoms/Input";
@@ -16,6 +16,9 @@ export default function DataTable<T>({
     onSearchChange,
     emptyMessage = "Nenhum registro encontrado.",
     filterElement,
+    onRowClick,
+    isRowClickable = () => Boolean(onRowClick),
+    getRowAriaLabel,
     toggleOptions,
     toggleValue,
     onToggleChange,
@@ -53,6 +56,13 @@ export default function DataTable<T>({
             case "center": return "text-center";
             case "right": return "text-right";
             default: return "text-left";
+        }
+    };
+
+    const handleRowKeyDown = (event: KeyboardEvent<HTMLElement>, item: T) => {
+        if ((event.key === "Enter" || event.key === " ") && onRowClick) {
+            event.preventDefault();
+            onRowClick(item);
         }
     };
 
@@ -103,11 +113,20 @@ export default function DataTable<T>({
                 ) : (
                     filteredData.map((item, rowIndex) => {
                         const isExpanded = expandedRows.has(rowIndex);
+                        const rowIsClickable = Boolean(onRowClick && isRowClickable(item));
                         // No mobile, se não estiver expandido, mostra apenas as 2 primeiras colunas
                         const visibleColumns = isExpanded ? columns : columns.slice(0, 2);
 
                         return (
-                            <div key={rowIndex} className="p-4 space-y-4 bg-white hover:bg-gray-50/50 transition-colors">
+                            <div
+                                key={rowIndex}
+                                className={`space-y-4 bg-white p-4 transition-colors ${rowIsClickable ? "cursor-pointer hover:bg-blue-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-weg-blue" : "hover:bg-gray-50/50"}`}
+                                role={rowIsClickable ? "link" : undefined}
+                                tabIndex={rowIsClickable ? 0 : undefined}
+                                aria-label={rowIsClickable ? getRowAriaLabel?.(item) ?? "Visualizar registro" : undefined}
+                                onClick={rowIsClickable ? () => onRowClick?.(item) : undefined}
+                                onKeyDown={rowIsClickable ? (event) => handleRowKeyDown(event, item) : undefined}
+                            >
                                 <div className="space-y-3">
                                     {visibleColumns.map((col, colIndex) => {
                                         const content = col.render
@@ -133,7 +152,11 @@ export default function DataTable<T>({
                                 
                                 {/* Botão para expandir/recolher o card inteiro */}
                                 <Button
-                                    onClick={() => toggleRow(rowIndex)}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        toggleRow(rowIndex);
+                                    }}
+                                    onKeyDown={(event) => event.stopPropagation()}
                                     variant="secondary"
                                     className="mt-2 w-full border border-gray-200 bg-gray-50 text-sm text-gray-600 shadow-none hover:bg-gray-100"
                                 >
@@ -172,8 +195,19 @@ export default function DataTable<T>({
                                 </td>
                             </tr>
                         ) : (
-                            filteredData.map((item, rowIndex) => (
-                                <tr key={rowIndex} className="hover:bg-gray-50/80 transition-colors">
+                            filteredData.map((item, rowIndex) => {
+                                const rowIsClickable = Boolean(onRowClick && isRowClickable(item));
+
+                                return (
+                                <tr
+                                    key={rowIndex}
+                                    className={`transition-colors ${rowIsClickable ? "cursor-pointer hover:bg-blue-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-weg-blue" : "hover:bg-gray-50/80"}`}
+                                    role={rowIsClickable ? "link" : undefined}
+                                    tabIndex={rowIsClickable ? 0 : undefined}
+                                    aria-label={rowIsClickable ? getRowAriaLabel?.(item) ?? "Visualizar registro" : undefined}
+                                    onClick={rowIsClickable ? () => onRowClick?.(item) : undefined}
+                                    onKeyDown={rowIsClickable ? (event) => handleRowKeyDown(event, item) : undefined}
+                                >
                                     {columns.map((col, colIndex) => (
                                         <td
                                             key={colIndex}
@@ -187,7 +221,8 @@ export default function DataTable<T>({
                                         </td>
                                     ))}
                                 </tr>
-                            ))
+                                );
+                            })
                         )}
                     </tbody>
                 </table>

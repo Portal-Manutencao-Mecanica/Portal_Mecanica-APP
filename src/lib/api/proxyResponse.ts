@@ -7,6 +7,8 @@ export function jsonFromUpstream(response: AxiosResponse) {
   const nextResponse = NextResponse.json(response.data ?? null, {
     status: response.status,
   });
+  const retryAfter = response.headers["retry-after"];
+  if (retryAfter) nextResponse.headers.set("Retry-After", String(retryAfter));
   nextResponse.headers.set("Cache-Control", "no-store");
   return nextResponse;
 }

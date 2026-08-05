@@ -16,6 +16,8 @@ import type { Buy, Page } from "@/lib/api/types";
 import type { ColumnProps } from "@/props/ColumnProps";
 import { buyService } from "@/services/buyService";
 import { getServiceErrorMessage } from "@/services/httpService";
+import { useAuth } from "@/hooks/useAuth";
+import { canEditPurchase } from "@/lib/permissions";
 
 const PAGE_SIZE = 10;
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -24,6 +26,7 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 export default function BuyPage() {
+  const { user } = useAuth();
   const [buyPage, setBuyPage] = useState<Page<Buy> | null>(null);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -102,17 +105,19 @@ export default function BuyPage() {
             aria-label={`Visualizar solicitação de ${buy.createdByName}`}
             title="Visualizar solicitação"
           />
-          <Button
-            href={`/compras/${buy.id}/editar`}
-            icon={Pencil}
-            iconOnly
-            aria-label={`Editar solicitação de ${buy.createdByName}`}
-            title="Editar solicitação"
-          />
+          {canEditPurchase(user?.role, user?.id, buy) && (
+            <Button
+              href={`/compras/${buy.id}/editar`}
+              icon={Pencil}
+              iconOnly
+              aria-label={`Editar solicitação de ${buy.createdByName}`}
+              title="Editar solicitação"
+            />
+          )}
         </div>
       ),
     },
-  ], []);
+  ], [user?.id, user?.role]);
 
   return (
     <LayoutDesktop>

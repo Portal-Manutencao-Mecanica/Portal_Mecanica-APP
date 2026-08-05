@@ -16,12 +16,18 @@ import type {
   AutonomousMaintenanceRequest,
   Machine,
   Student,
+  Teacher,
 } from "@/lib/api/types";
+import {
+  canCreateAutonomousMaintenance,
+  canManageAutonomousMaintenance,
+} from "@/lib/permissions";
 import { autonomousMaintenanceService } from "@/services/autonomousMaintenanceService";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { machineService } from "@/services/machineService";
 import { studentService } from "@/services/studentService";
+import { teacherService } from "@/services/teacherService";
 
 const formSchema = v.object({
   equipmentSituation: v.picklist(["OPERANDO", "NAO_OPERANDO"]),
@@ -43,6 +49,7 @@ const formSchema = v.object({
     v.array(v.string()),
     v.minLength(1, "Selecione pelo menos um aluno."),
   ),
+  responsibleTeacherId: v.string(),
 });
 
 type FormState = {
@@ -53,6 +60,7 @@ type FormState = {
   equipmentCondition: "CONFORME" | "NAO_CONFORME";
   identifiedNonconformities: string;
   studentIds: string[];
+  responsibleTeacherId: string;
 };
 
 function toLocalDateTimeInput(date: Date) {
@@ -76,6 +84,7 @@ function createInitialForm(maintenance?: AutonomousMaintenance): FormState {
       equipmentCondition: maintenance.equipmentCondition,
       identifiedNonconformities: maintenance.identifiedNonconformities ?? "",
       studentIds: maintenance.students.map((student) => student.id),
+      responsibleTeacherId: maintenance.responsibleTeacherId,
     };
   }
 
@@ -87,6 +96,7 @@ function createInitialForm(maintenance?: AutonomousMaintenance): FormState {
     equipmentCondition: "CONFORME",
     identifiedNonconformities: "",
     studentIds: [],
+    responsibleTeacherId: "",
   };
 }
 
@@ -101,6 +111,7 @@ export default function AutonomousMaintenanceForm({
   const [form, setForm] = useState<FormState>(() => createInitialForm(maintenance));
   const [machines, setMachines] = useState<Machine[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [studentSearch, setStudentSearch] = useState("");
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,10 +123,11 @@ export default function AutonomousMaintenanceForm({
   useEffect(() => {
     async function loadOptions() {
       try {
-        const [machinePage, activeStudents, classGroupPage] = await Promise.all([
+        const [machinePage, activeStudents, classGroupPage, activeTeachers] = await Promise.all([
           machineService.list({ size: 100, sort: "name,asc" }),
           studentService.listActive({ size: 1000, sort: "name,asc" }),
           classGroupBrowserService.list({ size: 100, sort: "acronym,asc" }),
+          teacherService.list(),
         ]);
         const teacherGroups = classGroupPage.content.filter(
           (group) =>
@@ -125,6 +137,9 @@ export default function AutonomousMaintenanceForm({
           teacherGroups.flatMap((group) => group.students.map((student) => student.id)),
         );
         setMachines(machinePage.content);
+        setTeachers(
+          activeTeachers.filter((teacher) => teacher.enabled && teacher.accountNonLocked),
+        );
         setStudents(
           activeStudents.content.filter(
             (student) =>
@@ -145,7 +160,7 @@ export default function AutonomousMaintenanceForm({
       }
     }
 
-    if (user?.role === "PROFESSOR" || (maintenance && user?.role === "ADMIN")) {
+    if (canCreateAutonomousMaintenance(user?.role)) {
       void loadOptions();
     }
   }, [maintenance, user?.id, user?.role]);
@@ -187,6 +202,11 @@ export default function AutonomousMaintenanceForm({
       return;
     }
 
+    if (user?.role !== "PROFESSOR" && !validation.output.responsibleTeacherId) {
+      toast.error("Selecione o professor responsável.");
+      return;
+    }
+
     const payload: AutonomousMaintenanceRequest = {
       ...validation.output,
       scheduledFor: validation.output.scheduledFor,
@@ -195,6 +215,9 @@ export default function AutonomousMaintenanceForm({
         : null,
       identifiedNonconformities:
         validation.output.identifiedNonconformities.trim() || null,
+      responsibleTeacherId: user?.role === "PROFESSOR"
+        ? undefined
+        : validation.output.responsibleTeacherId,
     };
 
     setIsSubmitting(true);
@@ -224,8 +247,8 @@ export default function AutonomousMaintenanceForm({
   }
 
   const canSubmit = maintenance
-    ? user?.role === "PROFESSOR" || user?.role === "ADMIN"
-    : user?.role === "PROFESSOR";
+    ? canManageAutonomousMaintenance(user?.role)
+    : canCreateAutonomousMaintenance(user?.role);
 
   if (!canSubmit) {
     return (
@@ -250,6 +273,19 @@ export default function AutonomousMaintenanceForm({
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
+          {user?.role !== "PROFESSOR" && (
+            <DropDown
+              id="autonomous-responsible-teacher"
+              label="Professor responsável *"
+              defaultSelection={isLoadingOptions ? "Carregando professores..." : "Selecione o professor"}
+              enumData={Object.fromEntries(
+                teachers.map((teacher) => [teacher.id, teacher.name]),
+              )}
+              value={form.responsibleTeacherId}
+              onSelect={(value) => updateField("responsibleTeacherId", value)}
+              disabled={isLoadingOptions}
+            />
+          )}
           <DropDown
             id="autonomous-machine"
             label="Máquina *"

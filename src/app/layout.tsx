@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ApiErrorRedirects } from "@/components/providers/ApiErrorRedirects";
 import { Roboto } from 'next/font/google';
 import "./globals.css";
 
@@ -25,7 +26,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${roboto.variable}`}>
       <body className="flex min-h-full flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ApiErrorRedirects>{children}</ApiErrorRedirects>
+        </AuthProvider>
         <Toaster position="top-right" richColors closeButton />
       </body>
     </html>

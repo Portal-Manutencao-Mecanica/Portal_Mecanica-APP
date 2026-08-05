@@ -6,4 +6,5 @@ export interface EquipmentComboboxProps {
   selectedName?: string; 
   onChange: (selected: EquipmentProps | { isNew: true; name: string }) => void;
   error?: string;
+  allowCreate?: boolean;
 }

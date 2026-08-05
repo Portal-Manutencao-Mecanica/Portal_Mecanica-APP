@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { AutonomousMaintenance } from "@/lib/api/types";
 import { autonomousMaintenanceService } from "@/services/autonomousMaintenanceService";
 import { getServiceErrorMessage } from "@/services/httpService";
+import { canManageAutonomousMaintenance } from "@/lib/permissions";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "long",
@@ -113,8 +114,8 @@ export default function AutonomousMaintenanceDetailsPage() {
   }
 
   const isPending = maintenance.status === "PENDENTE_APROVACAO_COORDENADOR";
-  const canDelete = isPending &&
-    (user?.role === "PROFESSOR" || user?.role === "ADMIN");
+  const canManage = canManageAutonomousMaintenance(user?.role);
+  const canDelete = isPending && canManage;
 
   return (
     <LayoutDesktop breadcrumbLabels={{ 1: maintenance.inspectedMachineName }}>
@@ -206,7 +207,7 @@ export default function AutonomousMaintenanceDetailsPage() {
           </section>
         )}
 
-        {user?.role === "COORDENADOR" && isPending && (
+        {canManage && isPending && (
           <section className="rounded-xl border border-blue-200 bg-blue-50 p-6">
             <h2 className="text-lg font-semibold text-gray-900">Aprovação da manutenção</h2>
             <p className="mt-1 text-sm text-gray-600">

@@ -1,6 +1,7 @@
 import type {
   CreateInconvenience5S,
   Inconvenience5S,
+  Inconvenience5SStatus,
   Page,
   PageQuery,
 } from "@/lib/api/types";
@@ -23,6 +24,14 @@ export const inconvenienceService = {
 
   async create(payload: CreateInconvenience5S) {
     const { data } = await browserApi.post<Inconvenience5S>("/5s", payload);
+    return data;
+  },
+
+  async updateStatus(id: string, status: Inconvenience5SStatus) {
+    const { data } = await browserApi.patch<Inconvenience5S>(
+      `/5s/${encodeURIComponent(id)}`,
+      { status },
+    );
     return data;
   },
 };

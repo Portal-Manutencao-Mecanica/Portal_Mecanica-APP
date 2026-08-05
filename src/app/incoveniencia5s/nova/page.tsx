@@ -11,6 +11,7 @@ import Input from "@/components/atoms/Input";
 import TextArea from "@/components/atoms/TextArea";
 import PageHeader from "@/components/molecules/PageHeader";
 import { CascadingMultiSelect } from "@/components/molecules/CascadingSelector";
+import UploadedFile64 from "@/components/molecules/UploadedFile64";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type {
   ClassGroup,
@@ -49,6 +50,10 @@ const inconvenienceSchema = v.object({
     v.trim(),
     v.minLength(10, "Descreva a ocorrência com mais detalhes."),
   ),
+  images: v.pipe(
+    v.array(v.string()),
+    v.maxLength(5, "Envie no máximo 5 imagens."),
+  ),
 });
 
 interface FormState {
@@ -59,6 +64,7 @@ interface FormState {
   registrationPeriod: RegistrationPeriod | "";
   involvedStudentIds: string[];
   description: string;
+  images: string[];
 }
 
 const initialForm: FormState = {
@@ -69,6 +75,7 @@ const initialForm: FormState = {
   registrationPeriod: "",
   involvedStudentIds: [],
   description: "",
+  images: [],
 };
 
 const registrationPeriods: Record<RegistrationPeriod, string> = {
@@ -256,6 +263,23 @@ export default function NewInconveniencePage() {
             rows={6}
             placeholder="Descreva a ocorrência..."
           />
+
+          <div className="space-y-2">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Fotos</h2>
+              <p className="text-sm text-gray-500">
+                Adicione até 5 imagens em PNG, JPEG, WebP ou SVG, com até 5 MB cada.
+              </p>
+            </div>
+            <UploadedFile64
+              id="inconvenience-images"
+              value={form.images}
+              onChange={(images) => updateField("images", images)}
+              maxFiles={5}
+              maxFileSizeBytes={5 * 1024 * 1024}
+              disabled={submitting}
+            />
+          </div>
 
           {loadError && <p className="text-sm text-weg-negative">{loadError}</p>}
 

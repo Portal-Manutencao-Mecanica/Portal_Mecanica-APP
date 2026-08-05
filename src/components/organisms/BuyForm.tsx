@@ -19,8 +19,9 @@ import type { EquipmentProps } from "@/props/EquipmentProps";
 import { buyService } from "@/services/buyService";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
 import { equipmentService } from "@/services/equipmentService";
-import { getServiceErrorMessage } from "@/services/httpService";
+import { applyApiFieldErrors, getServiceErrorMessage } from "@/services/httpService";
 import { teacherService } from "@/services/teacherService";
+import { canEditPurchase, canManageEquipment } from "@/lib/permissions";
 
 const buyItemSchema = v.object({
   equipmentId: v.optional(v.string()),
@@ -118,6 +119,8 @@ function defaultValues(buy?: Buy): BuyFormData {
 export default function BuyForm({ buy }: { buy?: Buy }) {
   const router = useRouter();
   const { user } = useAuth();
+  const canEdit = !buy || canEditPurchase(user?.role, user?.id, buy);
+  const canCreateEquipment = canManageEquipment(user?.role);
   const [equipments, setEquipments] = useState<EquipmentProps[]>([]);
   const [classGroups, setClassGroups] = useState<ClassGroup[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -128,6 +131,7 @@ export default function BuyForm({ buy }: { buy?: Buy }) {
     register,
     control,
     setValue,
+    setError,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<BuyFormData>({
@@ -228,6 +232,7 @@ export default function BuyForm({ buy }: { buy?: Buy }) {
       router.push(`/compras/${savedBuy.id}`);
       router.refresh();
     } catch (error) {
+      applyApiFieldErrors(error, setError);
       toast.error(
         getServiceErrorMessage(
           error,
@@ -237,6 +242,14 @@ export default function BuyForm({ buy }: { buy?: Buy }) {
         ),
       );
     }
+  }
+
+  if (!canEdit) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+        Esta solicitação não pode mais ser editada porque já foi visualizada ou pertence a outro usuário.
+      </div>
+    );
   }
 
   return (
@@ -334,6 +347,7 @@ export default function BuyForm({ buy }: { buy?: Buy }) {
                       value={equipmentId}
                       selectedName={equipmentName}
                       error={errors.items?.[index]?.equipmentName?.message}
+                      allowCreate={canCreateEquipment}
                       onChange={(selected) => {
                         if ("isNew" in selected) {
                           setValue(`items.${index}.equipmentId`, "", {

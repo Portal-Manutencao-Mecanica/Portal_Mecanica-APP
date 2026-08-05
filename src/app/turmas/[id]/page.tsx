@@ -9,7 +9,9 @@ import Button from "@/components/atoms/Button";
 import { StudentCard } from "@/components/molecules/StudentCard";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { useAuth } from "@/hooks/useAuth";
 import type { ClassGroup } from "@/lib/api/types";
+import { canManageClassGroups } from "@/lib/permissions";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
 import { getServiceErrorMessage } from "@/services/httpService";
 
@@ -17,6 +19,8 @@ interface Props { params: Promise<{ id: string }>; }
 
 export default function ClassGroupPage({ params }: Props) {
   const { id } = use(params);
+  const { user } = useAuth();
+  const canManage = canManageClassGroups(user?.role);
   const [classGroup, setClassGroup] = useState<ClassGroup | null>(null);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
@@ -29,7 +33,7 @@ export default function ClassGroupPage({ params }: Props) {
   }, [id]);
 
   async function deactivateClassGroup() {
-    if (!classGroup || deactivating) return;
+    if (!canManage || !classGroup || deactivating) return;
 
     setDeactivateDialogOpen(false);
     setDeactivating(true);
@@ -44,7 +48,7 @@ export default function ClassGroupPage({ params }: Props) {
   }
 
   async function reactivateClassGroup() {
-    if (!classGroup || !window.confirm(`Reativar a turma ${classGroup.acronym}?`)) return;
+    if (!canManage || !classGroup || !window.confirm(`Reativar a turma ${classGroup.acronym}?`)) return;
 
     setReactivating(true);
     try {
@@ -64,6 +68,7 @@ export default function ClassGroupPage({ params }: Props) {
   return (
     <LayoutDesktop breadcrumbLabels={{ 1: `Turma ${classGroup.acronym}` }}>
       <div className="mx-auto max-w-7xl space-y-6 p-8">
+        {canManage && (
         <div className="flex flex-wrap gap-3">
           <Link href={{ pathname: `/turmas/${id}/editar`, query: { turma: classGroup.acronym } }}>
             <Button icon={Pencil}>Editar turma</Button>
@@ -78,6 +83,7 @@ export default function ClassGroupPage({ params }: Props) {
             </Button>
           )}
         </div>
+        )}
 
         <div className="mb-10 mt-5 rounded-xl border border-t-8 border-gray-200 border-t-weg-blue bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center gap-3"><h1 className="text-3xl font-bold">Turma {classGroup.acronym}</h1><span className={`rounded-full px-3 py-1 text-sm font-semibold ${classGroup.enabled ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-700"}`}>{classGroup.enabled ? "Ativa" : "Inativa"}</span></div>

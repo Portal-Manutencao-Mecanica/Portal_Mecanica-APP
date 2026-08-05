@@ -20,6 +20,7 @@ interface ClassGroupTableProps {
   onStatusFilterChange: (value: string) => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  canManage: boolean;
 }
 
 export default function ClassGroupTable({
@@ -28,6 +29,7 @@ export default function ClassGroupTable({
   onStatusFilterChange,
   searchValue,
   onSearchChange,
+  canManage,
 }: ClassGroupTableProps) {
   const columns: ColumnProps<ClassGroupTableItem>[] = [
     { header: "Sigla", accessorKey: "acronym" },
@@ -46,18 +48,28 @@ export default function ClassGroupTable({
       align: "right",
       render: (group) => (
         <div className="flex justify-end gap-2">
-          <Button href={`/turmas/${group.id}?turma=${encodeURIComponent(group.acronym)}`} variant="secondary" icon={Eye} iconOnly aria-label={`Visualizar turma ${group.acronym}`} title="Visualizar turma" />
           <Button
-            href={`/turmas/${group.id}/editar?turma=${encodeURIComponent(group.acronym)}`}
-            icon={Pencil}
+            href={`/turmas/${group.id}?turma=${encodeURIComponent(group.acronym)}`}
+            variant="secondary"
+            icon={Eye}
             iconOnly
-            aria-label={`Editar turma ${group.acronym}`}
-            title="Editar turma"
+            aria-label={`Visualizar turma ${group.acronym}`}
+            title="Visualizar turma"
           />
+          {canManage && (
+            <Button
+              href={`/turmas/${group.id}/editar?turma=${encodeURIComponent(group.acronym)}`}
+              icon={Pencil}
+              iconOnly
+              aria-label={`Editar turma ${group.acronym}`}
+              title="Editar turma"
+            />
+          )}
         </div>
       ),
     },
   ];
+
   return (
     <DataTable
       data={classGroups}

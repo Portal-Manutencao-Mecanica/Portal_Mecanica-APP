@@ -88,6 +88,13 @@ export interface Equipment {
   availableQuantity: number;
 }
 
+export interface UpdateUserRequest {
+  name: string;
+  email: string;
+  numberCard: string;
+  organizationId?: string;
+}
+
 export interface CreateEquipment {
   name: string;
   sap?: string;
@@ -138,6 +145,7 @@ export interface AutonomousMaintenanceRequest {
   equipmentCondition: EquipmentCondition;
   identifiedNonconformities?: string | null;
   studentIds: string[];
+  responsibleTeacherId?: string;
 }
 
 export interface AutonomousMaintenanceApproval {
@@ -218,6 +226,13 @@ export interface BuyItem {
 }
 
 export type RegistrationPeriod = "MATUTINO" | "VESPERTINO" | "NOTURNO";
+export type Inconvenience5SStatus =
+  | "EM_ANALISE"
+  | "APROVADA"
+  | "REPROVADA"
+  | "NAO_VISUALIZADA"
+  | "EM_ANDAMENTO"
+  | "NOTIFICADO";
 
 export interface CreateInconvenience5S {
   inconvenience: string;
@@ -227,12 +242,13 @@ export interface CreateInconvenience5S {
   involvedStudentIds: string[];
   description: string;
   registrationPeriod: RegistrationPeriod;
+  images: string[];
 }
 
 export interface Inconvenience5S {
   id: string;
   inconvenience: string;
-  status: string;
+  status: Inconvenience5SStatus;
   placeId: string;
   placeName: string;
   notifiedTeacherId: string;
@@ -240,9 +256,12 @@ export interface Inconvenience5S {
   createdAt: string;
   classGroupId: string;
   classGroupAcronym: string;
+  createdById: string;
+  createdByName: string;
   involvedStudentIds: string[];
   description: string;
   registrationPeriod: RegistrationPeriod;
+  media: Media[];
 }
 
 export interface MaintenanceRequestApi {
@@ -337,6 +356,7 @@ export interface MachineLog {
   taskSituation: TaskSituation;
   machineId: string;
   machineName: string;
+  maintenanceRequestId: string | null;
   servicePerformed: string | null;
   responsibleTeacherId: string | null;
   responsibleTeacherName: string | null;
@@ -378,7 +398,6 @@ export type Teacher = Student;
 
 interface CreateUserBaseRequest {
   name: string;
-  username: string;
   email: string;
   organizationId?: string;
 }
