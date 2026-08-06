@@ -1,10 +1,14 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { EventClickArg, EventInput } from "@fullcalendar/core";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import Button from "@/components/atoms/Button";
 
 interface CalendarProps {
   events: EventInput[];
@@ -13,85 +17,74 @@ interface CalendarProps {
 }
 
 export default function Calendar({ events, onEventClick, onDateClick }: CalendarProps) {
+  const calendarRef = useRef<FullCalendar | null>(null);
+  const [currentTitle, setCurrentTitle] = useState("");
+
+  const updateTitle = () => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      setCurrentTitle(calendarApi.view.title);
+    }
+  };
+
+  useEffect(() => {
+    updateTitle();
+  }, []);
+
+  const handlePrev = () => {
+    const calendarApi = calendarRef.current?.getApi();
+    calendarApi?.prev();
+    updateTitle();
+  };
+
+  const handleNext = () => {
+    const calendarApi = calendarRef.current?.getApi();
+    calendarApi?.next();
+    updateTitle();
+  };
+
+  const handleToday = () => {
+    const calendarApi = calendarRef.current?.getApi();
+    calendarApi?.today();
+    updateTitle();
+  };
+
   return (
     <div className="calendar-shell w-full overflow-x-auto">
-      {/* Estilização moderna do FullCalendar */}
+      {/* CABEÇALHO UTILIZANDO OS ATOMS AZUIS DA SUA APLICAÇÃO */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            icon={ChevronLeft}
+            iconOnly
+            onClick={handlePrev}
+            aria-label="Mês anterior"
+            title="Mês anterior"
+          />
+          <Button
+            type="button"
+            icon={ChevronRight}
+            iconOnly
+            onClick={handleNext}
+            aria-label="Próximo mês"
+            title="Próximo mês"
+          />
+          <Button
+            type="button"
+            onClick={handleToday}
+          >
+            Hoje
+          </Button>
+        </div>
+
+        <h2 className="text-xl font-bold capitalize text-gray-800">
+          {currentTitle}
+        </h2>
+      </div>
+
+      {/* ESTILIZAÇÃO DA GRADE E DOS CARDS DE EVENTO */}
       <style jsx global>{`
-        /* --- CABEÇALHO E NAVEGAÇÃO --- */
-        .calendar-shell .fc-toolbar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 1.5rem !important;
-          flex-wrap: wrap;
-          gap: 1rem;
-        }
-
-        .calendar-shell .fc-toolbar-title {
-          font-size: 1.25rem !important;
-          font-weight: 700 !important;
-          color: #1f2937 !important;
-          text-transform: capitalize;
-        }
-
-        /* Desagrupa e separa os botões de seta e 'Hoje' */
-        .calendar-shell .fc-button-group {
-          display: inline-flex !important;
-          gap: 0.5rem !important;
-        }
-
-        .calendar-shell .fc-button-group > .fc-button,
-        .calendar-shell .fc-today-button {
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          border-radius: 0.5rem !important;
-          background-color: #f3f4f6 !important;
-          border: 1px solid #e5e7eb !important;
-          color: #374151 !important;
-          font-size: 0.875rem !important;
-          font-weight: 500 !important;
-          padding: 0.5rem 0.875rem !important;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-          transition: all 0.15s ease-in-out !important;
-          cursor: pointer !important;
-          text-transform: capitalize !important;
-          outline: none !important; /* Remove a borda/outline padrão de foco */
-          user-select: none !important;
-        }
-
-        .calendar-shell .fc-button-group > .fc-button:hover,
-        .calendar-shell .fc-today-button:hover {
-          background-color: #e5e7eb !important;
-          color: #111827 !important;
-          border-color: #d1d5db !important;
-        }
-
-        /* Efeito de clique tátil (suave afundamento do botão) */
-        .calendar-shell .fc-button-group > .fc-button:active,
-        .calendar-shell .fc-today-button:active {
-          transform: scale(0.96) !important;
-          background-color: #d1d5db !important;
-        }
-
-        /* Remoção total do anel/borda azul de foco no clique e navegação */
-        .calendar-shell .fc-button-group > .fc-button:focus,
-        .calendar-shell .fc-today-button:focus,
-        .calendar-shell .fc-button-group > .fc-button:focus-visible,
-        .calendar-shell .fc-today-button:focus-visible,
-        .calendar-shell .fc-button-primary:not(:disabled):focus,
-        .calendar-shell .fc-button-primary:not(:disabled):active {
-          box-shadow: none !important;
-          outline: none !important;
-          border-color: #e5e7eb !important;
-        }
-
-        .calendar-shell .fc-button-group > .fc-button:disabled,
-        .calendar-shell .fc-today-button:disabled {
-          opacity: 0.5 !important;
-          cursor: not-allowed !important;
-        }
-
         /* --- GRADE E DIAS DA SEMANA --- */
         .calendar-shell .fc-theme-standard td,
         .calendar-shell .fc-theme-standard th {
@@ -171,6 +164,7 @@ export default function Calendar({ events, onEventClick, onDateClick }: Calendar
       `}</style>
 
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         locales={[ptBrLocale]}
         locale="pt-br"
@@ -180,12 +174,7 @@ export default function Calendar({ events, onEventClick, onDateClick }: Calendar
         eventClick={onEventClick}
         dateClick={onDateClick}
         dayMaxEvents={2}
-        headerToolbar={{
-          left: "prev,next today",
-          center: "title",
-          right: "",
-        }}
-        buttonText={{ today: "Hoje" }}
+        headerToolbar={false}
       />
     </div>
   );
