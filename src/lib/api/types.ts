@@ -19,6 +19,24 @@ export interface HelperMaterial {
   type: HelperMaterialType;
 }
 
+export type OrganizationType = "SENAI" | "WEG" | "OTHER";
+
+export interface Organization {
+  id: string;
+  name: string;
+  type: OrganizationType;
+  emailDomain: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrganizationPayload {
+  name: string;
+  type: OrganizationType;
+  emailDomain: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
