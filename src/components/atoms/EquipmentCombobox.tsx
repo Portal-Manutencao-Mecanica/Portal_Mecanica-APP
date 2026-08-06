@@ -8,6 +8,7 @@ export default function EquipamentCombobox({
     selectedName,
     onChange,
     error,
+    allowCreate = true,
 }: EquipmentComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -123,7 +124,7 @@ export default function EquipamentCombobox({
                             </li>
                         )}
 
-                        {searchTerm.trim() !== "" && (
+                        {allowCreate && searchTerm.trim() !== "" && (
                             <li
                                 onClick={() => {
                                     onChange({ isNew: true, name: searchTerm });

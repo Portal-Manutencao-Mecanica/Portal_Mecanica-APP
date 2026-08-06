@@ -13,16 +13,27 @@ import { getServiceErrorMessage } from "@/services/httpService";
 import { useAuth } from "@/hooks/useAuth";
 
 const TEST_USERS = [
-  { label: "Administrador", email: "admin@teste.local" },
-  { label: "Coordenador", email: "coordenador@teste.local" },
-  { label: "Professor", email: "professor@teste.local" },
-  { label: "Aluno", email: "aluno@teste.local" },
+  {
+    label: "Administrador",
+    identifier: "seed.admin.senai@sesisenai.org.br",
+  },
+  {
+    label: "Coordenador",
+    identifier: "seed.marcos.coordenador@sesisenai.org.br",
+  },
+  {
+    label: "Professor",
+    identifier: "seed.carlos.rocha@sesisenai.org.br",
+  },
+  {
+    label: "Aluno",
+    identifier: "seed.joao.silva.01@sesisenai.org.br",
+  },
 ] as const;
 
 const TEST_PASSWORD = "Senha@123";
-
 const loginSchema = v.object({
-  email: v.pipe(v.string(), v.trim(), v.email("Informe um e-mail válido.")),
+  identifier: v.pipe(v.string(), v.trim(), v.minLength(1, "Informe seu e-mail ou username.")),
   password: v.pipe(v.string(), v.minLength(1, "Informe sua senha.")),
 });
 
@@ -34,7 +45,7 @@ export function LoginForm() {
     login,
     user: authenticatedUser,
   } = useAuth();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +59,7 @@ export function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = v.safeParse(loginSchema, { email, password });
+    const result = v.safeParse(loginSchema, { identifier, password });
 
     if (!result.success) {
       toast.error(result.issues[0]?.message ?? "Revise os dados de acesso.");
@@ -74,7 +85,7 @@ export function LoginForm() {
       }
       router.refresh();
     } catch (error) {
-      toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail e senha."));
+      toast.error(getServiceErrorMessage(error, "Não foi possível entrar. Verifique seu e-mail ou username e senha."));
     } finally {
       setLoading(false);
     }
@@ -84,13 +95,13 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
       <div className="flex flex-col gap-4">
         <Input
-          label="E-mail"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Digite seu e-mail"
-          autoComplete="email"
-          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          label="E-mail ou username"
+          type="text"
+          value={identifier}
+          onChange={(event) => setIdentifier(event.target.value)}
+          placeholder="Digite seu e-mail ou username"
+          autoComplete="username"
+          className="rounded-xl border-gray-300 focus:border-weg-blue"
           required
         />
         <Input
@@ -100,7 +111,7 @@ export function LoginForm() {
           onChange={(event) => setPassword(event.target.value)}
           placeholder="Digite sua senha"
           autoComplete="current-password"
-          className="rounded-xl border-gray-300 focus:border-[#00579D]"
+          className="rounded-xl border-gray-300 focus:border-weg-blue"
           required
         />
       </div>
@@ -113,13 +124,13 @@ export function LoginForm() {
           <div className="grid grid-cols-2 gap-2">
             {TEST_USERS.map((testUser) => (
               <button
-                key={testUser.email}
+                key={testUser.identifier}
                 type="button"
                 onClick={() => {
-                  setEmail(testUser.email);
+                  setIdentifier(testUser.identifier);
                   setPassword(TEST_PASSWORD);
                 }}
-                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium text-[#00579D] transition-colors hover:bg-blue-100"
+                className="rounded-lg border border-blue-200 bg-white px-2 py-2 text-xs font-medium text-weg-blue transition-colors hover:bg-blue-100"
               >
                 {testUser.label}
               </button>
@@ -135,7 +146,7 @@ export function LoginForm() {
       <div className="flex items-center justify-start pt-1">
         <Link
           href="/login/forgot-password"
-          className="text-xs font-semibold text-[#00579D] hover:underline transition-all"
+          className="text-xs font-semibold text-weg-blue hover:underline transition-all"
         >
           Esqueceu sua senha?
         </Link>
@@ -145,7 +156,7 @@ export function LoginForm() {
         type="submit"
         variant="primary"
         disabled={loading || isLoadingSession}
-        className="w-full py-3 mt-2 rounded-xl bg-[#00579D] hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
+        className="w-full py-3 mt-2 rounded-xl bg-weg-blue hover:bg-[#004077] text-white font-medium shadow-sm transition-all"
       >
         {loading || isLoadingSession ? "Entrando..." : "Entrar"}
       </Button>

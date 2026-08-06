@@ -11,6 +11,9 @@ export interface DataTableProps<T> {
     onSearchChange?: (value: string) => void;
     emptyMessage?: string;
     filterElement?: ReactNode;
+    onRowClick?: (item: T) => void;
+    isRowClickable?: (item: T) => boolean;
+    getRowAriaLabel?: (item: T) => string;
 
     toggleOptions?: ToggleGroupOption[];
     toggleValue?: string;

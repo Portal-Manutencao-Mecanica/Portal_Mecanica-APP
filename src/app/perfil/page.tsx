@@ -14,18 +14,35 @@ import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import Button from "@/components/atoms/Button";
 import { useAuth } from "@/hooks/useAuth";
 
+const roleLabels = {
+  ALUNO: "Aluno",
+  PROFESSOR: "Professor",
+  COORDENADOR: "Coordenador",
+  ADMIN: "Administrador",
+} as const;
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
 export default function PerfilPage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const usuario = {
-    nome: "Professor de Teste",
-    email: "professor@teste.local",
-    username: "professor.teste",
-    perfil: "Professor",
-    organizacao: "Organização de Teste",
-    iniciais: "PT",
+    nome: user?.name ?? "Carregando...",
+    email: user?.email ?? "...",
+    username: user?.username ?? "...",
+    perfil: user ? roleLabels[user.role] : "Carregando...",
+    organizacao: user?.organization?.name ?? "Não informada",
+    iniciais: getInitials(user?.name ?? ""),
   };
 
   const handleLogout = async () => {
@@ -39,10 +56,6 @@ export default function PerfilPage() {
     } finally {
       setIsLoggingOut(false);
     }
-  };
-
-  const handleAlterarSenha = () => {
-    console.log("Abrindo modal/tela de alterar senha...");
   };
 
   return (
@@ -66,7 +79,7 @@ export default function PerfilPage() {
             {/* CARTÃO DA FOTO / RESUMO (Altura idêntica ao card do lado) */}
             <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 flex flex-col items-center justify-center text-center gap-3 h-full">
               <div className="w-24 h-24 rounded-full bg-weg-blue/10 border-4 border-white shadow-md flex items-center justify-center text-weg-blue text-2xl font-bold select-none">
-                {usuario.iniciais}
+                {usuario.iniciais || "--"}
               </div>
 
               <h2 className="text-lg font-bold text-gray-800">
@@ -155,7 +168,7 @@ export default function PerfilPage() {
             {/* RODAPÉ DO CARD DE ACESSO */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-50">
               <Button
-                onClick={handleAlterarSenha}
+                href="/configuracao"
                 className="text-xs font-semibold w-full sm:w-auto"
               >
                 <span>Alterar minha senha</span>

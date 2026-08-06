@@ -10,7 +10,9 @@ import Pagination from "@/components/molecules/Pagination";
 import DataTable from "@/components/organisms/DataTable";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useAuth } from "@/hooks/useAuth";
 import type { Equipment, Page } from "@/lib/api/types";
+import { canManageEquipment } from "@/lib/permissions";
 import type { ColumnProps } from "@/props/ColumnProps";
 import { equipmentService } from "@/services/equipmentService";
 import { getServiceErrorMessage } from "@/services/httpService";
@@ -22,6 +24,8 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 });
 
 export default function EquipmentsPage() {
+  const { user } = useAuth();
+  const canManage = canManageEquipment(user?.role);
   const [equipmentPage, setEquipmentPage] = useState<Page<Equipment> | null>(null);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -72,7 +76,7 @@ export default function EquipmentsPage() {
     {
       header: "Preço unitário",
       render: (equipment) => currencyFormatter.format(equipment.unitPrice),
-      align: "right",
+      align: "left",
     },
     { header: "Quantidade disponível", accessorKey: "availableQuantity", align: "center" },
     {
@@ -88,17 +92,19 @@ export default function EquipmentsPage() {
             aria-label={`Visualizar equipamento ${equipment.name}`}
             title="Visualizar equipamento"
           />
-          <Button
-            href={`/equipamentos/${equipment.id}/editar`}
-            icon={Pencil}
-            iconOnly
-            aria-label={`Editar equipamento ${equipment.name}`}
-            title="Editar equipamento"
-          />
+          {canManage && (
+            <Button
+              href={`/equipamentos/${equipment.id}/editar`}
+              icon={Pencil}
+              iconOnly
+              aria-label={`Editar equipamento ${equipment.name}`}
+              title="Editar equipamento"
+            />
+          )}
         </div>
       ),
     },
-  ], []);
+  ], [canManage]);
 
   return (
     <LayoutDesktop>
@@ -106,7 +112,7 @@ export default function EquipmentsPage() {
         <PageHeader
           title="Equipamentos"
           description="Gerencie todos os equipamentos cadastrados."
-          actions={<Button href="/equipamentos/novo">Novo equipamento</Button>}
+          actions={canManage ? <Button href="/equipamentos/novo">Novo equipamento</Button> : undefined}
         />
         {loading ? (
           <PageFeedback message="Carregando equipamentos..." />

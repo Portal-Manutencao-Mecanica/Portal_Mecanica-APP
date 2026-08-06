@@ -20,6 +20,10 @@ import type {
 import type { ColumnProps } from "@/props/ColumnProps";
 import { autonomousMaintenanceService } from "@/services/autonomousMaintenanceService";
 import { getServiceErrorMessage } from "@/services/httpService";
+import {
+  canCreateAutonomousMaintenance,
+  canManageAutonomousMaintenance,
+} from "@/lib/permissions";
 
 type StatusFilter = AutonomousMaintenanceStatus | "TODAS";
 const PAGE_SIZE = 10;
@@ -30,6 +34,8 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 
 export default function AutonomousMaintenancePage() {
   const { user } = useAuth();
+  const canCreate = canCreateAutonomousMaintenance(user?.role);
+  const canManage = canManageAutonomousMaintenance(user?.role);
   const [maintenancePage, setMaintenancePage] = useState<Page<AutonomousMaintenance> | null>(null);
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("TODAS");
@@ -108,7 +114,7 @@ export default function AutonomousMaintenancePage() {
             }
             title="Visualizar manutenção autônoma"
           />
-          {(user?.role === "PROFESSOR" || user?.role === "ADMIN") && (
+          {canManage && (
             <Button
               href={`/manutencao-autonoma/${maintenance.id}/editar`}
               icon={Pencil}
@@ -120,7 +126,7 @@ export default function AutonomousMaintenancePage() {
         </div>
       ),
     },
-  ], [user?.role]);
+  ], [canManage, user?.role]);
 
   const description =
     user?.role === "COORDENADOR"
@@ -135,7 +141,7 @@ export default function AutonomousMaintenancePage() {
         <PageHeader
           title="Manutenção autônoma"
           description={description}
-          actions={user?.role === "PROFESSOR"
+          actions={canCreate
             ? <Button href="/manutencao-autonoma/nova" icon={Plus}>Nova manutenção</Button>
             : undefined}
         />

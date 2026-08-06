@@ -8,6 +8,8 @@ import Button from "@/components/atoms/Button";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { Equipment } from "@/lib/api/types";
+import { useAuth } from "@/hooks/useAuth";
+import { canManageEquipment } from "@/lib/permissions";
 import { equipmentService } from "@/services/equipmentService";
 import { getServiceErrorMessage } from "@/services/httpService";
 
@@ -18,6 +20,8 @@ interface PageProps {
 export default function EquipmentDetailsPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
+  const { user } = useAuth();
+  const canManage = canManageEquipment(user?.role);
   const [equipment, setEquipment] = useState<Equipment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -98,10 +102,12 @@ export default function EquipmentDetailsPage({ params }: PageProps) {
             <h1 className="text-3xl font-bold">{equipment.name}</h1>
             <p className="text-gray-500">Informações do equipamento.</p>
           </div>
-          <div className="flex gap-4">
-            <Link href={`/equipamentos/${equipment.id}/editar`}><Button>Editar</Button></Link>
-            <Button variant="danger" onClick={() => setOpenDeleteDialog(true)}>Deletar</Button>
-          </div>
+          {canManage && (
+            <div className="flex gap-4">
+              <Link href={`/equipamentos/${equipment.id}/editar`}><Button>Editar</Button></Link>
+              <Button variant="danger" onClick={() => setOpenDeleteDialog(true)}>Deletar</Button>
+            </div>
+          )}
         </div>
 
         {error && <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>}

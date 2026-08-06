@@ -16,6 +16,7 @@ import type { MaintenanceRequestApi } from "@/lib/api/types";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { maintenanceRequestService } from "@/services/maintenanceRequestService";
 import type { LabelStatus } from "@/types/LabelStatus";
+import { canManageOccurrences } from "@/lib/permissions";
 
 type Decision = "TEACHER_APPROVE" | "TEACHER_REJECT" | "COORDINATOR_APPROVE" | "COORDINATOR_REJECT";
 
@@ -36,9 +37,11 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [pendingDecision, setPendingDecision] = useState<Decision | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const isAdmin = user?.role === "ADMIN";
-  const canTeacherDecide = user?.role === "PROFESSOR" && user.id === request?.notifiedTeacherId && request.status === "PENDENTE_APROVACAO_PROFESSOR";
-  const canCoordinatorDecide = user?.role === "COORDENADOR" && request?.status === "PENDENTE_APROVACAO_COORDENADOR";
+  const canManage = canManageOccurrences(user?.role);
+  const canTeacherDecide = request?.status === "PENDENTE_APROVACAO_PROFESSOR"
+    && (user?.role === "PROFESSOR" || canManage);
+  const canCoordinatorDecide = request?.status === "PENDENTE_APROVACAO_COORDENADOR"
+    && canManage;
 
   useEffect(() => {
     maintenanceRequestService
@@ -164,8 +167,8 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
 
         <div className="flex flex-wrap justify-end gap-3">
           <Link href="/ocorrencias"><Button variant="secondary">Voltar</Button></Link>
-          {isAdmin && <Link href={`/ocorrencias/${request.id}/editar`}><Button icon={Edit}>Editar</Button></Link>}
-          {isAdmin && <Button variant="danger" icon={Trash2} onClick={() => setConfirmingDelete(true)}>Excluir</Button>}
+          {canManage && <Link href={`/ocorrencias/${request.id}/editar`}><Button icon={Edit}>Editar</Button></Link>}
+          {canManage && <Button variant="danger" icon={Trash2} onClick={() => setConfirmingDelete(true)}>Excluir</Button>}
           {canTeacherDecide && <Button variant="danger" icon={XCircle} onClick={() => setPendingDecision("TEACHER_REJECT")}>Reprovar solicitação</Button>}
           {canTeacherDecide && <Button icon={CheckCircle2} onClick={() => setPendingDecision("TEACHER_APPROVE")}>Aprovar e gerar ordem</Button>}
           {canCoordinatorDecide && <Button variant="danger" icon={XCircle} onClick={() => setPendingDecision("COORDINATOR_REJECT")}>Reprovar ordem</Button>}

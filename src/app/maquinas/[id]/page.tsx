@@ -14,7 +14,9 @@ import Pagination from "@/components/molecules/Pagination";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
 import DataTable from "@/components/organisms/DataTable";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { useAuth } from "@/hooks/useAuth";
 import type { Machine, MachineLog, Page } from "@/lib/api/types";
+import { canManageMachines } from "@/lib/permissions";
 import type { ColumnProps } from "@/props/ColumnProps";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { machineLogService } from "@/services/machineLogService";
@@ -29,6 +31,8 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 export default function ViewMachinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const { user } = useAuth();
+  const canManage = canManageMachines(user?.role);
   const [machine, setMachine] = useState<Machine | null>(null);
   const [machineError, setMachineError] = useState("");
   const [logPage, setLogPage] = useState<Page<MachineLog> | null>(null);
@@ -110,6 +114,7 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
   ], []);
 
   async function remove() {
+    if (!canManage) return;
     try {
       await machineService.remove(id);
       toast.success("Máquina excluída com sucesso.");
@@ -141,7 +146,7 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
         <PageHeader
           title={machine.name}
           description={`Patrimônio: ${machine.patrimony}`}
-          actions={
+          actions={canManage ? (
             <>
               <Button
                 href={`/maquinas/${id}/logs/novo`}
@@ -166,7 +171,7 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
                 onClick={() => setOpen(true)}
               />
             </>
-          }
+          ) : undefined}
         />
 
         <section className="grid gap-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:grid-cols-[minmax(0,320px)_1fr]">
@@ -213,6 +218,13 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
                 searchKeys={["title", "description", "servicePerformed", "responsibleTeacherName"]}
                 searchPlaceholder="Pesquisar no histórico..."
                 emptyMessage="Nenhum log registrado para esta máquina."
+                onRowClick={(log) => {
+                  if (log.maintenanceRequestId) {
+                    router.push(`/ocorrencias/${log.maintenanceRequestId}`);
+                  }
+                }}
+                isRowClickable={(log) => Boolean(log.maintenanceRequestId)}
+                getRowAriaLabel={(log) => `Visualizar ocorrência: ${log.title || log.servicePerformed || "Ocorrência de manutenção"}`}
               />
               <Pagination
                 page={logPage?.number ?? currentLogPage}

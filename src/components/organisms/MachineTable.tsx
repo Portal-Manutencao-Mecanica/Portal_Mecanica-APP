@@ -15,6 +15,7 @@ interface MachineTableProps {
   onSearchChange: (value: string) => void;
   condition: "" | Machine["condition"];
   onConditionChange: (value: "" | Machine["condition"]) => void;
+  canManage: boolean;
 }
 
 export function MachineTable({
@@ -23,6 +24,7 @@ export function MachineTable({
   onSearchChange,
   condition,
   onConditionChange,
+  canManage,
 }: MachineTableProps) {
   const columns: ColumnProps<Machine>[] = [
     { header: "Patrimônio", accessorKey: "patrimony" },
@@ -51,13 +53,15 @@ export function MachineTable({
             aria-label={`Visualizar máquina ${machine.name}`}
             title="Visualizar máquina"
           />
-          <Button
-            href={`/maquinas/${machine.id}/editar`}
-            icon={Pencil}
-            iconOnly
-            aria-label={`Editar máquina ${machine.name}`}
-            title="Editar máquina"
-          />
+          {canManage && (
+            <Button
+              href={`/maquinas/${machine.id}/editar`}
+              icon={Pencil}
+              iconOnly
+              aria-label={`Editar máquina ${machine.name}`}
+              title="Editar máquina"
+            />
+          )}
         </div>
       ),
     },

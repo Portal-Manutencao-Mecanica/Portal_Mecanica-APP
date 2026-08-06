@@ -20,9 +20,10 @@ import type {
   Place,
   Teacher,
 } from "@/lib/api/types";
-import { getServiceErrorMessage } from "@/services/httpService";
+import { applyApiFieldErrors, getServiceErrorMessage } from "@/services/httpService";
 import { machineService } from "@/services/machineService";
 import { maintenanceRequestService } from "@/services/maintenanceRequestService";
+import { canManageOccurrences } from "@/lib/permissions";
 import { placeService } from "@/services/placeService";
 import { teacherService } from "@/services/teacherService";
 
@@ -55,7 +56,7 @@ interface MaintenceFormProps {
 export default function MaintenceForm({ occurrenceId, onOccurrenceLoaded }: MaintenceFormProps) {
   const { user } = useAuth();
   const router = useRouter();
-  const canSubmit = !occurrenceId || user?.role === "ADMIN";
+  const canSubmit = !occurrenceId || canManageOccurrences(user?.role);
   const [places, setPlaces] = useState<Place[]>([]);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -65,6 +66,7 @@ export default function MaintenceForm({ occurrenceId, onOccurrenceLoaded }: Main
     register,
     handleSubmit,
     reset,
+    setError,
     setValue,
     control,
     formState: { errors, isSubmitting },
@@ -148,6 +150,7 @@ export default function MaintenceForm({ occurrenceId, onOccurrenceLoaded }: Main
       router.push(`/ocorrencias/${occurrence.id}`);
       router.refresh();
     } catch (error) {
+      applyApiFieldErrors(error, setError);
       toast.error(getServiceErrorMessage(error, occurrenceId ? "Não foi possível atualizar a ocorrência." : "Não foi possível cadastrar a ocorrência."));
     }
   }

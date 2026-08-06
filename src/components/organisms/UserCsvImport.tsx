@@ -18,7 +18,6 @@ interface UserCsvImportProps {
 
 const templateHeaders = [
   "name",
-  "username",
   "email",
   "role",
   "organization",
@@ -33,7 +32,33 @@ function normalizeName(value: string) {
     .toLocaleLowerCase("pt-BR");
 }
 
+function detectDelimiter(content: string) {
+  let quoted = false;
+  const counts = new Map([[",", 0], [";", 0], ["\t", 0]]);
+
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index];
+    const nextCharacter = content[index + 1];
+
+    if (character === '"' && quoted && nextCharacter === '"') {
+      index += 1;
+    } else if (character === '"') {
+      quoted = !quoted;
+    } else if (!quoted && (character === "\n" || character === "\r")) {
+      break;
+    } else if (!quoted && counts.has(character)) {
+      counts.set(character, (counts.get(character) ?? 0) + 1);
+    }
+  }
+
+  return [...counts.entries()].reduce(
+    (current, candidate) => candidate[1] > current[1] ? candidate : current,
+    [",", 0] as [string, number],
+  )[0];
+}
+
 function parseCsv(content: string) {
+  const delimiter = detectDelimiter(content);
   const records: string[][] = [];
   let record: string[] = [];
   let value = "";
@@ -48,7 +73,7 @@ function parseCsv(content: string) {
       index += 1;
     } else if (character === '"') {
       quoted = !quoted;
-    } else if (character === "," && !quoted) {
+    } else if (character === delimiter && !quoted) {
       record.push(value.trim());
       value = "";
     } else if ((character === "\n" || character === "\r") && !quoted) {
@@ -78,7 +103,7 @@ async function createImportFile(file: File) {
 
   if (!normalizedHeader || !templateHeaders.every((column) => normalizedHeader.includes(column))) {
     throw new Error(
-      "Use o modelo CSV com as colunas: name, username, email, role, organization e classGroupAcronyms.",
+      "Use o modelo CSV com as colunas: name, email, role, organization e classGroupAcronyms.",
     );
   }
 
@@ -115,7 +140,6 @@ async function createImportFile(file: File) {
 
   const backendHeader = [
     "name",
-    "username",
     "email",
     "role",
     "organization",
@@ -144,10 +168,10 @@ export default function UserCsvImport({
     : "ALUNO ou PROFESSOR";
 
   function downloadTemplate() {
-    const organization = actorRole === "COORDENADOR" ? "" : "SENAI";
+    const organization = "SENAI";
     const content = [
       templateHeaders.join(","),
-      `Nome do usuário,usuario.nome,usuario@empresa.com,ALUNO,${organization},MEC-2026`,
+      `Nome do usuário,usuario@empresa.com,ALUNO,${organization},MEC-2026`,
     ].join("\n");
     const url = URL.createObjectURL(new Blob([`\uFEFF${content}`], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
@@ -184,6 +208,9 @@ export default function UserCsvImport({
           <h2 className="text-lg font-semibold text-gray-800">Importar usuários por CSV</h2>
           <p className="text-sm text-gray-500">
             Use somente as siglas das turmas, separadas por <code>|</code>. Nenhum UUID precisa ser informado.
+          </p>
+          <p className="text-sm text-gray-500">
+            O username e gerado automaticamente pelo nome completo e uma sequencia numerica.
           </p>
           <p className="text-sm text-gray-500">Roles permitidas: {allowedRoles}.</p>
         </div>

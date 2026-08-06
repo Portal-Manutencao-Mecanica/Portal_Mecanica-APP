@@ -8,14 +8,17 @@ import PageHeader from "@/components/molecules/PageHeader";
 import Pagination from "@/components/molecules/Pagination";
 import { MachineTable } from "@/components/organisms/MachineTable";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { useAuth } from "@/hooks/useAuth";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Machine, Page } from "@/lib/api/types";
+import { canManageMachines } from "@/lib/permissions";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { machineService } from "@/services/machineService";
 
 const PAGE_SIZE = 10;
 
 export default function MachinesPage() {
+  const { user } = useAuth();
   const [machinePage, setMachinePage] = useState<Page<Machine> | null>(null);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -25,6 +28,7 @@ export default function MachinesPage() {
   const debouncedSearch = useDebouncedValue(search);
   const requestKey = `${page}:${debouncedSearch}:${condition}`;
   const loading = loadedRequestKey !== requestKey;
+  const canManage = canManageMachines(user?.role);
 
   useEffect(() => {
     let active = true;
@@ -74,7 +78,7 @@ export default function MachinesPage() {
         <PageHeader
           title="Máquinas"
           description="Visualize e gerencie as máquinas cadastradas."
-          actions={<Button href="/maquinas/criar">Nova máquina</Button>}
+          actions={canManage ? <Button href="/maquinas/criar">Nova máquina</Button> : undefined}
         />
         {loading ? (
           <PageFeedback message="Carregando máquinas..." />
@@ -88,6 +92,7 @@ export default function MachinesPage() {
               onSearchChange={changeSearch}
               condition={condition}
               onConditionChange={changeCondition}
+              canManage={canManage}
             />
             <Pagination
               page={machinePage?.number ?? page}

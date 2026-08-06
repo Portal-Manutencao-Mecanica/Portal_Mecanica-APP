@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
@@ -8,7 +9,10 @@ import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import ConfirmDialog from "@/components/organisms/ConfirmDialog";
+import { useAuth } from "@/hooks/useAuth";
 import type { Buy } from "@/lib/api/types";
+import { canEditPurchase } from "@/lib/permissions";
 import { buyService } from "@/services/buyService";
 import { getServiceErrorMessage } from "@/services/httpService";
 import type { LabelStatus } from "@/types/LabelStatus";
@@ -36,9 +40,13 @@ function statusDetails(status: string): { label: string; color: LabelStatus } {
 
 export default function BuyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
+  const { user } = useAuth();
   const [buy, setBuy] = useState<Buy | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function loadBuy() {
@@ -79,6 +87,21 @@ export default function BuyDetailsPage({ params }: { params: Promise<{ id: strin
   }
 
   const status = statusDetails(buy.status);
+  const canEdit = canEditPurchase(user?.role, user?.id, buy);
+
+  async function removeBuy() {
+    setDeleting(true);
+    try {
+      await buyService.remove(id);
+      toast.success("Solicitação excluída com sucesso.");
+      router.replace("/compras");
+      router.refresh();
+    } catch (error) {
+      toast.error(getServiceErrorMessage(error, "Não foi possível excluir a solicitação."));
+      setDeleting(false);
+      setConfirmingDelete(false);
+    }
+  }
 
   return (
     <LayoutDesktop breadcrumbLabels={{ 1: `Compra - ${buy.classGroupAcronym}` }}>
@@ -86,7 +109,17 @@ export default function BuyDetailsPage({ params }: { params: Promise<{ id: strin
         <PageHeader
           title="Solicitação de compra"
           description={`${buy.classGroupAcronym} · Solicitada por ${buy.createdByName}`}
-          actions={<Button href="/compras" variant="secondary">Voltar</Button>}
+          actions={(
+            <div className="flex flex-wrap gap-2">
+              <Button href="/compras" variant="secondary">Voltar</Button>
+              {canEdit && <Button href={`/compras/${buy.id}/editar`}>Editar</Button>}
+              {canEdit && (
+                <Button variant="danger" onClick={() => setConfirmingDelete(true)}>
+                  Excluir
+                </Button>
+              )}
+            </div>
+          )}
         />
 
         <section className="grid gap-5 rounded-xl bg-weg-card-white p-6 shadow-sm md:grid-cols-3">
@@ -151,6 +184,14 @@ export default function BuyDetailsPage({ params }: { params: Promise<{ id: strin
           </div>
         </section>
       </section>
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Excluir solicitação"
+        description="Esta ação não pode ser desfeita. Deseja excluir esta solicitação de compra?"
+        confirmText={deleting ? "Excluindo..." : "Excluir"}
+        onCancel={() => !deleting && setConfirmingDelete(false)}
+        onConfirm={removeBuy}
+      />
     </LayoutDesktop>
   );
 }

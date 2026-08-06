@@ -12,7 +12,7 @@ import DropDown from "@/components/atoms/DropDown";
 import Input from "@/components/atoms/Input";
 import UploadedFile64 from "@/components/molecules/UploadedFile64";
 import type { Place } from "@/lib/api/types";
-import { getServiceErrorMessage } from "@/services/httpService";
+import { applyApiFieldErrors, getServiceErrorMessage } from "@/services/httpService";
 import { machineService } from "@/services/machineService";
 import { placeService } from "@/services/placeService";
 
@@ -35,6 +35,7 @@ export default function MachineForm() {
   const {
     register,
     handleSubmit,
+    setError,
     setValue,
     control,
     formState: { errors, isSubmitting },
@@ -70,6 +71,7 @@ export default function MachineForm() {
       router.push(`/maquinas/${machine.id}`);
       router.refresh();
     } catch (error) {
+      applyApiFieldErrors(error, setError);
       toast.error(getServiceErrorMessage(error, "Não foi possível cadastrar a máquina."));
     }
   }
@@ -79,12 +81,12 @@ export default function MachineForm() {
       <h2 className="border-b pb-2 text-lg font-semibold text-gray-800">Informações da máquina</h2>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Field label="Número de patrimônio *" error={errors.patrimony?.message}>
-          <Input placeholder="Ex.: 100004" {...register("patrimony")} />
+        <Field label="Número de patrimônio *">
+          <Input error={errors.patrimony?.message} placeholder="Ex.: 100004" {...register("patrimony")} />
         </Field>
 
-        <Field label="Nome da máquina *" error={errors.name?.message}>
-          <Input placeholder="Ex.: Torno mecânico" {...register("name")} />
+        <Field label="Nome da máquina *">
+          <Input error={errors.name?.message} placeholder="Ex.: Torno mecânico" {...register("name")} />
         </Field>
 
         <DropDown
@@ -106,8 +108,8 @@ export default function MachineForm() {
           error={errors.condition?.message}
         />
 
-        <Field label="Tag ou categoria" error={errors.tag?.message}>
-          <Input placeholder="Ex.: CNC, 3D, FRESA" {...register("tag")} />
+        <Field label="Tag ou categoria">
+          <Input error={errors.tag?.message} placeholder="Ex.: CNC, 3D, FRESA" {...register("tag")} />
         </Field>
       </div>
 
@@ -138,12 +140,11 @@ export default function MachineForm() {
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block text-sm font-medium text-gray-700">
       {label}
       {children}
-      {error && <span className="mt-1 block text-xs text-weg-negative">{error}</span>}
     </label>
   );
 }

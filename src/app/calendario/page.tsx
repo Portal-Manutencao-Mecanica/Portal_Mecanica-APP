@@ -13,6 +13,7 @@ import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import Calendar from "@/components/organisms/Calendar";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { useAuth } from "@/hooks/useAuth";
 import type {
   Equipment,
   Machine,
@@ -29,6 +30,7 @@ import { placeService } from "@/services/placeService";
 import { studentService } from "@/services/studentService";
 import { teacherService } from "@/services/teacherService";
 import type { CalendarItem, CreateCalendarEventDto } from "@/types/CalendarEvent";
+import { canCreateCalendarEvents } from "@/lib/permissions";
 
 type CalendarForm = Omit<CreateCalendarEventDto, "studentId" | "status"> & {
   studentId: string;
@@ -94,6 +96,8 @@ function sortEvents(events: CalendarItem[]) {
 }
 
 export default function CalendarioPage() {
+  const { user } = useAuth();
+  const canCreateEvents = canCreateCalendarEvents(user?.role);
   const [events, setEvents] = useState<CalendarItem[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [machines, setMachines] = useState<Machine[]>([]);
@@ -110,6 +114,7 @@ export default function CalendarioPage() {
   };
 
   const openCreate = (scheduledFor: string) => {
+    if (!canCreateEvents) return;
     setForm(newForm(scheduledFor));
     setModal({ type: "create" });
   };
@@ -147,6 +152,11 @@ export default function CalendarioPage() {
 
   async function createEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canCreateEvents) {
+      toast.error("Você só possui permissão para visualizar o calendário.");
+      closeModal();
+      return;
+    }
     const validation = v.safeParse(calendarFormSchema, form);
 
     if (!validation.success) {
@@ -179,12 +189,14 @@ export default function CalendarioPage() {
       <section className="space-y-6">
         <PageHeader
           title="Calendário de manutenção"
-          description="Visualize os eventos do mês e clique em um dia para agendar uma manutenção."
-          actions={
+          description={canCreateEvents
+            ? "Visualize os eventos do mês e clique em um dia para agendar uma manutenção."
+            : "Visualize os eventos de manutenção programados."}
+          actions={canCreateEvents ? (
             <Button type="button" icon={Plus} onClick={() => openCreate(toInputDate(new Date()))}>
               Novo evento
             </Button>
-          }
+          ) : undefined}
         />
 
         {isLoading ? (
@@ -193,7 +205,7 @@ export default function CalendarioPage() {
           <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
             <Calendar
               events={events.map(toCalendarEvent)}
-              onDateClick={(info) => openCreate(`${info.dateStr}T08:00`)}
+              onDateClick={canCreateEvents ? (info) => openCreate(`${info.dateStr}T08:00`) : undefined}
               onEventClick={(info) => setModal({ type: "details", event: info.event.extendedProps as CalendarItem })}
             />
           </div>

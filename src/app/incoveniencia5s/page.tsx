@@ -14,10 +14,14 @@ import type { Inconvenience5S, Page } from "@/lib/api/types";
 import type { ColumnProps } from "@/props/ColumnProps";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { inconvenienceService } from "@/services/inconvenienceService";
+import { useAuth } from "@/hooks/useAuth";
+import { canCreateInconvenience } from "@/lib/permissions";
 
 const PAGE_SIZE = 10;
 
 export default function InconveniencePage() {
+  const { user } = useAuth();
+  const canCreate = canCreateInconvenience(user?.role);
   const [itemPage, setItemPage] = useState<Page<Inconvenience5S> | null>(null);
   const [page, setPage] = useState(0);
   const [loadedRequestKey, setLoadedRequestKey] = useState<string | null>(null);
@@ -59,8 +63,19 @@ export default function InconveniencePage() {
       header: "Situação",
       render: (item) => (
         <LabelWithCircle
-          status={item.status === "RESOLVIDA" ? "positive" : "warning"}
-          text={item.status.replaceAll("_", " ")}
+          status={item.status === "APROVADA"
+            ? "positive"
+            : item.status === "REPROVADA"
+              ? "negative"
+              : "warning"}
+          text={{
+            EM_ANALISE: "Em análise",
+            APROVADA: "Aprovada",
+            REPROVADA: "Reprovada",
+            NAO_VISUALIZADA: "Não visualizada",
+            EM_ANDAMENTO: "Em andamento",
+            NOTIFICADO: "Notificado",
+          }[item.status]}
         />
       ),
     },
@@ -86,7 +101,9 @@ export default function InconveniencePage() {
         <PageHeader
           title="Inconveniências 5S"
           description="Gerencie todas as ocorrências registradas."
-          actions={<Button href="/incoveniencia5s/nova">Nova ocorrência 5S</Button>}
+          actions={canCreate
+            ? <Button href="/incoveniencia5s/nova">Nova ocorrência 5S</Button>
+            : undefined}
         />
         {loading ? (
           <PageFeedback message="Carregando ocorrências..." />
