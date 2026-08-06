@@ -203,7 +203,7 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
 
         <section className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">Histórico da máquina</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Diário da máquina</h2>
             <p className="text-sm text-gray-500">
               Acompanhe serviços, inspeções e intervenções registrados.
             </p>
@@ -218,13 +218,8 @@ export default function ViewMachinePage({ params }: { params: Promise<{ id: stri
                 searchKeys={["title", "description", "servicePerformed", "responsibleTeacherName"]}
                 searchPlaceholder="Pesquisar no histórico..."
                 emptyMessage="Nenhum log registrado para esta máquina."
-                onRowClick={(log) => {
-                  if (log.maintenanceRequestId) {
-                    router.push(`/ocorrencias/${log.maintenanceRequestId}`);
-                  }
-                }}
-                isRowClickable={(log) => Boolean(log.maintenanceRequestId)}
-                getRowAriaLabel={(log) => `Visualizar ocorrência: ${log.title || log.servicePerformed || "Ocorrência de manutenção"}`}
+                onRowClick={(log) => router.push(`/maquinas/${id}/logs/${log.id}`)}
+                getRowAriaLabel={(log) => `Visualizar log: ${log.title || log.servicePerformed || "Registro do diário"}`}
               />
               <Pagination
                 page={logPage?.number ?? currentLogPage}

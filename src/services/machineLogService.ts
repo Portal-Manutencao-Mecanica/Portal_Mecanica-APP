@@ -13,4 +13,23 @@ export const machineLogService = {
     const { data } = await browserApi.post<MachineLog>("/maquina-log", payload);
     return data;
   },
+
+  async getById(id: string) {
+    const { data } = await browserApi.get<MachineLog>(
+      `/maquina-log/${encodeURIComponent(id)}`,
+    );
+    return data;
+  },
+
+  async update(id: string, payload: CreateMachineLog) {
+    const { data } = await browserApi.put<MachineLog>(
+      `/maquina-log/${encodeURIComponent(id)}`,
+      payload,
+    );
+    return data;
+  },
+
+  async remove(id: string) {
+    await browserApi.delete(`/maquina-log/${encodeURIComponent(id)}`);
+  },
 };
