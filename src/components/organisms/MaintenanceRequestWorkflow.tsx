@@ -6,16 +6,10 @@ import { CheckCircle2, ClipboardCheck, ClipboardList, Wrench, XCircle } from "lu
 import Button from "@/components/atoms/Button";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
+import { getStatusPresentation } from "@/lib/status";
 import { MaintenanceRequest, MaintenanceRequestStatus } from "@/types/MaintenanceRequest";
-import { LabelStatus } from "@/types/LabelStatus";
 
 type Action = "APPROVE_COORDINATOR" | "REJECT_COORDINATOR";
-
-const statusDetails: Record<MaintenanceRequestStatus, { label: string; color: LabelStatus }> = {
-  AGUARDANDO_APROVACAO_COORDENADOR: { label: "Aguardando sua aprovação", color: "warning" },
-  CONCLUIDA: { label: "Concluída", color: "positive" },
-  REPROVADA_PELO_COORDENADOR: { label: "Reprovada pelo coordenador", color: "negative" },
-};
 
 const priorityStyles = {
   BAIXA: "bg-slate-100 text-slate-700",
@@ -33,7 +27,7 @@ function getActionContent(action: Action) {
 export default function MaintenanceRequestWorkflow({ request }: { request: MaintenanceRequest }) {
   const [status, setStatus] = useState<MaintenanceRequestStatus>(request.status);
   const [pendingAction, setPendingAction] = useState<Action | null>(null);
-  const statusDetail = statusDetails[status];
+  const statusDetail = getStatusPresentation(status);
   const dialogContent = pendingAction ? getActionContent(pendingAction) : null;
   const steps = [
     { label: "Solicitação do aluno", icon: ClipboardList, complete: true },

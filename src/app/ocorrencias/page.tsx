@@ -21,6 +21,7 @@ import type {
 import type { ColumnProps } from "@/props/ColumnProps";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { maintenanceRequestService } from "@/services/maintenanceRequestService";
+import { getStatusPresentation } from "@/lib/status";
 
 const PAGE_SIZE = 10;
 
@@ -76,18 +77,10 @@ export default function OccurrencesPage() {
     { header: "Prioridade", accessorKey: "priority" },
     {
       header: "Situação",
-      render: (item) => (
-        <LabelWithCircle
-          status={
-            item.status === "APROVADA_PELO_PROFESSOR" || item.status === "FINALIZADA"
-              ? "positive"
-              : item.status.includes("REPROV")
-                ? "negative"
-                : "warning"
-          }
-          text={item.status.replaceAll("_", " ")}
-        />
-      ),
+      render: (item) => {
+        const status = getStatusPresentation(item.status);
+        return <LabelWithCircle status={status.color} text={status.label} />;
+      },
     },
     {
       header: "Ações",

@@ -16,6 +16,7 @@ import { getServiceErrorMessage } from "@/services/httpService";
 import { inconvenienceService } from "@/services/inconvenienceService";
 import { useAuth } from "@/hooks/useAuth";
 import { canCreateInconvenience } from "@/lib/permissions";
+import { getStatusPresentation } from "@/lib/status";
 
 const PAGE_SIZE = 10;
 
@@ -61,23 +62,10 @@ export default function InconveniencePage() {
     { header: "Professor", accessorKey: "notifiedTeacherName" },
     {
       header: "Situação",
-      render: (item) => (
-        <LabelWithCircle
-          status={item.status === "APROVADA"
-            ? "positive"
-            : item.status === "REPROVADA"
-              ? "negative"
-              : "warning"}
-          text={{
-            EM_ANALISE: "Em análise",
-            APROVADA: "Aprovada",
-            REPROVADA: "Reprovada",
-            NAO_VISUALIZADA: "Não visualizada",
-            EM_ANDAMENTO: "Em andamento",
-            NOTIFICADO: "Notificado",
-          }[item.status]}
-        />
-      ),
+      render: (item) => {
+        const status = getStatusPresentation(item.status);
+        return <LabelWithCircle status={status.color} text={status.label} />;
+      },
     },
     {
       header: "Ações",

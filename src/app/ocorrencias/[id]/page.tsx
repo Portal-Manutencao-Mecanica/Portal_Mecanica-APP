@@ -15,19 +15,10 @@ import { useAuth } from "@/hooks/useAuth";
 import type { MaintenanceRequestApi } from "@/lib/api/types";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { maintenanceRequestService } from "@/services/maintenanceRequestService";
-import type { LabelStatus } from "@/types/LabelStatus";
 import { canManageOccurrences } from "@/lib/permissions";
+import { getStatusPresentation } from "@/lib/status";
 
 type Decision = "TEACHER_APPROVE" | "TEACHER_REJECT" | "COORDINATOR_APPROVE" | "COORDINATOR_REJECT";
-
-const statusDetails: Record<string, { label: string; color: LabelStatus }> = {
-  PENDENTE_APROVACAO_PROFESSOR: { label: "Aguardando professor", color: "warning" },
-  REPROVADA_PELO_PROFESSOR: { label: "Reprovada pelo professor", color: "negative" },
-  PENDENTE_APROVACAO_COORDENADOR: { label: "Aguardando coordenador", color: "warning" },
-  APROVADA_PELO_COORDENADOR: { label: "Aprovada pelo coordenador", color: "positive" },
-  REPROVADA_PELO_COORDENADOR: { label: "Reprovada pelo coordenador", color: "negative" },
-  FINALIZADA: { label: "Finalizada", color: "positive" },
-};
 
 export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -86,7 +77,7 @@ export default function OccurrenceDetailsPage({ params }: { params: Promise<{ id
     return <LayoutDesktop><p className="p-8 text-center text-gray-500">Carregando ocorrência...</p></LayoutDesktop>;
   }
 
-  const status = statusDetails[request.status] ?? { label: request.status.replaceAll("_", " "), color: "warning" as LabelStatus };
+  const status = getStatusPresentation(request.status);
   const teacherDecisionDone = request.status !== "PENDENTE_APROVACAO_PROFESSOR";
   const coordinatorDecisionDone = request.status === "APROVADA_PELO_COORDENADOR" || request.status === "REPROVADA_PELO_COORDENADOR";
   const decisionContent = pendingDecision && getDecisionContent(pendingDecision);

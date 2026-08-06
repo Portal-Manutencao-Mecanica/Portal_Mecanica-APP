@@ -13,17 +13,9 @@ import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { useAuth } from "@/hooks/useAuth";
 import type { Inconvenience5S, Inconvenience5SStatus } from "@/lib/api/types";
 import { canChangeInconvenienceStatus } from "@/lib/permissions";
+import { getStatusPresentation } from "@/lib/status";
 import { inconvenienceService } from "@/services/inconvenienceService";
 import { getServiceErrorMessage } from "@/services/httpService";
-
-const statusLabels: Record<Inconvenience5SStatus, string> = {
-  EM_ANALISE: "Em análise",
-  APROVADA: "Aprovada",
-  REPROVADA: "Reprovada",
-  NAO_VISUALIZADA: "Não visualizada",
-  EM_ANDAMENTO: "Em andamento",
-  NOTIFICADO: "Notificado",
-};
 
 const editableStatuses = {
   EM_ANALISE: "Em análise",
@@ -94,11 +86,7 @@ export default function InconvenienceDetailsPage({
     );
   }
 
-  const badgeStatus = item.status === "APROVADA"
-    ? "positive"
-    : item.status === "REPROVADA"
-      ? "negative"
-      : "warning";
+  const status = getStatusPresentation(item.status);
 
   return (
     <LayoutDesktop breadcrumbLabels={{ 1: item.placeName }}>
@@ -106,7 +94,7 @@ export default function InconvenienceDetailsPage({
         <PageHeader
           title="Ocorrência 5S"
           description={item.inconvenience}
-          actions={<LabelWithCircle status={badgeStatus} text={statusLabels[item.status]} />}
+          actions={<LabelWithCircle status={status.color} text={status.label} />}
         />
 
         <section className="grid gap-5 rounded-xl bg-weg-card-white p-6 shadow-sm md:grid-cols-2">
