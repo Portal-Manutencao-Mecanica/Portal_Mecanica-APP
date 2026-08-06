@@ -176,34 +176,35 @@ export default function Home() {
           #{item.id.slice(0, 8).toUpperCase()}
         </span>
       ),
-      className: "w-28 align-middle whitespace-nowrap",
+      className: "w-24 align-middle whitespace-nowrap",
     },
     {
       header: "Descrição",
       accessor: (item) => (
-        <span className="block min-w-0 break-words text-left text-sm font-semibold leading-5 text-gray-800">
+        <span className="block min-w-0 line-clamp-2 text-left text-xs sm:text-sm font-semibold leading-snug text-gray-800" title={item.description}>
           {item.description}
         </span>
       ),
-      className: "min-w-52 align-middle text-left",
+      className: "min-w-[180px] align-middle text-left",
     },
-    { header: "Data", accessor: "date", className: "w-32 align-middle whitespace-nowrap text-xs text-gray-400" },
+    { header: "Data", accessor: "date", className: "w-28 align-middle whitespace-nowrap text-xs text-gray-400" },
     {
       header: "Prioridade",
       accessor: (item) => <LabelWithCircle text={item.priorityText} status={item.priorityStatus} />,
-      className: "align-middle whitespace-nowrap",
+      className: "align-middle whitespace-nowrap text-xs",
     },
     {
       header: "Status",
       accessor: (item) => <LabelWithCircle text={item.statusText} status={item.statusType} />,
-      className: "align-middle whitespace-nowrap",
+      className: "align-middle whitespace-nowrap text-xs",
     },
   ];
 
   return (
     <LayoutDesktop>
       <div className="grid grid-cols-1 items-start gap-6 pb-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
+        {/* 🔑 AQUI: Adicionado min-w-0 para travar o estiramento do Grid */}
+        <div className="flex flex-col gap-6 lg:col-span-2 min-w-0">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold text-gray-800">
               Bem-vindo de volta, {user?.name ?? "usuário"}!
@@ -219,7 +220,8 @@ export default function Home() {
             {stats.map((stat) => <StatCard key={stat.label} {...stat} />)}
           </section>
 
-          <section className="flex w-full flex-col gap-4 rounded-lg border border-gray-100 bg-white p-6 shadow-md">
+          {/* 🔑 AQUI: Ajustado padding (p-4 sm:p-6) e adicionado overflow-hidden */}
+          <section className="flex w-full flex-col gap-4 rounded-lg border border-gray-100 bg-white p-4 sm:p-6 shadow-md overflow-hidden">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-lg font-bold text-weg-blue">Ocorrências recentes</h2>
