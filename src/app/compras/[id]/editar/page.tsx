@@ -7,12 +7,15 @@ import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import BuyForm from "@/components/organisms/BuyForm";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
+import { useAuth } from "@/hooks/useAuth";
 import type { Buy } from "@/lib/api/types";
+import { canEditPurchase } from "@/lib/permissions";
 import { buyService } from "@/services/buyService";
 import { getServiceErrorMessage } from "@/services/httpService";
 
 export default function EditBuyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { user } = useAuth();
   const [buy, setBuy] = useState<Buy | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -52,8 +55,13 @@ export default function EditBuyPage({ params }: { params: Promise<{ id: string }
         />
         {loading ? (
           <PageFeedback message="Carregando solicitação de compra..." />
-        ) : buy ? (
+        ) : buy && canEditPurchase(user?.role, user?.id, buy) ? (
           <BuyForm buy={buy} />
+        ) : buy ? (
+          <PageFeedback
+            variant="error"
+            message="Esta compra não pode mais ser alterada porque já foi visualizada."
+          />
         ) : (
           <PageFeedback
             variant="error"

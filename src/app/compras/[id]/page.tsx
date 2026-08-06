@@ -5,38 +5,29 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
+import DropDown from "@/components/atoms/DropDown";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
 import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
 import { useAuth } from "@/hooks/useAuth";
-import type { Buy } from "@/lib/api/types";
-import { canEditPurchase } from "@/lib/permissions";
+import type { Buy, UpdateBuyStatus } from "@/lib/api/types";
+import { canChangePurchaseStatus, canEditPurchase } from "@/lib/permissions";
+import { getStatusPresentation } from "@/lib/status";
 import { buyService } from "@/services/buyService";
 import { getServiceErrorMessage } from "@/services/httpService";
-import type { LabelStatus } from "@/types/LabelStatus";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "long",
   timeStyle: "short",
 });
 
-function statusDetails(status: string): { label: string; color: LabelStatus } {
-  const label = status
-    .replaceAll("_", " ")
-    .toLocaleLowerCase("pt-BR")
-    .replace(/^./, (letter) => letter.toLocaleUpperCase("pt-BR"));
-
-  return {
-    label,
-    color: status.includes("REPROV")
-      ? "negative"
-      : status.includes("APROV")
-        ? "positive"
-        : "warning",
-  };
-}
+const editableStatuses: Record<UpdateBuyStatus["status"], string> = {
+  EM_ANALISE: "Em análise",
+  PEDIDO_EM_ANDAMENTO: "Pedido em andamento",
+  ENTREGUE: "Entregue",
+};
 
 export default function BuyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -47,11 +38,19 @@ export default function BuyDetailsPage({ params }: { params: Promise<{ id: strin
   const [loadError, setLoadError] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<UpdateBuyStatus["status"]>(
+    "EM_ANALISE",
+  );
+  const [savingStatus, setSavingStatus] = useState(false);
 
   useEffect(() => {
     async function loadBuy() {
       try {
-        setBuy(await buyService.getById(id));
+        const loadedBuy = await buyService.getById(id);
+        setBuy(loadedBuy);
+        if (loadedBuy.status !== "NAO_VISUALIZADO") {
+          setSelectedStatus(loadedBuy.status);
+        }
       } catch (error) {
         const message = getServiceErrorMessage(
           error,
@@ -86,8 +85,26 @@ export default function BuyDetailsPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const status = statusDetails(buy.status);
+  const status = getStatusPresentation(buy.status);
   const canEdit = canEditPurchase(user?.role, user?.id, buy);
+  const canChangeStatus = canChangePurchaseStatus(user?.role);
+
+  async function changeStatus() {
+    if (!buy || buy.status === selectedStatus) return;
+
+    setSavingStatus(true);
+    try {
+      const updatedBuy = await buyService.updateStatus(id, { status: selectedStatus });
+      setBuy(updatedBuy);
+      toast.success("Situação da compra atualizada com sucesso.");
+    } catch (error) {
+      toast.error(
+        getServiceErrorMessage(error, "Não foi possível alterar a situação da compra."),
+      );
+    } finally {
+      setSavingStatus(false);
+    }
+  }
 
   async function removeBuy() {
     setDeleting(true);
@@ -133,6 +150,38 @@ export default function BuyDetailsPage({ params }: { params: Promise<{ id: strin
             {buy.notifiedTeacherName || "Nenhum professor específico"}
           </Detail>
         </section>
+
+        {canChangeStatus && (
+          <section className="rounded-xl bg-weg-card-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div className="w-full space-y-1 md:max-w-sm">
+                <h2 className="text-lg font-semibold text-gray-800">Alterar situação</h2>
+                <p className="text-sm text-gray-500">
+                  Atualize somente o andamento da compra. Os dados visualizados permanecem bloqueados.
+                </p>
+                <DropDown
+                  id="buy-status"
+                  label="Situação da compra"
+                  defaultSelection="Selecione a situação"
+                  enumData={editableStatuses}
+                  value={selectedStatus}
+                  onSelect={(value) => {
+                    if (value in editableStatuses) {
+                      setSelectedStatus(value as UpdateBuyStatus["status"]);
+                    }
+                  }}
+                  disabled={savingStatus}
+                />
+              </div>
+              <Button
+                onClick={changeStatus}
+                disabled={savingStatus || buy.status === selectedStatus}
+              >
+                {savingStatus ? "Salvando..." : "Salvar situação"}
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section className="rounded-xl bg-weg-card-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-800">Justificativa</h2>

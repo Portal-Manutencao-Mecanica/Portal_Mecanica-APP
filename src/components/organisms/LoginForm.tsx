@@ -2,7 +2,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as v from "valibot";
@@ -15,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 const TEST_USERS = [
   {
     label: "Administrador",
-    identifier: "seed.admin.senai@sesisenai.org.br",
+    identifier: "admin@teste.local",
   },
   {
     label: "Coordenador",
@@ -141,16 +140,6 @@ export function LoginForm() {
           </p>
         </div>
       )}
-
-      {/* Link de 'Esqueceu sua senha' com fonte e cor padronizadas */}
-      <div className="flex items-center justify-start pt-1">
-        <Link
-          href="/login/forgot-password"
-          className="text-xs font-semibold text-weg-blue hover:underline transition-all"
-        >
-          Esqueceu sua senha?
-        </Link>
-      </div>
 
       <Button
         type="submit"

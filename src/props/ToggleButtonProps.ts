@@ -5,4 +5,5 @@ export interface ToggleButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonE
     checked?: boolean;
     defaultChecked?: boolean;
     onToggle?: (checked: boolean) => void;
+    variant?: "button" | "switch";
 }

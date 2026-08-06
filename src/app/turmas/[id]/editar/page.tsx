@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import ClassGroupForm from "@/components/organisms/ClassGroupForm";
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { ClassGroup, CreateClassGroup } from "@/lib/api/types";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
@@ -42,14 +44,14 @@ export default function EditClassPage({ params }: PageProps) {
 
   return (
     <LayoutDesktop breadcrumbLabels={classGroup ? { 1: `Turma ${classGroup.acronym}` } : undefined}>
-      <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Editar turma</h1>
-          <p className="mt-1 text-sm text-gray-500">Atualize a sigla e os membros da turma.</p>
-        </div>
+      <section className="space-y-6">
+        <PageHeader
+          title="Editar turma"
+          description="Atualize a sigla, os professores e os alunos disponíveis da turma."
+        />
 
         {loading ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">Carregando dados da turma...</div>
+          <PageFeedback message="Carregando dados da turma..." />
         ) : classGroup ? (
           <ClassGroupForm
             initialValues={classGroup}
@@ -59,9 +61,9 @@ export default function EditClassPage({ params }: PageProps) {
             onSubmit={updateClassGroup}
           />
         ) : (
-          <p className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">Turma não encontrada.</p>
+          <PageFeedback variant="error" message="Turma não encontrada." />
         )}
-      </div>
+      </section>
     </LayoutDesktop>
   );
 }

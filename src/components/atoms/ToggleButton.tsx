@@ -1,71 +1,64 @@
-'use client';
+"use client";
 
-import { ToggleButtonProps } from "@/props/ToggleButtonProps";
-import React, { useState } from "react";
+import { useState } from "react";
 
-const ToggleButton = ({
-    label,
-    checked: propsChecked,
-    defaultChecked = false,
-    onToggle,
-    disabled = false,
-    className = '',
-    ...props
-}: ToggleButtonProps) => {
-    const isControlled = propsChecked !== undefined;
-    const [internalChecked, setInternalChecked] = useState(defaultChecked);
+import type { ToggleButtonProps } from "@/props/ToggleButtonProps";
 
-    const currentChecked = isControlled ? propsChecked : internalChecked;
+export default function ToggleButton({
+  label,
+  checked: controlledChecked,
+  defaultChecked = false,
+  onToggle,
+  disabled = false,
+  className = "",
+  variant = "button",
+  onClick,
+  ...props
+}: ToggleButtonProps) {
+  const isControlled = controlledChecked !== undefined;
+  const [internalChecked, setInternalChecked] = useState(defaultChecked);
+  const checked = isControlled ? controlledChecked : internalChecked;
 
-    const handleToggle = (event?: React.MouseEvent<HTMLButtonElement>) => {
-        if (disabled) return;
+  function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    if (disabled) return;
+    const nextChecked = !checked;
 
-        const newCheckedState = !currentChecked;
+    if (!isControlled) setInternalChecked(nextChecked);
+    onToggle?.(nextChecked);
+    onClick?.(event);
+  }
 
-        if (!isControlled) {
-            setInternalChecked(newCheckedState);
-        }
-
-        if (onToggle) {
-            onToggle(newCheckedState);
-        }
-
-        if (props.onClick && event) {
-            props.onClick(event);
-        }
-    };
-
+  if (variant === "switch") {
     return (
-        <button
-            type="button"
-            role="switch"
-            aria-checked={currentChecked}
-            disabled={disabled}
-            onClick={handleToggle}
-            className={`
-                /* Estrutura base seguindo a imagem */
-                inline-flex items-center justify-center p-2 font-bold text-lg rounded-lg border
-                transition-all duration-100 ease-out outline-none select-none shadow-sm
-                
-                /* Efeito físico de clique rápido (pulsada sutil ao pressionar) */
-                active:scale-[0.97]
-                active:ring-4 active:ring-gray-400/20
-
-                /* 🎨 ESTADOS DO DESIGN DA IMAGEM: */
-                ${currentChecked
-                    ? 'bg-[#27272A] border-transparent text-white'
-                    : 'bg-white border-[#88888C] text-black hover:bg-gray-50'
-                }
-                
-                /* Estado desabilitado */
-                ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-                ${className}
-            `}
-            {...props}
-        >
-            {label}
-        </button>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={props["aria-label"] ?? label}
+        disabled={disabled}
+        onClick={handleClick}
+        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-weg-blue focus-visible:ring-offset-2 ${checked ? "bg-weg-blue" : "bg-gray-300"} ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${className}`}
+        {...props}
+      >
+        <span
+          aria-hidden="true"
+          className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`}
+        />
+      </button>
     );
-};
+  }
 
-export default ToggleButton;
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={handleClick}
+      className={`inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-weg-blue focus-visible:ring-offset-2 ${checked ? "border-weg-blue bg-weg-blue text-white" : "border-gray-300 bg-white text-gray-800 hover:border-weg-blue/60"} ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${className}`}
+      {...props}
+    >
+      {label}
+    </button>
+  );
+}

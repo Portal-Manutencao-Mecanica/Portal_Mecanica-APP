@@ -63,9 +63,9 @@ export function Breadcrumbs({ labels = {} }: BreadcrumbsProps) {
     if (contextualLabel) return contextualLabel;
 
     const dictionary: Record<string, string> = {
-      usuarios: "Usuários",
-      organizacoes: "Organizações",
       maquinas: "Máquinas",
+      logs: "Diário",
+      "locais-designacoes": "Locais e designações",
       ocorrencias: "Ocorrências",
       incoveniencia5s: "Inconveniências 5S",
       compras: "Compras",
@@ -73,6 +73,8 @@ export function Breadcrumbs({ labels = {} }: BreadcrumbsProps) {
       notificacoes: "Notificações",
       alunos: "Alunos",
       turmas: "Turmas",
+      usuarios: "Usuários",
+      organizacoes: "Organizações",
       calendario: "Calendário",
       configuracao: "Configuração",
       manutencao: "Manutenção",

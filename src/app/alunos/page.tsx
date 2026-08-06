@@ -8,7 +8,6 @@ import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import Pagination from "@/components/molecules/Pagination";
 import { StudentTable } from "@/components/organisms/StudentTable";
-import UserCsvImport from "@/components/organisms/UserCsvImport";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Page, Student } from "@/lib/api/types";
@@ -71,13 +70,6 @@ export default function StudentsPage() {
         <PageHeader
           title="Alunos"
           description="Visualize os alunos cadastrados e suas turmas vinculadas."
-        />
-
-        <UserCsvImport
-          onImportCompleted={() => {
-            setPage(0);
-            retryLoadStudents();
-          }}
         />
 
         {loading ? (

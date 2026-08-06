@@ -44,6 +44,10 @@ export const authService = {
     await authApi.post("/logout");
   },
 
+  async logoutAll() {
+    await authApi.post("/logout-all");
+  },
+
   async changePassword(payload: ChangePasswordCredentials) {
     await browserApi.patch("/users/me/password", payload);
   },

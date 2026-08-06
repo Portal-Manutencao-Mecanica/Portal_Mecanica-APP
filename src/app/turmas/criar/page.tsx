@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import ClassGroupForm from "@/components/organisms/ClassGroupForm";
+import PageHeader from "@/components/molecules/PageHeader";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import type { CreateClassGroup } from "@/lib/api/types";
 import { classGroupBrowserService } from "@/services/classGroupBrowserService";
@@ -18,18 +19,18 @@ export default function CreateClassGroupPage() {
 
   return (
     <LayoutDesktop>
-      <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Nova turma</h1>
-          <p className="mt-1 text-sm text-gray-500">Cadastre a turma e aloque seus alunos e professores.</p>
-        </div>
+      <section className="space-y-6">
+        <PageHeader
+          title="Nova turma"
+          description="Cadastre a turma e aloque alunos que ainda não possuem turma."
+        />
         <ClassGroupForm
           cancelHref="/turmas"
           submitLabel="Cadastrar turma"
           successMessage="Turma cadastrada com sucesso."
           onSubmit={createClassGroup}
         />
-      </div>
+      </section>
     </LayoutDesktop>
   );
 }

@@ -31,6 +31,7 @@ import { getServiceErrorMessage } from "@/services/httpService";
 import { machineService } from "@/services/machineService";
 import { maintenanceRequestService } from "@/services/maintenanceRequestService";
 import { notificationService } from "@/services/notificationService";
+import { getStatusPresentation } from "@/lib/status";
 
 interface OccurrenceHome {
   id: string;
@@ -55,16 +56,6 @@ function formatDate(value: string) {
 
 function statusLabel(status: string) {
   return status.replaceAll("_", " ");
-}
-
-function getStatusType(status: string): LabelStatus {
-  if (status === "FINALIZADA") return "positive";
-  if (status.includes("REPROVADA")) return "negative";
-  if (status === "PENDENTE_APROVACAO_PROFESSOR" || status === "NAO_VISUALIZADA") {
-    return "warning";
-  }
-
-  return "default";
 }
 
 function getPriorityType(priority: string): LabelStatus {
@@ -149,15 +140,18 @@ export default function Home() {
     [...occurrences]
       .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime())
       .slice(0, 5)
-      .map((occurrence) => ({
-        id: occurrence.id,
-        description: occurrence.description || occurrence.machineName,
-        date: formatDate(occurrence.createdAt),
-        priorityText: statusLabel(occurrence.priority),
-        priorityStatus: getPriorityType(occurrence.priority),
-        statusText: statusLabel(occurrence.status),
-        statusType: getStatusType(occurrence.status),
-      }))
+      .map((occurrence) => {
+        const status = getStatusPresentation(occurrence.status);
+        return {
+          id: occurrence.id,
+          description: occurrence.description || occurrence.machineName,
+          date: formatDate(occurrence.createdAt),
+          priorityText: statusLabel(occurrence.priority),
+          priorityStatus: getPriorityType(occurrence.priority),
+          statusText: status.label,
+          statusType: status.color,
+        };
+      })
   ), [occurrences]);
 
   const quickActions: ActionCardProps[] = [

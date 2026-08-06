@@ -18,6 +18,7 @@ import { buyService } from "@/services/buyService";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { useAuth } from "@/hooks/useAuth";
 import { canEditPurchase } from "@/lib/permissions";
+import { getStatusPresentation } from "@/lib/status";
 
 const PAGE_SIZE = 10;
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -79,18 +80,10 @@ export default function BuyPage() {
     { header: "Data", render: (buy) => dateFormatter.format(new Date(buy.createdAt)) },
     {
       header: "Situação",
-      render: (buy) => (
-        <LabelWithCircle
-          status={
-            buy.status.includes("REPROV")
-              ? "negative"
-              : buy.status.includes("APROV") || buy.status === "ENTREGUE"
-                ? "positive"
-                : "warning"
-          }
-          text={buy.status.replaceAll("_", " ")}
-        />
-      ),
+      render: (buy) => {
+        const status = getStatusPresentation(buy.status);
+        return <LabelWithCircle status={status.color} text={status.label} />;
+      },
     },
     {
       header: "Ações",

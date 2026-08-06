@@ -4,9 +4,9 @@ import { LabelProps } from "@/props/LabelProps";
 
 const statusStyles = {
   positive: {
-    bg: "bg-weg-info/60",
-    circleBg: "bg-weg-info",
-    text: "text-white",
+    bg: "bg-weg-positive/10",
+    circleBg: "bg-weg-positive",
+    text: "text-weg-positive",
   },
   info: {
     bg: "bg-weg-blue/10",
@@ -14,14 +14,14 @@ const statusStyles = {
     text: "text-weg-blue",
   },
   warning: {
-    bg: "bg-weg-label-warning/60",
-    circleBg: "bg-weg-label-warning",
-    text: "text-white",
+    bg: "bg-weg-warning/25",
+    circleBg: "bg-weg-warning",
+    text: "text-gray-800",
   },
   negative: {
-    bg: "bg-weg-negative/60",
+    bg: "bg-weg-negative/10",
     circleBg: "bg-weg-negative",
-    text: "text-white",
+    text: "text-weg-negative",
   },
   default: {
     bg: "bg-gray-200",

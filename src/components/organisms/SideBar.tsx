@@ -14,6 +14,10 @@ import {
   BrushCleaning,
   Calendar,
   ClipboardCheck,
+  MapPinned,
+  BookOpen,
+  Building2,
+  School,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,8 +44,11 @@ export function SideBar({
     ...(user?.role === "ADMIN" || user?.role === "COORDENADOR"
       ? [{ icon: Users, label: "Usuários", href: "/usuarios" }]
       : []),
-    { icon: Users, label: "Turmas", href: "/turmas" },
+    { icon: School, label: "Turmas", href: "/turmas" },
     { icon: Toolbox, label: "Equipamentos", href: "/equipamentos" },
+    ...(user?.role === "ADMIN" || user?.role === "COORDENADOR"
+      ? [{ icon: MapPinned, label: "Locais e designações", href: "/locais-designacoes" }]
+      : []),
     { icon: BrushCleaning, label: "Inconveniência 5S", href: "/incoveniencia5s" },
     { icon: ClipboardCheck, label: "Manutenção Autônoma", href: "/manutencao-autonoma" },
     { icon: Calendar, label: "Calendário", href: "/calendario" },
@@ -115,11 +122,11 @@ export function SideBar({
           <div className="border-t border-white/10 my-1 shrink-0 w-full" />
 
           {/* Links Principais */}
-          {menuItems.map((item, index) => {
+          {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <Link
-                key={index}
+                key={item.href}
                 href={item.href}
                 onClick={closeMobileMenu}
                 className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer w-full shrink-0 px-3 justify-start"
