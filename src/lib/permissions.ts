@@ -46,6 +46,14 @@ export function canManageOrganizations(role: AuthenticatedRole) {
   return isManager(role);
 }
 
+export function canManageUsers(role: AuthenticatedRole) {
+  return isManager(role);
+}
+
+export function canEditUsers(role: AuthenticatedRole) {
+  return role === "ADMIN";
+}
+
 export function canEditPurchase(
   role: AuthenticatedRole,
   userId: string | null | undefined,
@@ -69,6 +77,11 @@ export function isUnauthorizedRoute(pathname: string, role: AuthenticatedRole) {
 
   if (readOnlyResourceRoute && !isManager(role)) return true;
   if ((pathname === "/organizacoes" || pathname.startsWith("/organizacoes/")) && !isManager(role)) return true;
+  if ((pathname === "/usuarios" || pathname === "/usuarios/novo") && !isManager(role)) {
+    return true;
+  }
+  if (/^\/usuarios\/[^/]+\/editar$/.test(pathname) && role !== "ADMIN") return true;
+
 
   if (/^\/alunos\/[^/]+\/editar$/.test(pathname) && role !== "ADMIN") return true;
   if (pathname === "/incoveniencia5s/nova" && !canCreateInconvenience(role)) return true;

@@ -431,7 +431,8 @@ export type Teacher = Student;
 interface CreateUserBaseRequest {
   name: string;
   email: string;
-  organizationId?: string;
+  numberCard: string;
+  organizationId: string;
 }
 
 export type CreateUserRequest =
@@ -449,7 +450,6 @@ export type CreateUserRequest =
     })
   | (CreateUserBaseRequest & {
       role: "COORDENADOR";
-      coordinatorData: Record<string, never>;
       studentData?: never;
       teacherData?: never;
     })
@@ -472,6 +472,31 @@ export interface CreatedUser {
   credentialsSent: boolean;
   emailStatus: string;
   createdAt: string;
+}
+
+export interface ManagedUser {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  numberCard: string;
+  role: UserRole;
+  status: string;
+  passwordChangeRequired: boolean;
+  organization: OrganizationSummary;
+  enabled: boolean;
+  accountNonLocked: boolean;
+  statusChangeReason: string | null;
+  statusChangedAt: string | null;
+  statusChangedBy: string | null;
+  updatedAt: string;
+}
+
+export interface CredentialResendResponse {
+  userId: string;
+  credentialsSent: boolean;
+  emailStatus: string;
+  message: string;
 }
 
 export interface UserImportItem {
