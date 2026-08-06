@@ -49,18 +49,22 @@ export function Breadcrumbs({ labels = {} }: BreadcrumbsProps) {
       alunos: { editar: "Editar aluno" },
       compras: { cadastro: "Nova compra" },
       equipamentos: { novo: "Novo equipamento", editar: "Editar equipamento" },
+      organizacoes: { nova: "Nova organização", editar: "Editar organização" },
       incoveniencia5s: { nova: "Nova ocorrência 5S" },
       manutencao: { cadastro: "Nova manutenção" },
       "manutencao-autonoma": { nova: "Nova manutenção autônoma" },
       maquinas: { criar: "Nova máquina", editar: "Editar máquina" },
       ocorrencias: { cadastro: "Nova ocorrência", editar: "Editar ocorrência" },
       turmas: { criar: "Nova turma", editar: "Editar turma" },
+      usuarios: { novo: "Novo usuário", editar: "Editar usuário" },
     };
     const contextualLabel = contextualDictionary[pathSegments[0]]?.[segment];
 
     if (contextualLabel) return contextualLabel;
 
     const dictionary: Record<string, string> = {
+      usuarios: "Usuários",
+      organizacoes: "Organizações",
       maquinas: "Máquinas",
       ocorrencias: "Ocorrências",
       incoveniencia5s: "Inconveniências 5S",
@@ -73,7 +77,7 @@ export function Breadcrumbs({ labels = {} }: BreadcrumbsProps) {
       configuracao: "Configuração",
       manutencao: "Manutenção",
       "manutencao-autonoma": "Manutenção autônoma",
-      "material-complementar": "Material complementar",
+      "material-complementar": "Material de apoio",
       faq: "Perguntas frequentes",
       perfil: "Perfil",
       termos: "Termos de uso",
