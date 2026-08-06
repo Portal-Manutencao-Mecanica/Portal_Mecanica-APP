@@ -168,7 +168,7 @@ export default function PerfilPage() {
             {/* RODAPÉ DO CARD DE ACESSO */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-50">
               <Button
-                href="/configuracao"
+                href="/login/forgot-password"
                 className="text-xs font-semibold w-full sm:w-auto"
               >
                 <span>Alterar minha senha</span>

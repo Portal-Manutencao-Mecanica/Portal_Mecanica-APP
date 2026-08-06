@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, CircleQuestionMark, Menu, Settings } from "lucide-react";
+import { Bell, CircleQuestionMark, Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -178,17 +178,10 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
                 </div>
               )}
             </li>
-
-            <li className="hidden sm:block">
-              <Link href="/configuracao">
-                <button className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-white/10" aria-label="Configurações">
-                  <Settings color="white" size={24} />
-                </button>
-              </Link>
-            </li>
           </ul>
         </div>
       </nav>
     </header>
   );
 }
+
