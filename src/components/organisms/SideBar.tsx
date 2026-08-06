@@ -19,6 +19,8 @@ import {
   Building2,
   School,
   User,
+  BookOpen,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";

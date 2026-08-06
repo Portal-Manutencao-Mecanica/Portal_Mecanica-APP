@@ -25,6 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${roboto.variable}`}>
+      <meta charSet="UTF-8" />
       <body className="flex min-h-full flex-col">
         <AuthProvider>
           <ApiErrorRedirects>{children}</ApiErrorRedirects>

@@ -10,7 +10,7 @@ export function Table<T extends { id: string | number }>({
   columns,
   data,
   emptyMessage = "Nenhum registro encontrado.",
-  variant = "card", // Default continua sendo o card com borda
+  variant = "card",
   searchValue,
   onSearchChange,
   searchPlaceholder = "Pesquisar...",
@@ -25,11 +25,10 @@ export function Table<T extends { id: string | number }>({
   const showHeader = onSearchChange || actions;
   const mobilePreviewCount = 2;
 
-  // 🔑 Define a estilização externa com base na variante
   const containerStyle =
     variant === "card"
-      ? "bg-white rounded-xl border border-gray-200/80 shadow-sm overflow-hidden"
-      : "bg-transparent overflow-hidden"; // Variante "plain" fica transparente e sem bordas
+      ? "bg-white rounded-xl border border-gray-200/80 shadow-sm overflow-hidden min-w-0 w-full"
+      : "bg-transparent overflow-hidden min-w-0 w-full";
 
   return (
     <div className={`w-full ${containerStyle}`}>
@@ -58,12 +57,15 @@ export function Table<T extends { id: string | number }>({
       )}
 
       {/* 2. VISÃO DESKTOP */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left text-sm text-gray-600">
-          <thead className="bg-gray-50/80 text-xs uppercase text-gray-400 font-semibold border-b border-gray-100">
+      <div className="hidden md:block overflow-x-auto w-full">
+        <table className="w-full text-left text-xs sm:text-sm text-gray-600 border-collapse">
+          <thead className="bg-gray-50/80 text-[11px] sm:text-xs uppercase text-gray-400 font-semibold border-b border-gray-100">
             <tr>
               {columns.map((col, index) => (
-                <th key={index} className={`py-3.5 px-4 ${col.className || ""}`}>
+                <th 
+                  key={index} 
+                  className={`py-3 px-3 sm:px-3.5 whitespace-nowrap ${col.className || ""}`}
+                >
                   {col.header}
                 </th>
               ))}
@@ -74,7 +76,10 @@ export function Table<T extends { id: string | number }>({
               data.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                   {columns.map((col, index) => (
-                    <td key={index} className={`py-3.5 px-4 ${col.className || ""}`}>
+                    <td 
+                      key={index} 
+                      className={`py-3 px-3 sm:px-3.5 align-middle ${col.className || ""}`}
+                    >
                       {typeof col.accessor === "function"
                         ? col.accessor(item)
                         : (item[col.accessor] as React.ReactNode)}
