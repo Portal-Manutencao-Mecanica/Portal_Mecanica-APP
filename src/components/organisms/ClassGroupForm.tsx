@@ -130,6 +130,16 @@ export default function ClassGroupForm({
   const [students, setStudents] = useState<Student[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [saving, setSaving] = useState(false);
+  const initialStudentIds = useMemo(
+    () => new Set(initialValues?.students.map((student) => student.id) ?? []),
+    [initialValues],
+  );
+  const selectableStudents = useMemo(
+    () => students.filter(
+      (student) => student.classGroupIds.length === 0 || initialStudentIds.has(student.id),
+    ),
+    [initialStudentIds, students],
+  );
 
   useEffect(() => {
     async function loadMembers() {
@@ -177,7 +187,9 @@ export default function ClassGroupForm({
     <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div>
         <h2 className="border-b border-gray-100 pb-3 text-lg font-semibold text-gray-800">Dados da turma</h2>
-        <p className="mt-2 text-sm text-gray-500">Pesquise e selecione os alunos e professores que pertencem à turma.</p>
+        <p className="mt-2 text-sm text-gray-500">
+          Pesquise professores e selecione somente alunos que ainda não pertencem a outra turma.
+        </p>
       </div>
 
       <Input
@@ -202,8 +214,8 @@ export default function ClassGroupForm({
           />
           <MemberSelector
             label="Alunos"
-            emptyMessage="Nenhum aluno encontrado para esta pesquisa."
-            members={students}
+            emptyMessage="Nenhum aluno sem turma foi encontrado para esta pesquisa."
+            members={selectableStudents}
             selectedIds={studentIds}
             onChange={setStudentIds}
           />

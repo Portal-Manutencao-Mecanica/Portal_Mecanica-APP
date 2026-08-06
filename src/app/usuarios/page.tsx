@@ -12,6 +12,7 @@ import PageHeader from "@/components/molecules/PageHeader";
 import Pagination from "@/components/molecules/Pagination";
 import ConfirmDialog from "@/components/organisms/ConfirmDialog";
 import DataTable from "@/components/organisms/DataTable";
+import UserCsvImport from "@/components/organisms/UserCsvImport";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -41,12 +42,13 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<"" | UserRole>("");
   const [enabled, setEnabled] = useState("");
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [loadedRequestKey, setLoadedRequestKey] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [statusAction, setStatusAction] = useState<StatusAction | null>(null);
   const [changingStatus, setChangingStatus] = useState(false);
   const debouncedSearch = useDebouncedValue(search);
-  const requestKey = `${page}:${debouncedSearch}:${role}:${enabled}`;
+  const requestKey = `${page}:${debouncedSearch}:${role}:${enabled}:${reloadVersion}`;
   const loading = loadedRequestKey !== requestKey;
 
   useEffect(() => {
@@ -174,6 +176,13 @@ export default function UsersPage() {
           title="Usuários"
           description="Cadastre pessoas e gerencie os acessos ao portal."
           actions={<Button href="/usuarios/novo" icon={Plus}>Novo usuário</Button>}
+        />
+
+        <UserCsvImport
+          onImportCompleted={() => {
+            setPage(0);
+            setReloadVersion((current) => current + 1);
+          }}
         />
 
         {loading ? (
