@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   MonitorCog,
   MessageSquareWarning,
@@ -25,12 +25,51 @@ import { UserAvatar } from "@/components/atoms/UserAvatar";
 import { SideBarProps } from "@/props/SideBarProps";
 import { useAuth } from "@/hooks/useAuth";
 
+const SIDEBAR_EXPANDED_STORAGE_KEY = "maintenance-sidebar-expanded";
+const SIDEBAR_STATE_CHANGE_EVENT = "maintenance-sidebar-state-change";
+
+function getSidebarExpandedSnapshot() {
+  return window.localStorage.getItem(SIDEBAR_EXPANDED_STORAGE_KEY) === "true";
+}
+
+function getSidebarExpandedServerSnapshot() {
+  return false;
+}
+
+function subscribeToSidebarExpandedState(onStoreChange: () => void) {
+  function handleStorageChange(event: StorageEvent) {
+    if (event.key === SIDEBAR_EXPANDED_STORAGE_KEY) {
+      onStoreChange();
+    }
+  }
+
+  window.addEventListener(SIDEBAR_STATE_CHANGE_EVENT, onStoreChange);
+  window.addEventListener("storage", handleStorageChange);
+
+  return () => {
+    window.removeEventListener(SIDEBAR_STATE_CHANGE_EVENT, onStoreChange);
+    window.removeEventListener("storage", handleStorageChange);
+  };
+}
+
 export function SideBar({
   isMobileMenuOpen = false,
   closeMobileMenu,
 }: SideBarProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const isExpanded = useSyncExternalStore(
+    subscribeToSidebarExpandedState,
+    getSidebarExpandedSnapshot,
+    getSidebarExpandedServerSnapshot,
+  );
   const { user } = useAuth();
+
+  function toggleExpanded() {
+    window.localStorage.setItem(
+      SIDEBAR_EXPANDED_STORAGE_KEY,
+      String(!isExpanded),
+    );
+    window.dispatchEvent(new Event(SIDEBAR_STATE_CHANGE_EVENT));
+  }
 
   const menuItems = [
     { icon: BookOpen, label: "Material de apoio", href: "/maquinas/material-complementar" },
@@ -89,7 +128,7 @@ export function SideBar({
               if (isMobileMenuOpen && closeMobileMenu) {
                 closeMobileMenu();
               } else {
-                setIsExpanded(!isExpanded);
+                toggleExpanded();
               }
             }}
             className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer w-full shrink-0 px-3 justify-start"
