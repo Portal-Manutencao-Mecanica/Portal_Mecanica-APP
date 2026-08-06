@@ -5,6 +5,20 @@ export interface OrganizationSummary {
   name: string;
 }
 
+export type HelperMaterialType =
+  | "TECNICO"
+  | "LUBRIFICACAO"
+  | "MANUTENCAO_PREVENTIVA"
+  | "MANUAL";
+
+export interface HelperMaterial {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string;
+  type: HelperMaterialType;
+}
+
 export interface UserProfile {
   id: string;
   name: string;

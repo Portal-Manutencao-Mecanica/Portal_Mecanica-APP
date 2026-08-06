@@ -1,58 +1,81 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import PageFeedback from "@/components/molecules/PageFeedback";
+import PageHeader from "@/components/molecules/PageHeader";
+import Pagination from "@/components/molecules/Pagination";
+import type { HelperMaterial, Page } from "@/lib/api/types";
+import { getServiceErrorMessage } from "@/services/httpService";
+import { supportMaterialService } from "@/services/supportMaterialService";
 import MaterialCard from "../molecules/MaterialCard";
 
-export default function ComplementarMaterialForm() {
-  // MOCK
-  // Depois substituir pela chamada da API
+const PAGE_SIZE = 9;
 
-  const materials = [
-    {
-      id: 1,
-      title: "TORNO NARDINI MS 175/205",
-    },
-    {
-      id: 2,
-      title: "FRESADORA FERRAMENTEIRA DIPLOMAT",
-    },
-    {
-      id: 3,
-      title: "RETIFICADORA CILÍNDRICA UNIVERSAL",
-    },
-    {
-      id: 4,
-      title: "FURADEIRA DE COLUNA",
-    },
-    {
-      id: 5,
-      title: "RETIFICADORA PLANA MELLO",
-    },
-    {
-      id: 6,
-      title: "PALETEIRA TM2200/TM3020",
-    },
-  ];
+export default function ComplementarMaterialForm() {
+  const [materialPage, setMaterialPage] = useState<Page<HelperMaterial> | null>(null);
+  const [page, setPage] = useState(0);
+  const [loadedPage, setLoadedPage] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const loading = loadedPage !== page;
+
+  useEffect(() => {
+    let active = true;
+
+    supportMaterialService.list({ page, size: PAGE_SIZE, sort: "title,asc" })
+      .then((result) => {
+        if (!active) return;
+        setMaterialPage(result);
+        setError("");
+      })
+      .catch((loadError) => {
+        if (!active) return;
+        setError(
+          getServiceErrorMessage(
+            loadError,
+            "Não foi possível carregar os materiais de apoio.",
+          ),
+        );
+      })
+      .finally(() => {
+        if (active) setLoadedPage(page);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [page]);
+
+  const materials = materialPage?.content ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Material de Apoio</h1>
+    <section className="space-y-6">
+      <PageHeader
+        title="Material de apoio"
+        description="Consulte os materiais disponíveis para estudo e manutenção dos equipamentos."
+      />
 
-        <p className="mt-2 text-gray-500">
-          Consulte os materiais disponíveis para estudo e utilização dos
-          equipamentos.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {materials.map((material) => (
-          <MaterialCard
-            key={material.id}
-            id={material.id}
-            title={material.title}
+      {loading ? (
+        <PageFeedback message="Carregando materiais de apoio..." />
+      ) : error ? (
+        <PageFeedback variant="error" message={error} />
+      ) : materials.length === 0 ? (
+        <PageFeedback variant="empty" message="Nenhum material de apoio cadastrado." />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {materials.map((material) => (
+              <MaterialCard key={material.id} material={material} />
+            ))}
+          </div>
+          <Pagination
+            page={materialPage?.number ?? page}
+            totalPages={materialPage?.totalPages ?? 0}
+            totalElements={materialPage?.totalElements ?? 0}
+            onPageChange={setPage}
           />
-        ))}
-      </div>
-    </div>
+        </>
+      )}
+    </section>
   );
 }
