@@ -5,18 +5,42 @@ export interface OrganizationSummary {
   name: string;
 }
 
-export type HelperMaterialType =
-  | "TECNICO"
-  | "LUBRIFICACAO"
-  | "MANUTENCAO_PREVENTIVA"
-  | "MANUAL";
-
-export interface HelperMaterial {
+export interface UserProfile {
   id: string;
-  title: string;
-  description: string | null;
-  url: string;
-  type: HelperMaterialType;
+  name: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  status: string;
+  passwordChangeRequired: boolean;
+  organization: OrganizationSummary | null;
+  numberCard: string;
+  enabled: boolean;
+  accountNonLocked: boolean;
+}
+
+export interface NotificationPreferences {
+  emailEnabled: boolean;
+  inAppEnabled: boolean;
+  occurrenceNotifications: boolean;
+  purchaseNotifications: boolean;
+  inspectionNotifications: boolean;
+}
+
+export type NotificationPreferencesPatch = Partial<NotificationPreferences>;
+
+export interface OwnUserProfile {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  status: string;
+  passwordChangeRequired: boolean;
+  organization: OrganizationSummary;
+  preferences: NotificationPreferences;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type OrganizationType = "SENAI" | "WEG" | "OTHER";
@@ -37,15 +61,18 @@ export interface OrganizationPayload {
   emailDomain: string;
 }
 
-export interface UserProfile {
+export type HelperMaterialType =
+  | "TECNICO"
+  | "LUBRIFICACAO"
+  | "MANUTENCAO_PREVENTIVA"
+  | "MANUAL";
+
+export interface HelperMaterial {
   id: string;
-  name: string;
-  username: string;
-  email: string;
-  role: UserRole;
-  status: string;
-  passwordChangeRequired: boolean;
-  organization: OrganizationSummary | null;
+  title: string;
+  description: string | null;
+  url: string;
+  type: HelperMaterialType;
 }
 
 export interface LoginResponse {
@@ -154,6 +181,16 @@ export interface Place {
   name: string;
 }
 
+export type Sector =
+  | "AREA_NAO_DESIGNADA"
+  | "CENTRO_WEG"
+  | "WEG_MANUTENCAO";
+
+export interface Designation {
+  id: string;
+  sector: Sector;
+}
+
 export type EquipmentSituation = "OPERANDO" | "NAO_OPERANDO";
 export type EquipmentCondition = "CONFORME" | "NAO_CONFORME";
 
@@ -216,9 +253,15 @@ export interface CreateMachine {
   image?: string;
 }
 
+export type BuyStatus =
+  | "NAO_VISUALIZADO"
+  | "EM_ANALISE"
+  | "PEDIDO_EM_ANDAMENTO"
+  | "ENTREGUE";
+
 export interface Buy {
   id: string;
-  status: string;
+  status: BuyStatus;
   createdById: string;
   createdByName: string;
   notifiedTeacherId: string | null;
@@ -243,6 +286,10 @@ export interface CreateBuy {
   notifiedTeacherId?: string;
   items: CreateBuyItem[];
   mediaIds?: string[];
+}
+
+export interface UpdateBuyStatus {
+  status: Exclude<BuyStatus, "NAO_VISUALIZADO">;
 }
 
 export interface BuyItem {
