@@ -1,0 +1,57 @@
+Base URL: http://127.0.0.1:3000
+Resultado: APROVADO, com limitação visual documentada no README.md
+
+ROTAS SEM SESSÃO
+
+GET  /login                         200
+GET  /login/forgot-password         200
+GET  /termos                        307 -> /login?returnTo=%2Ftermos
+GET  /maquinas                      307 -> /login?returnTo=%2Fmaquinas
+GET  /turmas                        307 -> /login?returnTo=%2Fturmas
+GET  /ocorrencias                   307 -> /login?returnTo=%2Focorrencias
+GET  /rota-inexistente              307 -> /login?returnTo=%2Frota-inexistente
+GET  /api/auth/session              401
+
+AUTENTICAÇÃO
+
+POST /api/auth/login                200
+Cookies de sessão                   2
+GET  /api/auth/session              200
+Usuário autenticado                 Administrador SENAI (ADMIN)
+
+PÁGINAS COM SESSÃO VÁLIDA
+
+GET  /                              200, HTML presente
+GET  /maquinas                      200, HTML presente
+GET  /equipamentos                  200, HTML presente
+GET  /turmas                        200, HTML presente
+GET  /ocorrencias                   200, HTML presente
+GET  /alunos                        200, HTML presente
+GET  /compras                       200, HTML presente
+GET  /calendario                    200, HTML presente
+GET  /notificacoes                  200, HTML presente
+GET  /perfil                        200, HTML presente
+GET  /configuracao                  200, HTML presente
+GET  /faq                           200, HTML presente
+
+INTEGRAÇÃO DE LEITURA COM A API
+
+GET  /backend/maquinas?size=5                   200, JSON não vazio
+GET  /backend/equipamento?size=5                200, JSON não vazio
+GET  /backend/turma?size=5                      200, JSON não vazio
+GET  /backend/solicitao-manutencao?size=5       200, JSON não vazio
+GET  /backend/alunos?size=5                     200, JSON não vazio
+GET  /backend/compras?size=5                    200, JSON não vazio
+GET  /backend/eventos/calendario                200, JSON não vazio
+GET  /backend/notification?size=5               200, JSON não vazio
+
+ENCERRAMENTO DE SESSÃO
+
+POST /api/auth/logout               204
+GET  /api/auth/session pós-logout   401
+
+LIMITAÇÃO
+
+O runtime do navegador integrado não disponibilizou nenhum navegador. Assim,
+capturas de tela e testes manuais de responsividade, teclado, foco e modais não
+foram executados nesta rodada.
