@@ -7,4 +7,21 @@ export const placeService = {
     const { data } = await browserApi.get<Place[]>("/lugar");
     return data;
   },
+
+  async create(name: string) {
+    const { data } = await browserApi.post<Place>("/lugar", { name });
+    return data;
+  },
+
+  async update(id: string, name: string) {
+    const { data } = await browserApi.put<Place>(
+      `/lugar/${encodeURIComponent(id)}`,
+      { name },
+    );
+    return data;
+  },
+
+  async remove(id: string) {
+    await browserApi.delete(`/lugar/${encodeURIComponent(id)}`);
+  },
 };
