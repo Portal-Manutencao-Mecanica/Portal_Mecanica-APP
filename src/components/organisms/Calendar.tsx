@@ -45,7 +45,7 @@ export default function Calendar({ events, onEventClick, onDateClick }: Calendar
           display: inline-flex !important;
           align-items: center !important;
           justify-content: center !important;
-          border-radius: 0.5rem !important; /* Cantos arredondados individuais */
+          border-radius: 0.5rem !important;
           background-color: #f3f4f6 !important;
           border: 1px solid #e5e7eb !important;
           color: #374151 !important;
@@ -53,9 +53,11 @@ export default function Calendar({ events, onEventClick, onDateClick }: Calendar
           font-weight: 500 !important;
           padding: 0.5rem 0.875rem !important;
           box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-          transition: all 0.2s ease-in-out !important;
+          transition: all 0.15s ease-in-out !important;
           cursor: pointer !important;
           text-transform: capitalize !important;
+          outline: none !important; /* Remove a borda/outline padrão de foco */
+          user-select: none !important;
         }
 
         .calendar-shell .fc-button-group > .fc-button:hover,
@@ -65,9 +67,23 @@ export default function Calendar({ events, onEventClick, onDateClick }: Calendar
           border-color: #d1d5db !important;
         }
 
+        /* Efeito de clique tátil (suave afundamento do botão) */
+        .calendar-shell .fc-button-group > .fc-button:active,
+        .calendar-shell .fc-today-button:active {
+          transform: scale(0.96) !important;
+          background-color: #d1d5db !important;
+        }
+
+        /* Remoção total do anel/borda azul de foco no clique e navegação */
         .calendar-shell .fc-button-group > .fc-button:focus,
-        .calendar-shell .fc-today-button:focus {
-          box-shadow: 0 0 0 2px #3b82f6 !important;
+        .calendar-shell .fc-today-button:focus,
+        .calendar-shell .fc-button-group > .fc-button:focus-visible,
+        .calendar-shell .fc-today-button:focus-visible,
+        .calendar-shell .fc-button-primary:not(:disabled):focus,
+        .calendar-shell .fc-button-primary:not(:disabled):active {
+          box-shadow: none !important;
+          outline: none !important;
+          border-color: #e5e7eb !important;
         }
 
         .calendar-shell .fc-button-group > .fc-button:disabled,
