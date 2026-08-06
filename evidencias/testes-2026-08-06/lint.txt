@@ -1,0 +1,11 @@
+Comando: npm run lint
+Diretório: raiz do projeto
+Resultado: APROVADO
+Exit code: 0
+
+Saída:
+
+> portalmanutencao@0.1.0 lint
+> eslint
+
+Nenhum erro ou aviso foi emitido.

@@ -10,13 +10,11 @@ import {
   GraduationCap,
   X,
   Toolbox,
-  Settings,
   CircleQuestionMark,
   BrushCleaning,
   Calendar,
   ClipboardCheck,
-  BookOpen,
-  Building2,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/atoms/UserAvatar";
@@ -150,15 +148,15 @@ export function SideBar({
           {/* Itens Exclusivos de Mobile */}
           <div className="md:hidden flex flex-col gap-1 mt-1 pt-1 border-t border-white/20 shrink-0 w-full">
             <Link
-              href="/configuracao"
+              href="/perfil"
               onClick={closeMobileMenu}
               className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer px-3 w-full justify-start"
             >
               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                <Settings className="w-6 h-6" />
+                <User className="w-6 h-6" />
               </div>
               <span className="whitespace-nowrap text-sm font-medium ml-3">
-                Configurações
+                Meu Perfil
               </span>
             </Link>
 

@@ -1,64 +1,117 @@
-'use client'
-
 import { InputProps } from "@/props/InputProps";
-import { forwardRef, useId, useState } from "react";
+import { forwardRef, useState } from "react";
+
+
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ id, label, error, maxLength, onChange, className = '', ...props }, ref) => {
+
+    ({ label, error, maxLength, onChange, className = '', ...props }, ref) => {
+
         const [currentLength, setCurrentLength] = useState(0);
-        const generatedId = useId();
-        const inputId = id ?? generatedId;
-        const errorId = `${inputId}-error`;
+
+
 
         const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
             setCurrentLength(event.target.value.length);
+
             if (onChange) onChange(event);
+
         };
 
+
+
         return (
-            <div className="flex w-full flex-col gap-1.5">
+
+            <div className="w-full flex flex-col gap-1.5">
+
                 {label && (
-                    <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+
+                    <label className="text-sm font-medium text-gray-700">
+
                         {label}
+
                     </label>
+
                 )}
 
+
+
                 <div
+
                     className={`
-                    flex min-h-10 items-center justify-between rounded-lg border bg-white px-4 py-2 text-sm shadow-sm
-                    transition-colors hover:border-weg-blue/60 focus-within:border-weg-blue focus-within:ring-2 focus-within:ring-weg-blue/20
-            ${error ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-200' : 'border-gray-200'}
-            ${className}
-                    `}
+    flex items-center justify-between px-4 py-2 border rounded-lg bg-white text-sm
+    transition-all duration-200 ease-out 
+    
+    /* 1. HOVER: Borda muda ao passar o mouse */
+    hover:border-[#3498db]
+    
+    /* 2. FOCO FIXO: Mantém apenas a borda fina azul enquanto digita */
+    focus-within:border-[#3498db]
+    
+    /* 3. O PULSAMENTO (MOMENTO DO CLIQUE): Acende o brilho e some imediatamente ao soltar */
+    active:ring-4 
+    active:ring-[#3498db]/30 
+    active:scale-[0.99]
+
+    ${error ? 'border-red-500 hover:ring-red-200' : 'border-gray-200'}
+    ${className}
+`}
+
                 >
+
                     <input
+
                         ref={ref}
-                        id={inputId}
+
                         maxLength={maxLength}
+
                         onChange={handleInputChange}
-                        aria-describedby={error ? errorId : undefined}
-                        className="w-full border-none bg-transparent text-gray-900 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed"
+
+                        className="w-full bg-transparent outline-none border-none text-black placeholder-gray-400 italic"
+
                         {...props}
+
                     />
+
                     {maxLength && (
+
                         <span className="text-xs text-gray-400 italic select-none pl-2 whitespace-nowrap">
+
                             {currentLength}/{maxLength}
+
                         </span>
+
                     )}
+
                 </div>
 
 
+
+
+
                 {error && (
-                    <span id={errorId} className="text-sm text-red-700">
+
+                    <span className="text-xs font-medium text-red-500">
+
                         {error}
+
                     </span>
+
                 )}
+
             </div>
+
         );
+
     }
+
 );
+
+
 
 Input.displayName = 'Input';
 
-export default Input;
 
+
+export default Input;
