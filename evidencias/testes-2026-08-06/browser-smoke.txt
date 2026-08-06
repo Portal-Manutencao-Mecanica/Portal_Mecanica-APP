@@ -1,0 +1,49 @@
+Execução: npm run dev:local
+Base URL: http://localhost:3000
+Viewport desktop: 1440 x 900
+Viewport mobile: 390 x 844
+Ferramenta: Playwright CLI / Chromium
+
+PROTEÇÃO DE ROTA
+GET /maquinas sem sessão -> /login?returnTo=%2Fmaquinas
+Status: APROVADO
+
+LOGIN E TECLADO
+Ordem inicial do Tab: e-mail -> senha -> Administrador.
+Formulário vazio: os dois campos ficaram inválidos e o foco retornou ao e-mail.
+Status: APROVADO
+
+AUTENTICAÇÃO
+Botão Administrador: seed.admin.senai@sesisenai.org.br / Senha@123
+Resultado: 401, Credenciais inválidas.
+
+Conta do README: admin@teste.local / Senha@123
+Resultado: login aprovado; redirecionamento para /; Administrador de Teste (ADMIN).
+
+A API aplicou rate limit 429 entre tentativas; o intervalo informado foi respeitado.
+
+DASHBOARD
+Máquinas operacionais: 25/30
+Em manutenção: 5
+Ocorrências abertas: 27
+Turmas ativas: 10
+Ocorrências recentes: 5 linhas
+Status: APROVADO
+
+MÁQUINAS
+Página inicial: 30 registros, 3 páginas.
+Busca por Robô: 1 registro, Robô Industrial ABB, patrimônio PAT-2026017.
+Mobile: tabela apresentada como card; menu, filtro e paginação acessíveis.
+Status: APROVADO
+
+OUTRAS ROTAS AUTENTICADAS
+/equipamentos: abriu com sessão válida
+/turmas: abriu com sessão válida
+/ocorrencias: abriu com sessão válida
+/alunos: abriu com sessão válida
+
+CONSOLE
+- O 401 de /api/auth/session sem sessão é esperado.
+- Foi observado 404 para /favicon.ico.
+- Foi observado aviso do Next/Image sobre a proporção de /brand/logo-ctw.svg no mobile.
+- Após autenticação, a inspeção final de /alunos apresentou 0 erros e 0 avisos.
