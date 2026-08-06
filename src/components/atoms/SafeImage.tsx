@@ -4,8 +4,9 @@ import Image, {StaticImageData } from "next/image";
 
 export default function SafeImage({
   src,
-  fallbackSrc = "/images/default-equipment.png",
+  fallbackSrc = "/wrench-gray.svg",
   alt,
+  unoptimized,
   ...props
 }: SafeImageProps) {
 
@@ -27,10 +28,17 @@ export default function SafeImage({
     return `data:image/png;base64,${src}`;
   };
 
+  const formattedSrc = getFormattedSrc();
+  const shouldBypassOptimization =
+    unoptimized ??
+    (typeof formattedSrc === "string" &&
+      (formattedSrc.endsWith(".svg") || formattedSrc.startsWith("data:image")));
+
   return (
     <Image
-      src={getFormattedSrc()}
+      src={formattedSrc}
       alt={alt || "Imagem do equipamento"}
+      unoptimized={shouldBypassOptimization}
       {...props}
     />
   );
