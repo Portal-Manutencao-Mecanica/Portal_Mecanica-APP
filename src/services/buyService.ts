@@ -1,4 +1,10 @@
-import type { Buy, CreateBuy, Page, PageQuery } from "@/lib/api/types";
+import type {
+  Buy,
+  CreateBuy,
+  Page,
+  PageQuery,
+  UpdateBuyStatus,
+} from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const buyService = {
@@ -21,6 +27,14 @@ export const buyService = {
 
   async update(id: string, payload: CreateBuy) {
     const { data } = await browserApi.put<Buy>(
+      `/compras/${encodeURIComponent(id)}`,
+      payload,
+    );
+    return data;
+  },
+
+  async updateStatus(id: string, payload: UpdateBuyStatus) {
+    const { data } = await browserApi.patch<Buy>(
       `/compras/${encodeURIComponent(id)}`,
       payload,
     );
