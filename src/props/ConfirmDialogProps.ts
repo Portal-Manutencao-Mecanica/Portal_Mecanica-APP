@@ -5,6 +5,7 @@ export interface ConfirmDialogProps {
 
   confirmText?: string;
   confirmVariant?: "primary" | "secondary" | "warning" | "danger";
+  confirming?: boolean;
 
   onCancel: () => void;
   onConfirm: () => void;
