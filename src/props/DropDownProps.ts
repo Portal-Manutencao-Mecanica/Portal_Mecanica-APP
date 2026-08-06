@@ -8,4 +8,5 @@ export interface DropDownProps {
   className?: string;
   disabled?: boolean;
   id?: string;
+  allowEmptySelection?: boolean;
 }

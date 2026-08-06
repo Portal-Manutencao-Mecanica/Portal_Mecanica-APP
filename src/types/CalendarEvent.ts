@@ -25,12 +25,6 @@ export type CalendarResponseDto = {
   status: TaskSituation;
 };
 
-export type CalendarItem = {
-  day: string;
-  hour: string;
-  title: string;
-};
-
 export type CreateCalendarEventDto = {
   scheduledAction: string;
   criticality: TaskCriticality;
@@ -44,3 +38,7 @@ export type CreateCalendarEventDto = {
   teacherId: string;
   status?: TaskSituation;
 };
+
+export type UpdateCalendarEventDto = Partial<
+  Omit<CreateCalendarEventDto, "requestedAt">
+>;

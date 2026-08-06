@@ -8,6 +8,11 @@ const statusStyles = {
     circleBg: "bg-weg-info",
     text: "text-white",
   },
+  info: {
+    bg: "bg-weg-blue/10",
+    circleBg: "bg-weg-blue",
+    text: "text-weg-blue",
+  },
   warning: {
     bg: "bg-weg-label-warning/60",
     circleBg: "bg-weg-label-warning",

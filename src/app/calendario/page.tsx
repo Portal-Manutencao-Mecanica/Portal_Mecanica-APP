@@ -1,27 +1,24 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
-import { EventInput } from "@fullcalendar/core";
-import { Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import type { EventInput } from "@fullcalendar/core";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import * as v from "valibot";
 
 import Button from "@/components/atoms/Button";
-import DropDown from "@/components/atoms/DropDown";
-import Input from "@/components/atoms/Input";
 import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import Calendar from "@/components/organisms/Calendar";
+import CalendarEventDetails from "@/components/organisms/CalendarEventDetails";
+import CalendarEventForm, {
+  type CalendarEventFormValues,
+} from "@/components/organisms/CalendarEventForm";
+import ConfirmDialog from "@/components/organisms/ConfirmDialog";
+import ModalDialog from "@/components/organisms/ModalDialog";
 import LayoutDesktop from "@/components/templates/LayoutDesktop";
 import { useAuth } from "@/hooks/useAuth";
-import type {
-  Equipment,
-  Machine,
-  Place,
-  Student,
-  TaskSituation,
-  Teacher,
-} from "@/lib/api/types";
+import type { Equipment, Machine, Place, Student, Teacher } from "@/lib/api/types";
+import { canManageCalendarEvents } from "@/lib/permissions";
 import { calendarService } from "@/services/calendarService";
 import { equipmentService } from "@/services/equipmentService";
 import { getServiceErrorMessage } from "@/services/httpService";
@@ -29,306 +26,313 @@ import { machineService } from "@/services/machineService";
 import { placeService } from "@/services/placeService";
 import { studentService } from "@/services/studentService";
 import { teacherService } from "@/services/teacherService";
-import type { CalendarItem, CreateCalendarEventDto } from "@/types/CalendarEvent";
-import { canCreateCalendarEvents } from "@/lib/permissions";
+import type {
+  CalendarResponseDto,
+  CreateCalendarEventDto,
+  UpdateCalendarEventDto,
+} from "@/types/CalendarEvent";
 
-type CalendarForm = Omit<CreateCalendarEventDto, "studentId" | "status"> & {
-  studentId: string;
-  status: TaskSituation;
-};
-
-type Modal =
-  | { type: "create" }
-  | { type: "details"; event: CalendarItem };
-
-const calendarFormSchema = v.object({
-  scheduledAction: v.pipe(v.string(), v.trim(), v.minLength(3, "Informe a acao programada.")),
-  criticality: v.picklist(["BAIXA", "MEDIA", "ALTA"]),
-  scheduledFor: v.pipe(v.string(), v.nonEmpty("Informe a data e a hora.")),
-  requestedAt: v.pipe(v.string(), v.nonEmpty("Informe a data da solicitacao.")),
-  maintenanceType: v.picklist(["PREVENTIVA", "CORRETIVA", "PREDITIVA", "AUTONOMA"]),
-  equipmentId: v.pipe(v.string(), v.uuid("Selecione um equipamento valido.")),
-  machineId: v.pipe(v.string(), v.uuid("Selecione uma maquina valida.")),
-  placeId: v.pipe(v.string(), v.uuid("Selecione um local valido.")),
-  studentId: v.optional(v.string()),
-  teacherId: v.pipe(v.string(), v.uuid("Selecione um professor valido.")),
-  status: v.picklist(["PENDENTE", "EM_ANDAMENTO", "CONCLUIDA"]),
-});
+type CalendarModal =
+  | { type: "create"; scheduledFor: string }
+  | { type: "details"; event: CalendarResponseDto }
+  | { type: "edit"; event: CalendarResponseDto };
 
 function toInputDate(date: Date) {
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return localDate.toISOString().slice(0, 16);
 }
 
-function newForm(scheduledFor: string): CalendarForm {
-  return {
-    scheduledAction: "",
-    criticality: "MEDIA",
-    scheduledFor,
-    requestedAt: toInputDate(new Date()),
-    maintenanceType: "PREVENTIVA",
-    equipmentId: "",
-    machineId: "",
-    placeId: "",
-    studentId: "",
-    teacherId: "",
-    status: "PENDENTE",
-  };
+function nextAvailableDate() {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + 5, 0, 0);
+  return toInputDate(date);
 }
 
-function toCalendarEvent(event: CalendarItem): EventInput {
-  return {
-    title: event.title,
-    start: `${event.day}T${event.hour}`,
-    extendedProps: event,
-  };
+function scheduledTimeForDate(day: string) {
+  const today = toInputDate(new Date()).slice(0, 10);
+  return day === today ? nextAvailableDate() : `${day}T08:00`;
 }
 
-function toCalendarItem(event: Pick<CreateCalendarEventDto, "scheduledAction" | "scheduledFor">): CalendarItem {
-  const [day, hour] = event.scheduledFor.split("T");
-  return { day, hour: hour ?? "00:00", title: event.scheduledAction };
-}
-
-function sortEvents(events: CalendarItem[]) {
+function sortEvents(events: CalendarResponseDto[]) {
   return [...events].sort((left, right) =>
-    `${left.day}T${left.hour}`.localeCompare(`${right.day}T${right.hour}`),
+    left.scheduledFor.localeCompare(right.scheduledFor),
   );
 }
 
-export default function CalendarioPage() {
+function toCalendarEvent(event: CalendarResponseDto): EventInput {
+  return {
+    id: event.id,
+    title: event.scheduledAction,
+    start: event.scheduledFor,
+  };
+}
+
+export default function CalendarPage() {
   const { user } = useAuth();
-  const canCreateEvents = canCreateCalendarEvents(user?.role);
-  const [events, setEvents] = useState<CalendarItem[]>([]);
+  const canManage = canManageCalendarEvents(user?.role);
+  const [events, setEvents] = useState<CalendarResponseDto[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [modal, setModal] = useState<Modal | null>(null);
-  const [form, setForm] = useState<CalendarForm>(() => newForm(toInputDate(new Date())));
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const updateForm = (field: keyof CalendarForm, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }));
-  };
-
-  const openCreate = (scheduledFor: string) => {
-    if (!canCreateEvents) return;
-    setForm(newForm(scheduledFor));
-    setModal({ type: "create" });
-  };
+  const [modal, setModal] = useState<CalendarModal | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CalendarResponseDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
 
   const closeModal = useCallback(() => setModal(null), []);
 
   useEffect(() => {
-    async function loadCalendarData() {
-      try {
-        const [calendarItems, equipmentPage, machinePage, availablePlaces, availableTeachers, availableStudents] =
-          await Promise.all([
-            calendarService.list(),
-            equipmentService.list({ size: 1000, sort: "name,asc" }),
-            machineService.list({ size: 1000, sort: "name,asc" }),
-            placeService.list(),
-            teacherService.list(),
-            studentService.list({ size: 1000, sort: "name,asc" }),
-          ]);
+    let active = true;
 
-        setEvents(calendarItems);
-        setEquipment(equipmentPage.content);
-        setMachines(machinePage.content);
-        setPlaces(availablePlaces);
-        setTeachers(availableTeachers);
-        setStudents(availableStudents.content);
-      } catch (error) {
-        toast.error(getServiceErrorMessage(error, "Não foi possível carregar os dados do calendário."));
+    async function loadCalendar() {
+      setLoading(true);
+      try {
+        const eventPagePromise = calendarService.list({
+          size: 1000,
+          sort: "scheduledFor,asc",
+        });
+        const referenceDataPromise = canManage
+          ? Promise.all([
+              equipmentService.list({ size: 1000, sort: "name,asc" }),
+              machineService.list({ size: 1000, sort: "name,asc" }),
+              placeService.list(),
+              teacherService.list(),
+              studentService.list({ size: 1000, sort: "name,asc" }),
+            ])
+          : Promise.resolve(null);
+
+        const [eventPage, referenceData] = await Promise.all([
+          eventPagePromise,
+          referenceDataPromise,
+        ]);
+        if (!active) return;
+
+        setEvents(sortEvents(eventPage.content));
+        if (referenceData) {
+          const [equipmentPage, machinePage, availablePlaces, availableTeachers, studentPage] =
+            referenceData;
+          setEquipment(equipmentPage.content);
+          setMachines(machinePage.content);
+          setPlaces(availablePlaces);
+          setTeachers(availableTeachers);
+          setStudents(studentPage.content);
+        }
+        setError("");
+      } catch (loadError) {
+        if (!active) return;
+        setError(
+          getServiceErrorMessage(loadError, "Não foi possível carregar o calendário."),
+        );
       } finally {
-        setIsLoading(false);
+        if (active) setLoading(false);
       }
     }
 
-    void loadCalendarData();
-  }, []);
+    void loadCalendar();
+    return () => {
+      active = false;
+    };
+  }, [canManage]);
 
-  async function createEvent(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!canCreateEvents) {
-      toast.error("Você só possui permissão para visualizar o calendário.");
-      closeModal();
+  function openCreate(scheduledFor: string) {
+    if (!canManage) return;
+    if (new Date(scheduledFor).getTime() < Date.now()) {
+      toast.error("Não é possível agendar um evento em uma data passada.");
       return;
     }
-    const validation = v.safeParse(calendarFormSchema, form);
-
-    if (!validation.success) {
-      toast.error(validation.issues[0]?.message ?? "Revise os dados do evento.");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const payload: CreateCalendarEventDto = {
-        ...validation.output,
-        studentId: validation.output.studentId?.trim() || undefined,
-      };
-      const createdEvent = await calendarService.create(payload);
-
-      setEvents((current) => sortEvents([...current, toCalendarItem(createdEvent)]));
-      toast.success("Evento adicionado ao calendário.");
-      closeModal();
-    } catch (error) {
-      toast.error(getServiceErrorMessage(error, "Não foi possível criar o evento."));
-    } finally {
-      setIsSaving(false);
-    }
+    setModal({ type: "create", scheduledFor });
   }
 
-  const referencesLoading = isLoading || isSaving;
+  function openDetails(id: string) {
+    const event = events.find((calendarEvent) => calendarEvent.id === id);
+    if (event) setModal({ type: "details", event });
+  }
+
+  async function createEvent(values: CalendarEventFormValues) {
+    const payload: CreateCalendarEventDto = {
+      ...values,
+      requestedAt: toInputDate(new Date()),
+      studentId: values.studentId || undefined,
+    };
+    const created = await calendarService.create(payload);
+    setEvents((current) => sortEvents([...current, created]));
+    toast.success("Evento criado com sucesso.");
+    closeModal();
+  }
+
+  async function updateEvent(
+    original: CalendarResponseDto,
+    values: CalendarEventFormValues,
+  ) {
+    const payload = toUpdatePayload(original, values);
+    if (Object.keys(payload).length === 0) {
+      toast.info("Nenhuma alteração foi realizada.");
+      setModal({ type: "details", event: original });
+      return;
+    }
+
+    const updated = await calendarService.update(original.id, payload);
+    setEvents((current) => sortEvents(
+      current.map((event) => event.id === updated.id ? updated : event),
+    ));
+    toast.success("Evento atualizado com sucesso.");
+    setModal({ type: "details", event: updated });
+  }
+
+  async function deleteEvent() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await calendarService.remove(deleteTarget.id);
+      setEvents((current) => current.filter((event) => event.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      setModal(null);
+      toast.success("Evento excluído com sucesso.");
+    } catch (deleteError) {
+      toast.error(getServiceErrorMessage(deleteError, "Não foi possível excluir o evento."));
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <LayoutDesktop>
       <section className="space-y-6">
         <PageHeader
           title="Calendário de manutenção"
-          description={canCreateEvents
-            ? "Visualize os eventos do mês e clique em um dia para agendar uma manutenção."
+          description={canManage
+            ? "Visualize os eventos e clique em um dia para agendar uma manutenção."
             : "Visualize os eventos de manutenção programados."}
-          actions={canCreateEvents ? (
-            <Button type="button" icon={Plus} onClick={() => openCreate(toInputDate(new Date()))}>
+          actions={canManage ? (
+            <Button
+              type="button"
+              icon={Plus}
+              onClick={() => openCreate(nextAvailableDate())}
+            >
               Novo evento
             </Button>
           ) : undefined}
         />
 
-        {isLoading ? (
+        {loading ? (
           <PageFeedback message="Carregando eventos..." />
+        ) : error ? (
+          <PageFeedback variant="error" message={error} />
         ) : (
-          <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
+          <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
             <Calendar
               events={events.map(toCalendarEvent)}
-              onDateClick={canCreateEvents ? (info) => openCreate(`${info.dateStr}T08:00`) : undefined}
-              onEventClick={(info) => setModal({ type: "details", event: info.event.extendedProps as CalendarItem })}
+              onDateClick={canManage
+                ? (info) => openCreate(scheduledTimeForDate(info.dateStr))
+                : undefined}
+              onEventClick={(info) => openDetails(info.event.id)}
             />
+            {events.length === 0 && (
+              <p role="status" className="text-center text-sm text-gray-500">
+                Nenhum evento programado. {canManage ? "Clique em um dia para criar o primeiro." : ""}
+              </p>
+            )}
           </div>
         )}
       </section>
 
       {modal?.type === "create" && (
-        <ModalShell title="Agendar manutencao" description="Preencha os dados do evento." onClose={closeModal}>
-          <form onSubmit={createEvent} className="space-y-4">
-            <Input id="scheduledAction" label="Acao programada *" value={form.scheduledAction} onChange={(event) => updateForm("scheduledAction", event.target.value)} required />
+        <ModalDialog
+          title="Agendar manutenção"
+          description="Preencha os dados do novo evento."
+          onClose={closeModal}
+        >
+          <CalendarEventForm
+            key={modal.scheduledFor}
+            mode="create"
+            defaultScheduledFor={modal.scheduledFor}
+            equipment={equipment}
+            machines={machines}
+            places={places}
+            teachers={teachers}
+            students={students}
+            onCancel={closeModal}
+            onSubmit={createEvent}
+          />
+        </ModalDialog>
+      )}
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input id="scheduledFor" label="Data e hora *" type="datetime-local" value={form.scheduledFor} onChange={(event) => updateForm("scheduledFor", event.target.value)} required />
-              <DropDown id="criticality" label="Criticidade *" defaultSelection="Selecione a criticidade" enumData={{ BAIXA: "Baixa", MEDIA: "Media", ALTA: "Alta" }} value={form.criticality} onSelect={(value) => updateForm("criticality", value)} />
-            </div>
-
-            <DropDown id="maintenanceType" label="Tipo de manutencao *" defaultSelection="Selecione o tipo" enumData={{ PREVENTIVA: "Preventiva", CORRETIVA: "Corretiva", PREDITIVA: "Preditiva", AUTONOMA: "Autonoma" }} value={form.maintenanceType} onSelect={(value) => updateForm("maintenanceType", value)} />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <DropDown id="equipmentId" label="Equipamento *" defaultSelection={referencesLoading ? "Carregando opcoes..." : "Selecione um equipamento"} enumData={Object.fromEntries(equipment.map((item) => [item.id, item.name]))} value={form.equipmentId} onSelect={(value) => updateForm("equipmentId", value)} disabled={referencesLoading} />
-              <DropDown id="machineId" label="Maquina *" defaultSelection={referencesLoading ? "Carregando opcoes..." : "Selecione uma maquina"} enumData={Object.fromEntries(machines.map((item) => [item.id, item.name]))} value={form.machineId} onSelect={(value) => updateForm("machineId", value)} disabled={referencesLoading} />
-              <DropDown id="placeId" label="Local *" defaultSelection={referencesLoading ? "Carregando opcoes..." : "Selecione um local"} enumData={Object.fromEntries(places.map((item) => [item.id, item.name]))} value={form.placeId} onSelect={(value) => updateForm("placeId", value)} disabled={referencesLoading} />
-              <DropDown id="teacherId" label="Professor responsavel *" defaultSelection={referencesLoading ? "Carregando opcoes..." : "Selecione um professor"} enumData={Object.fromEntries(teachers.map((item) => [item.id, item.name]))} value={form.teacherId} onSelect={(value) => updateForm("teacherId", value)} disabled={referencesLoading} />
-              <DropDown id="studentId" label="Aluno responsavel" defaultSelection={referencesLoading ? "Carregando opcoes..." : "Nenhum aluno selecionado"} enumData={Object.fromEntries(students.map((item) => [item.id, item.name]))} value={form.studentId} onSelect={(value) => updateForm("studentId", value)} disabled={referencesLoading} />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="secondary" onClick={closeModal}>Cancelar</Button>
-              <Button type="submit" disabled={isSaving || isLoading}>{isSaving ? "Criando..." : "Criar evento"}</Button>
-            </div>
-          </form>
-        </ModalShell>
+      {modal?.type === "edit" && (
+        <ModalDialog
+          title="Editar evento"
+          description="Atualize os dados da manutenção programada."
+          onClose={closeModal}
+        >
+          <CalendarEventForm
+            key={modal.event.id}
+            mode="edit"
+            initialValues={modal.event}
+            equipment={equipment}
+            machines={machines}
+            places={places}
+            teachers={teachers}
+            students={students}
+            onCancel={() => setModal({ type: "details", event: modal.event })}
+            onSubmit={(values) => updateEvent(modal.event, values)}
+          />
+        </ModalDialog>
       )}
 
       {modal?.type === "details" && (
-        <ModalShell title={modal.event.title} description="Manutencao programada" onClose={closeModal}>
-          <p className="text-sm text-gray-700">{formatScheduledDate(modal.event)}</p>
-          <div className="mt-6 flex justify-end"><Button type="button" variant="secondary" onClick={closeModal}>Fechar</Button></div>
-        </ModalShell>
+        <ModalDialog
+          title={modal.event.scheduledAction}
+          description="Detalhes da manutenção programada."
+          onClose={closeModal}
+        >
+          <CalendarEventDetails
+            event={modal.event}
+            canManage={canManage}
+            onClose={closeModal}
+            onEdit={() => setModal({ type: "edit", event: modal.event })}
+            onDelete={() => setDeleteTarget(modal.event)}
+          />
+        </ModalDialog>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Excluir evento"
+        description="Esta ação não poderá ser desfeita. Deseja excluir o evento do calendário?"
+        confirmText="Excluir"
+        confirmVariant="danger"
+        confirming={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void deleteEvent()}
+      />
     </LayoutDesktop>
   );
 }
 
-function ModalShell({ title, description, onClose, children }: { title: string; description: string; onClose: () => void; children: React.ReactNode }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const titleId = useId();
-  const descriptionId = useId();
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const previousFocus = document.activeElement as HTMLElement | null;
-    const focusableSelector =
-      'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-    const focusableElements = Array.from(
-      dialog.querySelectorAll<HTMLElement>(focusableSelector),
-    );
-    focusableElements[0]?.focus();
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-      if (event.key !== "Tab") return;
-
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements.at(-1);
-      if (!firstElement || !lastElement) {
-        event.preventDefault();
-        return;
-      }
-
-      if (event.shiftKey && document.activeElement === firstElement) {
-        event.preventDefault();
-        lastElement.focus();
-      } else if (!event.shiftKey && document.activeElement === lastElement) {
-        event.preventDefault();
-        firstElement.focus();
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      if (previousFocus?.isConnected) previousFocus.focus();
-    };
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl"
-      >
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 id={titleId} className="text-xl font-bold text-gray-800">{title}</h2>
-            <p id={descriptionId} className="text-sm text-gray-500">{description}</p>
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            icon={X}
-            iconOnly
-            onClick={onClose}
-            aria-label="Fechar"
-            title="Fechar"
-          />
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function formatScheduledDate(event: CalendarItem) {
-  return new Date(`${event.day}T${event.hour}`).toLocaleString("pt-BR", { dateStyle: "long", timeStyle: "short" });
+function toUpdatePayload(
+  original: CalendarResponseDto,
+  values: CalendarEventFormValues,
+): UpdateCalendarEventDto {
+  const payload: UpdateCalendarEventDto = {};
+  if (values.scheduledAction !== original.scheduledAction) {
+    payload.scheduledAction = values.scheduledAction;
+  }
+  if (values.criticality !== original.criticality) payload.criticality = values.criticality;
+  if (values.scheduledFor !== original.scheduledFor.slice(0, 16)) {
+    payload.scheduledFor = values.scheduledFor;
+  }
+  if (values.maintenanceType !== original.maintenanceType) {
+    payload.maintenanceType = values.maintenanceType;
+  }
+  if (values.equipmentId !== original.equipmentId) payload.equipmentId = values.equipmentId;
+  if (values.machineId !== original.machineId) payload.machineId = values.machineId;
+  if (values.placeId !== original.placeId) payload.placeId = values.placeId;
+  if (values.teacherId !== original.teacherId) payload.teacherId = values.teacherId;
+  if (values.studentId && values.studentId !== original.studentId) {
+    payload.studentId = values.studentId;
+  }
+  if (values.status !== original.status) payload.status = values.status;
+  return payload;
 }

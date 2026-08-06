@@ -29,10 +29,17 @@ export function SideBar({
   const { user } = useAuth();
 
   const menuItems = [
+    { icon: BookOpen, label: "Material de apoio", href: "/maquinas/material-complementar" },
     { icon: MonitorCog, label: "Máquinas", href: "/maquinas" },
     { icon: MessageSquareWarning, label: "Ocorrências", href: "/ocorrencias" },
     { icon: ShoppingCart, label: "Compras", href: "/compras" },
     { icon: GraduationCap, label: "Alunos", href: "/alunos" },
+    ...(user?.role === "ADMIN" || user?.role === "COORDENADOR"
+      ? [{ icon: Building2, label: "Organizações", href: "/organizacoes" }]
+      : []),
+    ...(user?.role === "ADMIN" || user?.role === "COORDENADOR"
+      ? [{ icon: Users, label: "Usuários", href: "/usuarios" }]
+      : []),
     { icon: Users, label: "Turmas", href: "/turmas" },
     { icon: Toolbox, label: "Equipamentos", href: "/equipamentos" },
     { icon: BrushCleaning, label: "Inconveniência 5S", href: "/incoveniencia5s" },

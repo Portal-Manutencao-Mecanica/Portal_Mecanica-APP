@@ -15,6 +15,7 @@ export default function DropDown({
   value = "",
   disabled = false,
   id,
+  allowEmptySelection = true,
 }: DropDownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,9 +62,11 @@ export default function DropDown({
 
         {isOpen && !disabled && (
           <div role="listbox" aria-labelledby={inputId} className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-            <button type="button" role="option" aria-selected={!value} onClick={() => selectOption("")} className="w-full border-b border-gray-100 px-4 py-2.5 text-left text-sm italic text-gray-400 hover:bg-gray-50">
-              {defaultSelection}
-            </button>
+            {allowEmptySelection && (
+              <button type="button" role="option" aria-selected={!value} onClick={() => selectOption("")} className="w-full border-b border-gray-100 px-4 py-2.5 text-left text-sm italic text-gray-400 hover:bg-gray-50">
+                {defaultSelection}
+              </button>
+            )}
             {options.map(([optionValue, optionLabel]) => (
               <button key={optionValue} type="button" role="option" aria-selected={value === optionValue} onClick={() => selectOption(optionValue)} className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${value === optionValue ? "bg-weg-blue/80 font-medium text-white" : "text-gray-700 hover:bg-gray-50 hover:text-weg-blue"}`}>
                 {optionLabel}
