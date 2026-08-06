@@ -22,6 +22,10 @@ export function canCreateCalendarEvents(role: AuthenticatedRole) {
   return role === "ADMIN";
 }
 
+export function canManageCalendarEvents(role: AuthenticatedRole) {
+  return role === "ADMIN";
+}
+
 export function canCreateInconvenience(role: AuthenticatedRole) {
   return role === "ADMIN" || role === "PROFESSOR";
 }
