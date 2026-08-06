@@ -3,9 +3,10 @@ import type {
   CreatedUser,
   CreateUserRequest,
   ManagedUser,
+  NotificationPreferencesPatch,
+  OwnUserProfile,
   Page,
   PageQuery,
-  UserProfile,
   UserRole,
   UserImportResponse,
   UpdateUserRequest,
@@ -13,13 +14,15 @@ import type {
 import { browserApi } from "./httpService";
 
 export const userService = {
-  async list(
-    query: PageQuery & {
-      search?: string;
-      role?: UserRole;
-      enabled?: boolean;
-    } = {},
-  ) {
+  async getOwnProfile() {
+    const { data } = await browserApi.get<OwnUserProfile>("/users/me");
+    return data;
+  },
+  async list(query: PageQuery & {
+    search?: string;
+    role?: UserRole;
+    enabled?: boolean;
+  } = {}) {
     const { data } = await browserApi.get<Page<ManagedUser>>("/users", {
       params: query,
     });
@@ -45,7 +48,14 @@ export const userService = {
     return data;
   },
   async updateOwnProfile(name: string) {
-    const { data } = await browserApi.patch<UserProfile>("/users/me", { name });
+    const { data } = await browserApi.patch<OwnUserProfile>("/users/me", { name });
+    return data;
+  },
+  async updateNotificationPreferences(payload: NotificationPreferencesPatch) {
+    const { data } = await browserApi.patch<OwnUserProfile>(
+      "/users/me/preferences",
+      payload,
+    );
     return data;
   },
   async update(id: string, payload: UpdateUserRequest) {
@@ -55,40 +65,28 @@ export const userService = {
     );
     return data;
   },
-  async deactivate(
-    id: string,
-    reason = "Inativação realizada pelo gerenciamento de usuários.",
-  ) {
+  async deactivate(id: string, reason = "Inativação realizada pelo gerenciamento de usuários.") {
     const { data } = await browserApi.patch<ManagedUser>(
       `/users/${encodeURIComponent(id)}/deactivate`,
       { reason },
     );
     return data;
   },
-  async reactivate(
-    id: string,
-    reason = "Reativação realizada pelo gerenciamento de usuários.",
-  ) {
+  async reactivate(id: string, reason = "Reativação realizada pelo gerenciamento de usuários.") {
     const { data } = await browserApi.patch<ManagedUser>(
       `/users/${encodeURIComponent(id)}/reactivate`,
       { reason },
     );
     return data;
   },
-  async block(
-    id: string,
-    reason = "Bloqueio realizado pelo gerenciamento de usuários.",
-  ) {
+  async block(id: string, reason = "Bloqueio realizado pelo gerenciamento de usuários.") {
     const { data } = await browserApi.patch<ManagedUser>(
       `/users/${encodeURIComponent(id)}/block`,
       { reason },
     );
     return data;
   },
-  async unblock(
-    id: string,
-    reason = "Desbloqueio realizado pelo gerenciamento de usuários.",
-  ) {
+  async unblock(id: string, reason = "Desbloqueio realizado pelo gerenciamento de usuários.") {
     const { data } = await browserApi.patch<ManagedUser>(
       `/users/${encodeURIComponent(id)}/unblock`,
       { reason },
