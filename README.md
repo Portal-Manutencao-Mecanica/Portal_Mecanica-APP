@@ -1,66 +1,435 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Portal da Manutenção — Frontend
 
-## Integração com a API
+Aplicação web do Portal da Manutenção Mecânica, utilizada para acessar os módulos de manutenção, ativos, usuários, compras, 5S, calendário e materiais em um ambiente integrado entre WEG e SENAI.
 
-O frontend usa a API
-[`Manutencao-API`](https://github.com/Portal-Manutencao-Mecanica/Manutencao-API)
-por meio de rotas server-side do Next.js. Os tokens de acesso e renovação ficam em
-cookies `httpOnly`; eles não são expostos ao JavaScript do navegador.
+Status: projeto concluído — release 1.0.0.
 
-Copie `.env.example` para `.env.local` caso a API não esteja disponível em
-`http://127.0.0.1:8080/api`:
+Sobre o projeto
 
-```env
+O frontend foi desenvolvido com Next.js 15, React 19 e TypeScript, utilizando App Router, componentes reutilizáveis e uma camada de proxy em /api/** para comunicação com a API Spring Boot.
+
+Frontend: https://github.com/Portal-Manutencao-Mecanica/Portal_Mecanica-APP
+
+Backend: https://github.com/Portal-Manutencao-Mecanica/Manutencao-API
+
+Funcionalidades
+
+Autenticação e acesso
+
+login;
+
+refresh de sessão;
+
+logout;
+
+primeiro acesso;
+
+definição de senha definitiva;
+
+recuperação de senha;
+
+proteção de páginas;
+
+controle de funcionalidades por perfil.
+
+Perfis suportados:
+
+ADMIN;
+
+COORDENADOR;
+
+PROFESSOR;
+
+ALUNO.
+
+Os tokens são tratados por cookies protegidos no servidor Next.js.
+
+Usuários e turmas
+
+listagem de usuários;
+
+cadastro e edição;
+
+exclusão;
+
+ativação e inativação;
+
+associação com organizações;
+
+gerenciamento de turmas;
+
+associação de professores e alunos;
+
+importação em massa;
+
+feedback de erros de importação.
+
+Ocorrências e manutenção
+
+solicitações de manutenção;
+
+manutenção corretiva;
+
+manutenção preventiva;
+
+manutenção preditiva;
+
+manutenção autônoma;
+
+aprovação e acompanhamento;
+
+detalhes das solicitações;
+
+prioridades e status;
+
+anexos e evidências.
+
+Máquinas e equipamentos
+
+listagem, pesquisa e paginação;
+
+cadastro e edição;
+
+visualização de detalhes;
+
+patrimônio;
+
+TAG;
+
+local;
+
+condição;
+
+equipamentos e materiais;
+
+código SAP;
+
+estoque;
+
+valores;
+
+imagens e anexos.
+
+Demais módulos
+
+Livro de Máquina;
+
+solicitações de compra;
+
+inconvenientes 5S;
+
+calendário;
+
+eventos;
+
+materiais de apoio;
+
+notificações;
+
+dashboards e visualizações;
+
+formulários e fluxos de aprovação.
+
+Tecnologias
+
+Tecnologia
+
+Uso
+
+Next.js 15.3.6
+
+Framework e App Router
+
+React 19
+
+Interface
+
+TypeScript 5
+
+Tipagem
+
+Tailwind CSS 4
+
+Estilização
+
+Lucide React
+
+Ícones
+
+Recharts
+
+Gráficos
+
+date-fns
+
+Datas
+
+xlsx
+
+Planilhas
+
+ESLint 9
+
+Qualidade
+
+Vercel Analytics
+
+Métricas
+
+Node.js 20
+
+Runtime recomendado
+
+Arquitetura
+
+src/
+├── app/                # Rotas, layouts e handlers /api
+├── components/         # Componentes reutilizáveis
+├── context/            # Contextos
+├── lib/                # Tipos, helpers e regras auxiliares
+├── services/           # Comunicação com os endpoints
+└── ...
+
+O projeto utiliza componentes reutilizáveis em níveis como atoms, molecules, organisms e templates.
+
+Comunicação com a API
+
+O navegador utiliza a camada /api/** do próprio Next.js.
+
+Browser
+   │
+   │ /api/*
+   ▼
+Next.js
+   │
+   │ MAINTENANCE_API_URL
+   ▼
+Spring Boot
+   │
+   ├── PostgreSQL
+   └── Redis
+
+Essa abordagem permite centralizar:
+
+autenticação;
+
+cookies HTTP-only;
+
+tratamento de erros;
+
+regras de acesso;
+
+comunicação com o backend sem expor diretamente sua URL interna ao navegador.
+
+Pré-requisitos
+
+Node.js 20;
+
+npm;
+
+backend Manutencao-API em execução.
+
+Instalação
+
+git clone https://github.com/Portal-Manutencao-Mecanica/Portal_Mecanica-APP.git
+cd Portal_Mecanica-APP
+npm install
+
+Configuração
+
+Configure a URL interna da API Spring Boot:
+
 MAINTENANCE_API_URL=http://127.0.0.1:8080/api
-```
 
-No perfil `dev`, o Flyway da API disponibiliza as contas abaixo. Todas usam a
-senha `Senha@123`:
+Em produção, utilize a URL interna correspondente ao ambiente implantado.
 
-| Perfil | E-mail |
-| --- | --- |
-| Administrador | `admin@teste.local` |
-| Coordenador | `coordenador@teste.local` |
-| Professor | `professor@teste.local` |
-| Aluno | `aluno@teste.local` |
+MAINTENANCE_API_URL é utilizada no servidor Next.js. Evite substituir essa configuração por uma variável pública do navegador sem necessidade.
 
-Durante o desenvolvimento, a tela de login oferece atalhos para preencher essas
-credenciais.
+Desenvolvimento
 
-## Getting Started
-
-Para iniciar o frontend com um link público temporário, execute:
-
-```bash
 npm run dev
-```
 
-O terminal imprime `Link público: https://...trycloudflare.com` após o frontend
-ficar disponível. A URL muda a cada inicialização e funciona enquanto o comando
-permanecer em execução. A API também precisa estar em execução em
-`http://127.0.0.1:8080/api`.
+A aplicação é iniciada em:
 
-Para iniciar somente localmente, sem criar um túnel:
+http://localhost:3333
 
-```bash
-npm run dev:local
-```
+Build de produção
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+npm run build
+npm run start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Testes e qualidade
 
-## Learn More
+Lint:
 
-To learn more about Next.js, take a look at the following resources:
+npm run lint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Smoke tests:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+npm run test:smoke
 
-## Deploy on Vercel
+Build:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+npm run build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Na validação final arquivada em 06/08/2026, o repositório registrou:
+
+lint aprovado;
+
+7/7 smoke tests aprovados;
+
+build aprovado;
+
+código de saída 0.
+
+As evidências estão em:
+
+evidencias/testes-2026-08-06/
+
+Scripts
+
+Comando
+
+Função
+
+npm run dev
+
+Desenvolvimento na porta 3333
+
+npm run build
+
+Build de produção
+
+npm run start
+
+Execução do build
+
+npm run lint
+
+ESLint sem warnings
+
+npm run test:smoke
+
+Smoke tests
+
+Padrões do projeto
+
+Requisições
+
+As requisições do cliente devem passar pela camada /api/** do Next.js, em vez de acessar diretamente o backend.
+
+Autorização
+
+As regras de acesso por perfil são centralizadas em helpers e guards próprios.
+
+Componentização
+
+A interface reutiliza componentes para:
+
+navbar;
+
+cabeçalhos;
+
+pesquisa;
+
+selects;
+
+botões;
+
+tabelas;
+
+paginação;
+
+diálogos;
+
+feedback de página;
+
+guards;
+
+toasts.
+
+TypeScript
+
+O projeto utiliza TypeScript em modo estrito e alias interno:
+
+@/*
+
+Segurança
+
+O frontend complementa as regras da API com:
+
+cookies httpOnly;
+
+SameSite=Lax;
+
+cookie Secure em produção;
+
+proxy same-origin;
+
+proteção de rotas;
+
+guards por perfil;
+
+controle de ações exibidas na interface;
+
+tratamento de erros HTTP;
+
+políticas e cabeçalhos de segurança;
+
+URL da API mantida no ambiente do servidor.
+
+A autorização do frontend não substitui as validações de segurança do backend.
+
+Estrutura geral
+
+Portal_Mecanica-APP/
+├── .github/
+├── docs/
+├── evidencias/
+├── public/
+├── src/
+│   ├── app/
+│   ├── components/
+│   ├── context/
+│   ├── lib/
+│   └── services/
+├── tests/
+├── AGENTS.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── Dockerfile
+├── docker-compose.yml
+├── eslint.config.mjs
+├── next.config.ts
+├── package.json
+├── postcss.config.mjs
+├── tsconfig.json
+└── README.md
+
+Backend
+
+A API utilizada pelo frontend está em:
+
+https://github.com/Portal-Manutencao-Mecanica/Manutencao-API
+
+Principais tecnologias da API:
+
+Java 21;
+
+Spring Boot;
+
+Spring Security;
+
+PostgreSQL;
+
+Redis;
+
+Flyway;
+
+JWT.
+
+Status final
+
+A release 1.0.0 marca a conclusão do frontend. A etapa final incluiu hardening de segurança, revisão de rotas protegidas, ajustes de interface, melhoria da comunicação com a API e validação por lint, smoke tests e build.
+
+Desenvolvido como parte do Portal da Manutenção Mecânica — WEG / SENAI.
