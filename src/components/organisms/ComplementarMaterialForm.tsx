@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 
+import Button from "@/components/atoms/Button";
 import PageFeedback from "@/components/molecules/PageFeedback";
 import PageHeader from "@/components/molecules/PageHeader";
 import Pagination from "@/components/molecules/Pagination";
+import { useAuth } from "@/hooks/useAuth";
 import type { HelperMaterial, Page } from "@/lib/api/types";
+import { canManageSupportMaterials } from "@/lib/permissions";
 import { getServiceErrorMessage } from "@/services/httpService";
 import { supportMaterialService } from "@/services/supportMaterialService";
 import MaterialCard from "../molecules/MaterialCard";
@@ -13,6 +17,8 @@ import MaterialCard from "../molecules/MaterialCard";
 const PAGE_SIZE = 9;
 
 export default function ComplementarMaterialForm() {
+  const { user } = useAuth();
+  const canManage = canManageSupportMaterials(user?.role);
   const [materialPage, setMaterialPage] = useState<Page<HelperMaterial> | null>(null);
   const [page, setPage] = useState(0);
   const [loadedPage, setLoadedPage] = useState<number | null>(null);
@@ -53,6 +59,11 @@ export default function ComplementarMaterialForm() {
       <PageHeader
         title="Material de apoio"
         description="Consulte os materiais disponíveis para estudo e manutenção dos equipamentos."
+        actions={canManage ? (
+          <Button href="/maquinas/material-complementar/novo" icon={Plus}>
+            Novo material
+          </Button>
+        ) : undefined}
       />
 
       {loading ? (

@@ -11,7 +11,6 @@ import type { CreateEquipment } from "@/lib/api/types";
 import { getApiFieldErrors, getServiceErrorMessage } from "@/services/httpService";
 import UploadedFile64 from "../molecules/UploadedFile64";
 
-// 1. Schema atualizado para incluir a propriedade media (Base64)
 const equipmentSchema = v.object({
   name: v.pipe(v.string(), v.trim(), v.minLength(3, "Informe o nome do equipamento.")),
   unitPrice: v.pipe(
@@ -28,7 +27,6 @@ const equipmentSchema = v.object({
     v.transform(Number),
     v.minValue(0, "A quantidade não pode ser negativa."),
   ),
-  media: v.optional(v.string()), // 👈 Mídia adicionada ao schema
 });
 
 type EquipmentFormData = v.InferOutput<typeof equipmentSchema>;
@@ -51,7 +49,8 @@ export default function EquipmentForm({
   const [availableQuantity, setAvailableQuantity] = useState(
     initialValues?.availableQuantity?.toString() ?? "",
   );
-  const [media, setMedia] = useState(initialValues?.media ?? "");
+  const initialImage = initialValues?.image;
+  const [images, setImages] = useState<string[]>(initialImage ? [initialImage] : []);
   const [saving, setSaving] = useState(false);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
 
@@ -59,12 +58,10 @@ export default function EquipmentForm({
     event.preventDefault();
     setServerErrors({});
 
-    // 2. Passamos o 'media' para a validação do Valibot
     const result = v.safeParse(equipmentSchema, {
       name,
       unitPrice,
-      availableQuantity,
-      media,
+      availableQuantity
     });
 
     if (!result.success) {
@@ -80,7 +77,7 @@ export default function EquipmentForm({
         name: formData.name,
         unitPrice: formData.unitPrice,
         availableQuantity: formData.availableQuantity,
-        media: formData.media || undefined, // 👈 Corrigido: agora envia a string Base64 tratada
+        image: images[0] !== initialImage ? images[0] : undefined,
       });
       toast.success(successMessage);
     } catch (submitError) {
@@ -139,15 +136,17 @@ export default function EquipmentForm({
 
         {/* 3. Componente de Upload ocupando 2 colunas para melhor usabilidade */}
         <div className="md:col-span-2 space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
-            Imagem do Equipamento
-          </label>
           <UploadedFile64
-            onChange={(base64List) => {
-              // Pega a primeira imagem convertida em Base64 enviada pelo componente
-              setMedia(base64List[0] || "");
-            }}
+            id="equipment-image"
+            value={images}
+            onChange={setImages}
+            maxFiles={1}
+            maxFileSizeBytes={5 * 1024 * 1024}
+            disabled={saving}
           />
+          <p className="text-xs text-gray-500">
+            Envie uma imagem PNG, JPG, WEBP ou SVG de até 5 MB. A imagem atual aparece como pré-visualização ao editar.
+          </p>
         </div>
       </div>
 

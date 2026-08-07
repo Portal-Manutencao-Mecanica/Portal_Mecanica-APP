@@ -136,11 +136,15 @@ export default function UserForm({
     };
   }, [mode]);
 
+  const studentHasSingleClassGroup = role === "ALUNO";
+
   function toggleClassGroup(id: string) {
     setClassGroupIds((current) =>
-      current.includes(id)
-        ? current.filter((classGroupId) => classGroupId !== id)
-        : [...current, id],
+      studentHasSingleClassGroup
+        ? current.includes(id) ? [] : [id]
+        : current.includes(id)
+          ? current.filter((classGroupId) => classGroupId !== id)
+          : [...current, id],
     );
   }
 
@@ -169,6 +173,11 @@ export default function UserForm({
 
     if (showClassGroups && classGroupIds.length === 0) {
       toast.error("Selecione ao menos uma turma para o usuário.");
+      return;
+    }
+
+    if (studentHasSingleClassGroup && classGroupIds.length !== 1) {
+      toast.error("Um aluno deve ser designado a somente uma turma.");
       return;
     }
 
@@ -258,16 +267,23 @@ export default function UserForm({
         <fieldset className="space-y-4 rounded-xl border border-gray-200 bg-weg-card-white p-6 shadow-sm">
           <legend className="px-1 text-lg font-semibold text-gray-800">Turmas</legend>
           <p className="text-sm text-gray-500">
-            Selecione as turmas que devem ser vinculadas ao novo {roleLabels[role].toLowerCase()}.
+            {studentHasSingleClassGroup
+              ? "Selecione a única turma à qual o novo aluno será vinculado."
+              : `Selecione as turmas que devem ser vinculadas ao novo ${roleLabels[role].toLowerCase()}.`}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            role={studentHasSingleClassGroup ? "radiogroup" : undefined}
+            aria-label={studentHasSingleClassGroup ? "Turma do aluno" : undefined}
+          >
             {classGroups.length ? classGroups.map((classGroup) => (
               <label
                 key={classGroup.id}
                 className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-700 hover:border-weg-blue/60"
               >
                 <input
-                  type="checkbox"
+                  type={studentHasSingleClassGroup ? "radio" : "checkbox"}
+                  name={studentHasSingleClassGroup ? "student-class-group" : undefined}
                   checked={classGroupIds.includes(classGroup.id)}
                   onChange={() => toggleClassGroup(classGroup.id)}
                   disabled={saving}

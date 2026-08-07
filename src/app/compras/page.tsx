@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, Pencil } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -27,6 +28,7 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 export default function BuyPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [buyPage, setBuyPage] = useState<Page<Buy> | null>(null);
   const [page, setPage] = useState(0);
@@ -128,6 +130,8 @@ export default function BuyPage() {
           <>
             <DataTable
               data={buyPage?.content ?? []}
+              onRowClick={(buy) => router.push(`/compras/${buy.id}`)}
+              getRowAriaLabel={(buy) => `Visualizar solicitaÃ§Ã£o de ${buy.createdByName}`}
               columns={columns}
               searchKeys={["createdByName", "classGroupAcronym", "purchaseJustification"]}
               searchValue={search}

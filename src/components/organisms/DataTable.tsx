@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, type KeyboardEvent } from "react";
+import { useState, useMemo, type KeyboardEvent, type MouseEvent } from "react";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { DataTableProps } from "@/props/DataTableProps";
 import Input from "../atoms/Input";
@@ -59,7 +59,15 @@ export default function DataTable<T>({
         }
     };
 
+    const isInteractiveTarget = (target: EventTarget | null) =>
+        target instanceof Element && Boolean(target.closest("a, button, input, select, textarea, label"));
+
+    const handleRowClick = (event: MouseEvent<HTMLElement>, item: T) => {
+        if (!isInteractiveTarget(event.target)) onRowClick?.(item);
+    };
+
     const handleRowKeyDown = (event: KeyboardEvent<HTMLElement>, item: T) => {
+        if (isInteractiveTarget(event.target)) return;
         if ((event.key === "Enter" || event.key === " ") && onRowClick) {
             event.preventDefault();
             onRowClick(item);
@@ -124,7 +132,7 @@ export default function DataTable<T>({
                                 role={rowIsClickable ? "link" : undefined}
                                 tabIndex={rowIsClickable ? 0 : undefined}
                                 aria-label={rowIsClickable ? getRowAriaLabel?.(item) ?? "Visualizar registro" : undefined}
-                                onClick={rowIsClickable ? () => onRowClick?.(item) : undefined}
+                                onClick={rowIsClickable ? (event) => handleRowClick(event, item) : undefined}
                                 onKeyDown={rowIsClickable ? (event) => handleRowKeyDown(event, item) : undefined}
                             >
                                 <div className="space-y-3">
@@ -205,7 +213,7 @@ export default function DataTable<T>({
                                     role={rowIsClickable ? "link" : undefined}
                                     tabIndex={rowIsClickable ? 0 : undefined}
                                     aria-label={rowIsClickable ? getRowAriaLabel?.(item) ?? "Visualizar registro" : undefined}
-                                    onClick={rowIsClickable ? () => onRowClick?.(item) : undefined}
+                                    onClick={rowIsClickable ? (event) => handleRowClick(event, item) : undefined}
                                     onKeyDown={rowIsClickable ? (event) => handleRowKeyDown(event, item) : undefined}
                                 >
                                     {columns.map((col, colIndex) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 export default function AutonomousMaintenancePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const canCreate = canCreateAutonomousMaintenance(user?.role);
   const canManage = canManageAutonomousMaintenance(user?.role);
@@ -154,6 +156,8 @@ export default function AutonomousMaintenancePage() {
           <>
             <DataTable
               data={maintenancePage?.content ?? []}
+              onRowClick={(maintenance) => router.push(`/manutencao-autonoma/${maintenance.id}`)}
+              getRowAriaLabel={(maintenance) => `Visualizar manutenÃ§Ã£o da mÃ¡quina ${maintenance.inspectedMachineName}`}
               columns={columns}
               searchKeys={["inspectedMachineName", "responsibleTeacherName"]}
               searchPlaceholder="Buscar por máquina ou professor"

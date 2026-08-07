@@ -18,6 +18,10 @@ export function canManageEquipment(role: AuthenticatedRole) {
   return isManager(role);
 }
 
+export function canManageSupportMaterials(role: AuthenticatedRole) {
+  return role === "PROFESSOR" || isManager(role);
+}
+
 export function canManagePlacesAndDesignations(role: AuthenticatedRole) {
   return isManager(role);
 }
@@ -88,6 +92,9 @@ export function isUnauthorizedRoute(pathname: string, role: AuthenticatedRole) {
     || /^\/equipamentos\/[^/]+\/editar$/.test(pathname);
 
   if (readOnlyResourceRoute && !isManager(role)) return true;
+  if ((pathname === "/maquinas/material-complementar/novo"
+    || /^\/maquinas\/material-complementar\/[^/]+\/editar$/.test(pathname))
+    && !canManageSupportMaterials(role)) return true;
   if (pathname === "/locais-designacoes" && !isManager(role)) return true;
   if ((pathname === "/usuarios" || pathname === "/usuarios/novo") && !isManager(role)) {
     return true;

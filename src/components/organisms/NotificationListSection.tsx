@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCheck, Eye } from "lucide-react";
 import Button from "@/components/atoms/Button";
 import PageHeader from "@/components/molecules/PageHeader";
@@ -11,6 +12,7 @@ import type { NotificationData } from "@/props/NotificationDetailProps";
 interface NotificationListSectionProps { notifications: NotificationData[]; onMarkAllAsRead?: () => void; }
 
 export default function NotificationListSection({ notifications, onMarkAllAsRead }: NotificationListSectionProps) {
+  const router = useRouter();
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
   const unreadCount = notifications.filter((notification) => !notification.statusRead).length;
   const filteredNotifications = filter === "UNREAD" ? notifications.filter((notification) => !notification.statusRead) : notifications;
@@ -24,6 +26,6 @@ export default function NotificationListSection({ notifications, onMarkAllAsRead
   return <div className="space-y-6">
     <PageHeader title="Todas as notificações" description="Gerencie e visualize seu histórico de alertas." actions={unreadCount > 0 && onMarkAllAsRead ? <Button variant="secondary" icon={CheckCheck} onClick={onMarkAllAsRead}>Marcar todas como lidas</Button> : undefined} />
     <div className="flex flex-wrap gap-3"><Button variant={filter === "ALL" ? "primary" : "secondary"} onClick={() => setFilter("ALL")}>Todas ({notifications.length})</Button><Button variant={filter === "UNREAD" ? "primary" : "secondary"} onClick={() => setFilter("UNREAD")}>Não lidas ({unreadCount})</Button></div>
-    <DataTable data={filteredNotifications} columns={columns} searchKeys={["title", "about", "email"]} searchPlaceholder="Pesquisar notificações..." emptyMessage="Nenhuma notificação encontrada." />
+    <DataTable data={filteredNotifications} columns={columns} onRowClick={(notification) => router.push(`/notificacoes/${notification.id}`)} getRowAriaLabel={(notification) => `Visualizar notificação: ${notification.title}`} searchKeys={["title", "about", "email"]} searchPlaceholder="Pesquisar notificações..." emptyMessage="Nenhuma notificação encontrada." />
   </div>;
 }

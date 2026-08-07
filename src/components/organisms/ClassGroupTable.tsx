@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import Button from "@/components/atoms/Button";
 import DataTable from "@/components/organisms/DataTable";
@@ -31,6 +32,7 @@ export default function ClassGroupTable({
   onSearchChange,
   canManage,
 }: ClassGroupTableProps) {
+  const router = useRouter();
   const columns: ColumnProps<ClassGroupTableItem>[] = [
     { header: "Sigla", accessorKey: "acronym" },
     {
@@ -79,6 +81,8 @@ export default function ClassGroupTable({
       onSearchChange={onSearchChange}
       searchPlaceholder="Pesquisar turma..."
       emptyMessage="Nenhuma turma encontrada."
+      onRowClick={(group) => router.push(`/turmas/${group.id}?turma=${encodeURIComponent(group.acronym)}`)}
+      getRowAriaLabel={(group) => `Visualizar turma ${group.acronym}`}
       toggleOptions={[
         { label: "Todas", value: "ALL" },
         { label: "Ativas", value: "ACTIVE" },

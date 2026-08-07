@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -21,6 +22,7 @@ import { getStatusPresentation } from "@/lib/status";
 const PAGE_SIZE = 10;
 
 export default function InconveniencePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const canCreate = canCreateInconvenience(user?.role);
   const [itemPage, setItemPage] = useState<Page<Inconvenience5S> | null>(null);
@@ -101,6 +103,8 @@ export default function InconveniencePage() {
           <>
             <DataTable
               data={itemPage?.content ?? []}
+              onRowClick={(item) => router.push(`/incoveniencia5s/${item.id}`)}
+              getRowAriaLabel={(item) => `Visualizar ocorrÃªncia 5S ${item.inconvenience}`}
               columns={columns}
               searchKeys={["inconvenience", "placeName", "classGroupAcronym"]}
               searchPlaceholder="Pesquisar ocorrência..."

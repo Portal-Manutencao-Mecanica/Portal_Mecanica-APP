@@ -75,6 +75,13 @@ export interface HelperMaterial {
   type: HelperMaterialType;
 }
 
+export interface CreateHelperMaterial {
+  title: string;
+  description: string | null;
+  url: string;
+  type: HelperMaterialType;
+}
+
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
@@ -145,6 +152,7 @@ export interface Equipment {
   tag: string | null;
   unitPrice: number;
   availableQuantity: number;
+  image: string | null;
 }
 
 export interface UpdateUserRequest {
@@ -161,8 +169,12 @@ export interface CreateEquipment {
   tag?: string;
   unitPrice: number;
   availableQuantity: number;
-  media?: string;
+  image?: string;
 }
+
+export type UpdateEquipment = Partial<
+  Pick<CreateEquipment, "name" | "unitPrice" | "availableQuantity" | "image">
+>;
 
 export interface Machine {
   id: string;

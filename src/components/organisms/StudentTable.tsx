@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import Button from "@/components/atoms/Button";
 import LabelWithCircle from "@/components/molecules/LabelWithCircle";
@@ -23,6 +24,7 @@ export function StudentTable({
   searchValue,
   onSearchChange,
 }: StudentTableProps) {
+  const router = useRouter();
   const columns: ColumnProps<Student>[] = [
     { header: "Nome", accessorKey: "name" },
     { header: "E-mail", accessorKey: "email" },
@@ -60,6 +62,8 @@ export function StudentTable({
       onSearchChange={onSearchChange}
       searchPlaceholder="Pesquisar aluno..."
       emptyMessage="Nenhum aluno encontrado."
+      onRowClick={(student) => router.push(`/alunos/${student.id}`)}
+      getRowAriaLabel={(student) => `Visualizar aluno ${student.name}`}
       toggleOptions={[
         { label: "Todos", value: "ALL" },
         { label: "Ativos", value: "ACTIVE" },

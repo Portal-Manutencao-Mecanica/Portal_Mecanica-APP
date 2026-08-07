@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, Pencil } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -26,6 +27,7 @@ import { getStatusPresentation } from "@/lib/status";
 const PAGE_SIZE = 10;
 
 export default function OccurrencesPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [requestPage, setRequestPage] = useState<Page<MaintenanceRequestApi> | null>(null);
   const [page, setPage] = useState(0);
@@ -130,6 +132,8 @@ export default function OccurrencesPage() {
           <>
             <DataTable
               data={requestPage?.content ?? []}
+              onRowClick={(item) => router.push(`/ocorrencias/${item.id}`)}
+              getRowAriaLabel={(item) => `Visualizar ocorrÃªncia da mÃ¡quina ${item.machineName}`}
               columns={columns}
               searchKeys={["machineName", "placeName", "notifiedTeacherName", "description"]}
               searchValue={search}

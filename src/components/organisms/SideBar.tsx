@@ -133,7 +133,7 @@ export function SideBar({
                 toggleExpanded();
               }
             }}
-            className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer w-full shrink-0 px-3 justify-start"
+            className="group relative flex h-12 w-full shrink-0 cursor-pointer items-center justify-start rounded-lg px-3 transition-colors hover:bg-white/10"
           >
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
               <X className="w-6 h-6 md:hidden" />
@@ -170,11 +170,16 @@ export function SideBar({
                 key={item.href}
                 href={item.href}
                 onClick={closeMobileMenu}
-                className="flex items-center h-12 rounded-lg transition-colors hover:bg-white/10 cursor-pointer w-full shrink-0 px-3 justify-start"
+                className="group relative flex h-12 w-full shrink-0 cursor-pointer items-center justify-start rounded-lg px-3 transition-colors hover:bg-white/10"
               >
                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
                   <Icon className="w-6 h-6" />
                 </div>
+                {!isExpanded && (
+                  <span className="pointer-events-none absolute left-full z-30 ml-3 hidden whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 md:block">
+                    {item.label}
+                  </span>
+                )}
 
                 {/* Texto com transição suave de opacidade */}
                 <span
