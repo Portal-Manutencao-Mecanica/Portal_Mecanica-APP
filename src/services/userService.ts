@@ -65,6 +65,9 @@ export const userService = {
     );
     return data;
   },
+  async remove(id: string) {
+    await browserApi.delete(`/users/${encodeURIComponent(id)}`);
+  },
   async deactivate(id: string, reason = "Inativação realizada pelo gerenciamento de usuários.") {
     const { data } = await browserApi.patch<ManagedUser>(
       `/users/${encodeURIComponent(id)}/deactivate`,

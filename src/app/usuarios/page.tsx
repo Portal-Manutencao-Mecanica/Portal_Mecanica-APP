@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, Plus, Power, PowerOff } from "lucide-react";
+import { Pencil, Plus, Power, PowerOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/atoms/Button";
@@ -32,7 +32,7 @@ const roleLabels: Record<UserRole, string> = {
 
 type StatusAction = {
   managedUser: ManagedUser;
-  type: "deactivate" | "reactivate";
+  type: "deactivate" | "reactivate" | "delete";
 };
 
 export default function UsersPage() {
@@ -113,6 +113,16 @@ export default function UsersPage() {
                 title="Editar usuário"
               />
             )}
+            {canEditUsers(user?.role) && !isOwnAccount && (
+              <Button
+                variant="danger"
+                icon={Trash2}
+                iconOnly
+                aria-label={`Excluir usuário ${managedUser.name}`}
+                title="Excluir usuário"
+                onClick={() => setStatusAction({ managedUser, type: "delete" })}
+              />
+            )}
             {!isOwnAccount && managedUser.enabled && (
               <Button
                 variant="danger"
@@ -143,6 +153,15 @@ export default function UsersPage() {
     if (!statusAction) return;
     setChangingStatus(true);
     try {
+      if (statusAction.type === "delete") {
+        await userService.remove(statusAction.managedUser.id);
+        setUserPage((current) => current
+          ? { ...current, content: current.content.filter((managedUser) => managedUser.id !== statusAction.managedUser.id) }
+          : current);
+        toast.success("Usuário excluído com sucesso.");
+        setStatusAction(null);
+        return;
+      }
       const updated = statusAction.type === "deactivate"
         ? await userService.deactivate(statusAction.managedUser.id)
         : await userService.reactivate(statusAction.managedUser.id);
@@ -239,12 +258,12 @@ export default function UsersPage() {
 
       <ConfirmDialog
         open={Boolean(statusAction)}
-        title={statusAction?.type === "deactivate" ? "Inativar usuário" : "Reativar usuário"}
-        description={statusAction?.type === "deactivate"
+        title={statusAction?.type === "delete" ? "Excluir usuário" : statusAction?.type === "deactivate" ? "Inativar usuário" : "Reativar usuário"}
+        description={statusAction?.type === "delete" ? "Esta ação não pode ser desfeita. Deseja excluir o usuário?" : statusAction?.type === "deactivate"
           ? "O usuário perderá o acesso ao portal. Deseja continuar?"
           : "O acesso do usuário será restabelecido. Deseja continuar?"}
-        confirmText={statusAction?.type === "deactivate" ? "Inativar" : "Reativar"}
-        confirmVariant={statusAction?.type === "deactivate" ? "danger" : "primary"}
+        confirmText={statusAction?.type === "delete" ? "Excluir" : statusAction?.type === "deactivate" ? "Inativar" : "Reativar"}
+        confirmVariant={statusAction?.type === "delete" || statusAction?.type === "deactivate" ? "danger" : "primary"}
         confirming={changingStatus}
         onCancel={() => setStatusAction(null)}
         onConfirm={() => void changeStatus()}

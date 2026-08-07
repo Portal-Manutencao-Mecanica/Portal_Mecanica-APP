@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, Pencil } from "lucide-react";
 
 import Button from "@/components/atoms/Button";
@@ -24,6 +25,7 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 });
 
 export default function EquipmentsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const canManage = canManageEquipment(user?.role);
   const [equipmentPage, setEquipmentPage] = useState<Page<Equipment> | null>(null);
@@ -131,6 +133,8 @@ export default function EquipmentsPage() {
               }}
               searchPlaceholder="Pesquisar por nome, SAP, patrimônio ou TAG..."
               emptyMessage="Nenhum equipamento encontrado."
+              onRowClick={(equipment) => router.push(`/equipamentos/${equipment.id}`)}
+              getRowAriaLabel={(equipment) => `Visualizar equipamento ${equipment.name}`}
             />
             <Pagination
               page={equipmentPage?.number ?? page}

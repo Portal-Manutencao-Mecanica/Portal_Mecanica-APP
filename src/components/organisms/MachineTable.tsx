@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import Button from "@/components/atoms/Button";
 import DropDown from "@/components/atoms/DropDown";
@@ -26,6 +27,7 @@ export function MachineTable({
   onConditionChange,
   canManage,
 }: MachineTableProps) {
+  const router = useRouter();
   const columns: ColumnProps<Machine>[] = [
     { header: "Patrimônio", accessorKey: "patrimony" },
     { header: "Nome", accessorKey: "name" },
@@ -70,6 +72,8 @@ export function MachineTable({
   return (
     <DataTable
       data={machines}
+      onRowClick={(machine) => router.push(`/maquinas/${machine.id}`)}
+      getRowAriaLabel={(machine) => `Visualizar mÃ¡quina ${machine.name}`}
       columns={columns}
       searchKeys={["patrimony", "name", "placeName", "tag"]}
       searchValue={searchValue}

@@ -1,4 +1,10 @@
-import type { CreateEquipment, Equipment, Page, PageQuery } from "@/lib/api/types";
+import type {
+  CreateEquipment,
+  Equipment,
+  Page,
+  PageQuery,
+  UpdateEquipment,
+} from "@/lib/api/types";
 import { browserApi } from "./httpService";
 
 export const equipmentService = {
@@ -21,8 +27,8 @@ export const equipmentService = {
     return data;
   },
 
-  async update(id: string, equipment: CreateEquipment) {
-    const { data } = await browserApi.put<Equipment>(
+  async update(id: string, equipment: UpdateEquipment) {
+    const { data } = await browserApi.patch<Equipment>(
       `/equipamento/${encodeURIComponent(id)}`,
       equipment,
     );

@@ -75,6 +75,7 @@ export default function EditEquipmentPage({ params }: PageProps) {
               tag: equipment.tag ?? undefined,
               unitPrice: equipment.unitPrice,
               availableQuantity: equipment.availableQuantity,
+              image: equipment.image ?? undefined,
             }}
             submitLabel="Salvar alterações"
             successMessage="Equipamento atualizado com sucesso."

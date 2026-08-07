@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 const TEST_USERS = [
   {
     label: "Administrador",
-    identifier: "admin@teste.local",
+    identifier: "seed.admin.senai@sesisenai.org.br",
   },
   {
     label: "Coordenador",
