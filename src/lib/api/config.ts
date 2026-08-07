@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "http://localhost:8080/api";
+const DEFAULT_API_URL = "URL da API";
 
 export function getApiUrl() {
   return (process.env.MAINTENANCE_API_URL ?? DEFAULT_API_URL).replace(/\/$/, "");
